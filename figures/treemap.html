@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PREVYO - Treemap circulaire D3</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        :root {
+            --bg: #f5f7fb;
+            --panel: #ffffff;
+            --text: #0f172a;
+            --muted: #475569;
+            --stroke: rgba(15, 23, 42, 0.14);
+            --shadow: 0 14px 40px rgba(15, 23, 42, 0.08);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background: radial-gradient(circle at top left, #ffffff 0%, #eef3fb 35%, #f5f7fb 100%);
+            color: var(--text);
+        }
+
+        .page {
+            max-width: 1380px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+
+        .header {
+            display: flex;
+            align-items: end;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 18px;
+        }
+
+        .title-block h1 {
+            margin: 0;
+            font-size: 2rem;
+            line-height: 1.1;
+            letter-spacing: -0.02em;
+        }
+
+        .title-block p {
+            margin: 8px 0 0;
+            color: var(--muted);
+            font-size: 0.98rem;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(148, 163, 184, 0.25);
+            border-radius: 14px;
+            padding: 10px 12px;
+            box-shadow: var(--shadow);
+        }
+
+        .controls label {
+            font-size: 0.92rem;
+            color: var(--muted);
+            font-weight: 600;
+        }
+
+        .controls select,
+        .controls button {
+            border: 1px solid rgba(148, 163, 184, 0.35);
+            background: white;
+            color: var(--text);
+            border-radius: 10px;
+            padding: 8px 10px;
+            font-size: 0.92rem;
+            cursor: pointer;
+        }
+
+        .controls button:hover,
+        .controls select:hover {
+            border-color: rgba(51, 65, 85, 0.45);
+        }
+
+        .card {
+            position: relative;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.96) 100%);
+            border: 1px solid rgba(148, 163, 184, 0.22);
+            border-radius: 24px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            min-height: 820px;
+            height: 80vh;
+        }
+
+        #chart {
+            width: 100%;
+            height: 100%;
+        }
+
+        svg {
+            display: block;
+            width: 100%;
+            height: 100%;
+            touch-action: none;
+            cursor: grab;
+            user-select: none;
+        }
+
+        svg:active {
+            cursor: grabbing;
+        }
+
+        .node circle {
+            stroke: var(--stroke);
+            stroke-width: 1.2px;
+            transition: stroke 160ms ease, stroke-width 160ms ease, opacity 160ms ease;
+        }
+
+        .node:hover circle {
+            stroke: rgba(15, 23, 42, 0.85);
+            stroke-width: 2px;
+        }
+
+        .node text {
+            pointer-events: none;
+            text-anchor: middle;
+            dominant-baseline: middle;
+            fill: rgba(255, 255, 255, 0.98);
+            font-weight: 700;
+            letter-spacing: -0.01em;
+            paint-order: stroke;
+            stroke: rgba(15, 23, 42, 0.22);
+            stroke-linejoin: round;
+            transition: opacity 120ms ease;
+        }
+
+        .tooltip {
+            position: absolute;
+            pointer-events: none;
+            background: rgba(15, 23, 42, 0.96);
+            color: white;
+            border-radius: 14px;
+            padding: 12px 14px;
+            font-size: 0.9rem;
+            line-height: 1.45;
+            box-shadow: 0 12px 28px rgba(2, 6, 23, 0.25);
+            max-width: 380px;
+            opacity: 0;
+            transform: translateY(4px);
+            transition: opacity 140ms ease, transform 140ms ease;
+            z-index: 5;
+        }
+
+        .tooltip.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .tooltip .path {
+            color: #cbd5e1;
+            font-size: 0.8rem;
+            margin-top: 4px;
+            word-break: break-word;
+        }
+
+        .legend {
+            position: absolute;
+            left: 18px;
+            bottom: 18px;
+            background: rgba(255, 255, 255, 0.92);
+            border: 1px solid rgba(148, 163, 184, 0.25);
+            border-radius: 14px;
+            padding: 10px 12px;
+            box-shadow: var(--shadow);
+            color: var(--muted);
+            font-size: 0.88rem;
+            backdrop-filter: blur(8px);
+            z-index: 4;
+        }
+
+        .loading,
+        .error {
+            padding: 40px 28px;
+            color: var(--muted);
+            font-size: 1rem;
+        }
+
+        .error {
+            color: #991b1b;
+        }
+
+        @media (max-width: 900px) {
+            .header {
+                flex-direction: column;
+                align-items: start;
+            }
+
+            .card {
+                min-height: 640px;
+                height: 72vh;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="page">
+        <div class="header">
+            <div class="title-block">
+                <h1>Treemap circulaire PREVYO</h1>
+                <p>Visualisation hiérarchique des événements à partir de <code>export.events.json</code></p>
+            </div>
+
+            <div class="controls">
+                <label for="fieldSelect">Champ</label>
+                <select id="fieldSelect">
+                    <option value="type" selected>type</option>
+                    <option value="domain">domain</option>
+                    <option value="subdomain">subdomain</option>
+                    <option value="risk">risk</option>
+                    <option value="riskCarac">riskCarac</option>
+                    <option value="nodes.labels">nodes.labels</option>
+                    <option value="edges.type">edges.type</option>
+                </select>
+                <button id="resetZoomBtn" type="button">Réinitialiser la vue</button>
+            </div>
+        </div>
+
+        <div class="card" id="card">
+            <div id="chart"></div>
+            <div id="tooltip" class="tooltip"></div>
+            <div class="legend">Molette pour zoomer, glisser pour déplacer, clic sur un cercle pour centrer</div>
+        </div>
+    </div>
+
+    <script>
+        const filePath = "../data/export.events.json";
+
+        const chartEl = document.getElementById("chart");
+        const cardEl = document.getElementById("card");
+        const tooltipEl = document.getElementById("tooltip");
+        const fieldSelect = document.getElementById("fieldSelect");
+        const resetZoomBtn = document.getElementById("resetZoomBtn");
+
+        let cachedEvents = null;
+        let currentSvg = null;
+        let currentZoom = null;
+        let resizeTimer = null;
+
+        function prettifyLabel(label) {
+            const map = {
+                "nodes.labels": "Labels des nœuds",
+                "edges.type": "Types de liens",
+                "riskCarac": "Caractéristiques du risque",
+                "type": "Type",
+                "domain": "Domaine",
+                "subdomain": "Sous-domaine"
+            };
+            return map[label] || label;
+        }
+
+        async function loadJsonFlexible(path) {
+            const raw = await fetch(path).then(r => {
+                if (!r.ok) {
+                    throw new Error(`Impossible de charger ${path} (${r.status})`);
+                }
+                return r.text();
+            });
+
+            try {
+                const parsed = JSON.parse(raw);
+                if (Array.isArray(parsed)) return parsed;
+                if (parsed && Array.isArray(parsed.events)) return parsed.events;
+                if (parsed && Array.isArray(parsed.data)) return parsed.data;
+                throw new Error("Format JSON non reconnu");
+            } catch (e) {
+                const lines = raw
+                    .split(/\r?\n/)
+                    .map(line => line.trim())
+                    .filter(Boolean);
+
+                const parsedLines = lines.map(line => JSON.parse(line));
+                if (parsedLines.length) return parsedLines;
+                throw e;
+            }
+        }
+
+        function createTreeNode(name) {
+            return {
+                name,
+                children: new Map(),
+                value: 0
+            };
+        }
+
+        function addPath(root, parts) {
+            if (!parts || !parts.length) return;
+
+            let node = root;
+            node.value += 1;
+
+            for (const part of parts) {
+                if (!part) continue;
+                if (!node.children.has(part)) {
+                    node.children.set(part, createTreeNode(part));
+                }
+                node = node.children.get(part);
+                node.value += 1;
+            }
+        }
+
+        function finalizeTree(node) {
+            const children = Array.from(node.children.values()).map(finalizeTree);
+            if (children.length) {
+                return {
+                    name: node.name,
+                    children
+                };
+            }
+            return {
+                name: node.name,
+                value: node.value
+            };
+        }
+
+        function getPathsForField(event, field) {
+            if (field === "nodes.labels") {
+                const out = [];
+                for (const node of event.nodes || []) {
+                    for (const label of node.labels || []) {
+                        if (typeof label === "string" && label.trim()) {
+                            out.push(label.split("/").filter(Boolean));
+                        }
+                    }
+                }
+                return out;
+            }
+
+            if (field === "edges.type") {
+                const out = [];
+                for (const edge of event.edges || []) {
+                    if (typeof edge.type === "string" && edge.type.trim()) {
+                        out.push([edge.type.trim()]);
+                    }
+                }
+                return out;
+            }
+
+            const value = event[field];
+            if (typeof value === "string" && value.trim()) {
+                return [value.split("/").filter(Boolean)];
+            }
+
+            return [];
+        }
+
+        function buildHierarchy(events, field) {
+            const root = createTreeNode(prettifyLabel(field));
+
+            for (const event of events) {
+                const paths = getPathsForField(event, field);
+                for (const path of paths) {
+                    addPath(root, path);
+                }
+            }
+
+            return finalizeTree(root);
+        }
+
+        function nodePath(d) {
+            return d.ancestors().reverse().map(x => x.data.name).join(" / ");
+        }
+
+        function colorForNode(d, maxDepth) {
+            if (d.depth === 0) return "#123b64";
+
+            const t = d.depth / Math.max(maxDepth, 1);
+            const c = d3.interpolateRgbBasis([
+                "#123b64",
+                "#1f5f99",
+                "#3b86c6",
+                "#78b0dc",
+                "#cfe7f7"
+            ])(0.1 + t * 0.85);
+
+            const hsl = d3.hsl(c);
+
+            if (d.children) {
+                hsl.s = Math.min(0.72, hsl.s + 0.04);
+                hsl.l = Math.max(0.24, hsl.l - 0.02);
+            } else {
+                hsl.s = Math.max(0.18, hsl.s - 0.08);
+                hsl.l = Math.min(0.88, hsl.l + 0.02);
+            }
+
+            return hsl.formatHex();
+        }
+
+        function truncateLabel(text, maxLength = 18) {
+            if (!text) return "";
+            return text.length > maxLength ? text.slice(0, maxLength - 1) + "…" : text;
+        }
+
+        function estimateTextWidth(text, fontSize) {
+            return text.length * fontSize * 0.56;
+        }
+
+        function fitLabel(text, maxWidth, fontSize) {
+            if (!text) return "";
+            const estimated = estimateTextWidth(text, fontSize);
+            if (estimated <= maxWidth) return text;
+
+            const maxChars = Math.max(4, Math.floor(maxWidth / (fontSize * 0.56)));
+            if (text.length <= maxChars) return text;
+            return text.slice(0, Math.max(1, maxChars - 1)) + "…";
+        }
+
+        function rectsOverlap(a, b) {
+            return !(
+                a.x + a.w < b.x ||
+                b.x + b.w < a.x ||
+                a.y + a.h < b.y ||
+                b.y + b.h < a.y
+            );
+        }
+
+        function showTooltip(event, d) {
+            const percentage = d.parent
+                ? ((d.value / d.parent.value) * 100).toFixed(1)
+                : "100.0";
+
+            tooltipEl.innerHTML = `
+        <div><strong>${d.data.name}</strong></div>
+        <div>Occurrences : <strong>${d.value}</strong></div>
+        <div>Part du parent : <strong>${percentage}%</strong></div>
+        <div class="path">${nodePath(d)}</div>
+      `;
+
+            moveTooltip(event);
+            tooltipEl.classList.add("visible");
+        }
+
+        function moveTooltip(event) {
+            const cardRect = cardEl.getBoundingClientRect();
+            const tooltipRect = tooltipEl.getBoundingClientRect();
+
+            let x = event.clientX - cardRect.left + 16;
+            let y = event.clientY - cardRect.top + 16;
+
+            const maxX = cardRect.width - tooltipRect.width - 12;
+            const maxY = cardRect.height - tooltipRect.height - 12;
+
+            x = Math.max(12, Math.min(x, maxX));
+            y = Math.max(12, Math.min(y, maxY));
+
+            tooltipEl.style.left = `${x}px`;
+            tooltipEl.style.top = `${y}px`;
+        }
+
+        function hideTooltip() {
+            tooltipEl.classList.remove("visible");
+        }
+
+        function clearChart() {
+            chartEl.innerHTML = "";
+            hideTooltip();
+            currentSvg = null;
+            currentZoom = null;
+        }
+
+        function renderChart(treeData, selectedField) {
+            clearChart();
+
+            const rect = cardEl.getBoundingClientRect();
+            const width = Math.max(400, rect.width);
+            const height = Math.max(400, rect.height);
+            const outerMargin = 24;
+            const size = Math.max(260, Math.min(width, height) - outerMargin * 2);
+            const innerPadding = 16;
+
+            const originX = (width - size) / 2 + innerPadding;
+            const originY = (height - size) / 2 + innerPadding;
+            const packSize = size - innerPadding * 2;
+
+            const root = d3.hierarchy(treeData)
+                .sum(d => d.value || 0)
+                .sort((a, b) => b.value - a.value);
+
+            const pack = d3.pack()
+                .size([packSize, packSize])
+                .padding(4);
+
+            pack(root);
+
+            const maxDepth = root.height + 1;
+
+            const svg = d3.select("#chart")
+                .append("svg")
+                .attr("viewBox", `0 0 ${width} ${height}`)
+                .attr("preserveAspectRatio", "xMidYMid meet")
+                .attr("role", "img")
+                .attr("aria-label", `Treemap circulaire PREVYO basé sur le champ ${selectedField}`);
+
+            currentSvg = svg;
+
+            svg.append("rect")
+                .attr("width", width)
+                .attr("height", height)
+                .attr("fill", "transparent")
+                .on("click", () => {
+                    svg.transition()
+                        .duration(650)
+                        .call(currentZoom.transform, d3.zoomIdentity);
+                });
+
+            const zoomLayer = svg.append("g");
+
+            const graphLayer = zoomLayer.append("g")
+                .attr("transform", `translate(${originX}, ${originY})`);
+
+            const nodes = root.descendants();
+
+            const node = graphLayer.selectAll("g.node")
+                .data(nodes)
+                .join("g")
+                .attr("class", "node")
+                .attr("transform", d => `translate(${d.x},${d.y})`)
+                .on("mouseenter", (event, d) => showTooltip(event, d))
+                .on("mousemove", moveTooltip)
+                .on("mouseleave", hideTooltip)
+                .on("click", (event, d) => {
+                    event.stopPropagation();
+                    centerOnNode(d);
+                });
+
+            const circles = node.append("circle")
+                .attr("r", d => d.r)
+                .attr("fill", d => colorForNode(d, maxDepth))
+                .attr("fill-opacity", d => d.depth === 0 ? 1 : d.children ? 0.96 : 0.9);
+
+            const labels = node.append("text")
+                .attr("class", "node-label")
+                .style("display", "none")
+                .style("opacity", 0)
+                .text("");
+
+            function getScreenNode(d, transform) {
+                const x = transform.applyX(originX + d.x);
+                const y = transform.applyY(originY + d.y);
+                const r = d.r * transform.k;
+                return { x, y, r };
+            }
+
+            function isInViewport(p) {
+                return (
+                    p.x + p.r > 0 &&
+                    p.x - p.r < width &&
+                    p.y + p.r > 0 &&
+                    p.y - p.r < height
+                );
+            }
+
+            function labelFontSize(screenRadius) {
+                if (screenRadius > 180) return 30;
+                if (screenRadius > 120) return 24;
+                if (screenRadius > 80) return 18;
+                if (screenRadius > 52) return 14;
+                if (screenRadius > 32) return 11;
+                return 0;
+            }
+
+            function updateLabels(transform = d3.zoomIdentity) {
+                const k = transform.k || 1;
+
+                const depthLimit =
+                    k < 0.9 ? 2 :
+                        k < 1.5 ? 3 :
+                            k < 2.5 ? 4 :
+                                k < 4 ? 5 : Infinity;
+
+                const candidates = [];
+
+                nodes.forEach(d => {
+                    if (d.depth === 0) return;
+                    if (d.depth > depthLimit) return;
+
+                    const p = getScreenNode(d, transform);
+                    if (!isInViewport(p)) return;
+                    if (p.r < 18) return;
+
+                    const fontSize = labelFontSize(p.r);
+                    if (fontSize === 0) return;
+
+                    const maxLabelWidth = Math.min(p.r * 1.45, 220);
+                    const text = fitLabel(truncateLabel(d.data.name, 36), maxLabelWidth, fontSize);
+                    if (!text || text.length < 2) return;
+
+                    const textWidth = Math.min(estimateTextWidth(text, fontSize), maxLabelWidth);
+                    const textHeight = fontSize * 1.15;
+
+                    if (textWidth > p.r * 1.55) return;
+                    if (textHeight > p.r * 0.95) return;
+
+                    candidates.push({
+                        d,
+                        r: p.r,
+                        fontSize,
+                        text,
+                        rect: {
+                            x: p.x - textWidth / 2,
+                            y: p.y - textHeight / 2,
+                            w: textWidth,
+                            h: textHeight
+                        }
+                    });
+                });
+
+                candidates.sort((a, b) => b.r - a.r);
+
+                const placed = [];
+                const visible = new Set();
+
+                for (const c of candidates) {
+                    let collide = false;
+
+                    for (const p of placed) {
+                        if (rectsOverlap(c.rect, p.rect)) {
+                            collide = true;
+                            break;
+                        }
+                    }
+
+                    if (collide) continue;
+
+                    placed.push(c);
+                    visible.add(c.d);
+                    c.d._labelMeta = c;
+                }
+
+                labels
+                    .style("display", d => visible.has(d) ? "inline" : "none")
+                    .style("opacity", d => visible.has(d) ? 1 : 0)
+                    .style("font-size", d => `${d._labelMeta?.fontSize || 12}px`)
+                    .style("stroke-width", d => `${Math.max(1.2, (d._labelMeta?.fontSize || 12) * 0.12)}px`)
+                    .attr("transform", `scale(${1 / k})`)
+                    .text(d => d._labelMeta?.text || "");
+
+                circles.style("stroke-width", `${Math.max(0.7, 1.2 / k)}px`);
+            }
+
+            function centerOnNode(d) {
+                const targetScale = Math.max(1, Math.min(8, (size * 0.30) / d.r));
+                const tx = width / 2 - (originX + d.x) * targetScale;
+                const ty = height / 2 - (originY + d.y) * targetScale;
+
+                svg.transition()
+                    .duration(650)
+                    .call(
+                        currentZoom.transform,
+                        d3.zoomIdentity.translate(tx, ty).scale(targetScale)
+                    );
+            }
+
+            currentZoom = d3.zoom()
+                .scaleExtent([0.35, 12])
+                .translateExtent([
+                    [-width * 4, -height * 4],
+                    [width * 5, height * 5]
+                ])
+                .on("zoom", (event) => {
+                    zoomLayer.attr("transform", event.transform);
+                    updateLabels(event.transform);
+                });
+
+            svg.call(currentZoom);
+            svg.on("dblclick.zoom", null);
+
+            resetZoomBtn.onclick = () => {
+                svg.transition()
+                    .duration(650)
+                    .call(currentZoom.transform, d3.zoomIdentity);
+            };
+
+            updateLabels(d3.zoomIdentity);
+        }
+
+        async function init() {
+            chartEl.innerHTML = `<div class="loading">Chargement de ${filePath}...</div>`;
+
+            try {
+                cachedEvents = await loadJsonFlexible(filePath);
+
+                const renderCurrent = () => {
+                    const field = fieldSelect.value;
+                    const hierarchy = buildHierarchy(cachedEvents, field);
+                    renderChart(hierarchy, field);
+                };
+
+                renderCurrent();
+
+                fieldSelect.onchange = renderCurrent;
+
+                window.addEventListener("resize", () => {
+                    clearTimeout(resizeTimer);
+                    resizeTimer = setTimeout(() => {
+                        if (!cachedEvents) return;
+                        const hierarchy = buildHierarchy(cachedEvents, fieldSelect.value);
+                        renderChart(hierarchy, fieldSelect.value);
+                    }, 180);
+                });
+
+            } catch (error) {
+                console.error(error);
+                chartEl.innerHTML = `
+          <div class="error">
+            Erreur lors du chargement ou du traitement de <code>${filePath}</code><br><br>
+            ${String(error.message || error)}
+          </div>
+        `;
+            }
+        }
+
+        init();
+    </script>
+</body>
+</html>
