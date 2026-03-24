@@ -2,3 +2,8 @@ numpy
 matplotlib
 pandas
 seaborn
+networkx
+plotly 
+nbformat>=4.2.0
+ipykernel
+scipy
