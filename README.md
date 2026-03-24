@@ -6,7 +6,7 @@
 
 **Un outil interactif d'analyse de données et de détection d'anomalies basé sur la base de connaissances NLP d'EMVISTA. Développé pendant le Marathon du Web !**
 
-<img src="figure/prevyo.png" alt="Logo PREVYO" width="250" />
+<img src="figures/prevyo.png" alt="Logo PREVYO" width="250" />
 
 </div>
 
