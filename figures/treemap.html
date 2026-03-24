@@ -4,103 +4,197 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>PREVYO - Treemap circulaire D3</title>
+    <title>PREVYO — Treemap circulaire</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <style>
         :root {
-            --bg: #f5f7fb;
-            --panel: #ffffff;
-            --text: #0f172a;
-            --muted: #475569;
-            --stroke: rgba(15, 23, 42, 0.14);
-            --shadow: 0 14px 40px rgba(15, 23, 42, 0.08);
+            --ink:     #111010;
+            --ink-mid: #5a5858;
+            --ink-low: #a09e9e;
+            --paper:   #f8f6f1;
+            --rule:    rgba(17,16,16,.10);
+            --accent:  #1a3a5c;
+            --serif: 'Instrument Serif', Georgia, serif;
+            --sans:  'Geist', ui-sans-serif, sans-serif;
         }
 
-        * {
-            box-sizing: border-box;
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        html, body {
+            height: 100%;
+            background: var(--paper);
+            color: var(--ink);
+            font-family: var(--sans);
+            font-size: 14px;
+            -webkit-font-smoothing: antialiased;
         }
 
-        body {
-            margin: 0;
-            font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-            background: radial-gradient(circle at top left, #ffffff 0%, #eef3fb 35%, #f5f7fb 100%);
-            color: var(--text);
-        }
+        /* ── Layout ─────────────────────────────────────── */
 
         .page {
-            max-width: 1380px;
+            display: grid;
+            grid-template-rows: auto 1fr;
+            height: 100vh;
+            max-width: 1440px;
             margin: 0 auto;
-            padding: 24px;
+            padding: 28px 40px 24px;
+            gap: 16px;
         }
+
+        /* ── Header ─────────────────────────────────────── */
 
         .header {
             display: flex;
-            align-items: end;
+            align-items: flex-end;
             justify-content: space-between;
+            gap: 24px;
+            padding-bottom: 18px;
+            border-bottom: 1px solid var(--rule);
+        }
+
+        .title-block {
+            display: flex;
+            align-items: baseline;
             gap: 16px;
-            margin-bottom: 18px;
         }
 
         .title-block h1 {
-            margin: 0;
-            font-size: 2rem;
-            line-height: 1.1;
-            letter-spacing: -0.02em;
+            font-family: var(--serif);
+            font-size: 2.05rem;
+            font-weight: 400;
+            letter-spacing: -0.01em;
+            line-height: 1;
+            color: var(--ink);
         }
 
-        .title-block p {
-            margin: 8px 0 0;
-            color: var(--muted);
-            font-size: 0.98rem;
+        .title-block .eyebrow {
+            font-size: 0.78rem;
+            font-weight: 500;
+            letter-spacing: .12em;
+            text-transform: uppercase;
+            color: var(--ink-low);
         }
+
+        /* ── Controls ────────────────────────────────────── */
 
         .controls {
             display: flex;
-            gap: 10px;
             align-items: center;
-            background: rgba(255, 255, 255, 0.9);
-            border: 1px solid rgba(148, 163, 184, 0.25);
-            border-radius: 14px;
-            padding: 10px 12px;
-            box-shadow: var(--shadow);
+            gap: 8px;
         }
 
         .controls label {
-            font-size: 0.92rem;
-            color: var(--muted);
-            font-weight: 600;
+            font-size: 0.78rem;
+            font-weight: 500;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+            color: var(--ink-low);
+            margin-right: 4px;
         }
 
-        .controls select,
-        .controls button {
-            border: 1px solid rgba(148, 163, 184, 0.35);
-            background: white;
-            color: var(--text);
-            border-radius: 10px;
-            padding: 8px 10px;
-            font-size: 0.92rem;
+        .controls select {
+            appearance: none;
+            -webkit-appearance: none;
+            border: 1px solid var(--rule);
+            background: transparent;
+            color: var(--ink);
+            border-radius: 6px;
+            padding: 7px 32px 7px 12px;
+            font-family: var(--sans);
+            font-size: 0.85rem;
             cursor: pointer;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%235a5858' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            transition: border-color 150ms;
         }
 
-        .controls button:hover,
-        .controls select:hover {
-            border-color: rgba(51, 65, 85, 0.45);
+        .controls select:hover { border-color: rgba(17,16,16,.3); }
+        .controls select:focus { outline: none; border-color: var(--accent); }
+
+        /* ── Search ──────────────────────────────────────── */
+
+        .search-wrap {
+            position: relative;
+            display: flex;
+            align-items: center;
         }
+
+        .search-wrap .search-icon {
+            position: absolute;
+            left: 10px;
+            pointer-events: none;
+            color: var(--ink-low);
+        }
+
+        #searchInput {
+            border: 1px solid var(--rule);
+            background: transparent;
+            color: var(--ink);
+            border-radius: 6px;
+            padding: 7px 28px 7px 32px;
+            font-family: var(--sans);
+            font-size: 0.85rem;
+            width: 178px;
+            transition: border-color 150ms, width 220ms ease;
+        }
+
+        #searchInput::placeholder { color: var(--ink-low); }
+        #searchInput:focus { outline: none; border-color: var(--accent); width: 228px; }
+
+        #searchClear {
+            position: absolute;
+            right: 8px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--ink-low);
+            display: none;
+            font-size: 13px;
+            line-height: 1;
+            padding: 2px 0;
+        }
+
+        #searchClear.visible { display: block; }
+        #searchClear:hover { color: var(--ink); }
+
+        /* ── Shared button ───────────────────────────────── */
+
+        .controls button {
+            border: 1px solid var(--rule);
+            background: transparent;
+            color: var(--ink-mid);
+            border-radius: 6px;
+            padding: 7px 14px;
+            font-family: var(--sans);
+            font-size: 0.82rem;
+            cursor: pointer;
+            transition: color 150ms, border-color 150ms;
+        }
+
+        .controls button:hover { color: var(--ink); border-color: rgba(17,16,16,.3); }
+
+        .divider { width: 1px; height: 22px; background: var(--rule); margin: 0 4px; }
+
+        /* ── Card ────────────────────────────────────────── */
 
         .card {
             position: relative;
-            background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.96) 100%);
-            border: 1px solid rgba(148, 163, 184, 0.22);
-            border-radius: 24px;
-            box-shadow: var(--shadow);
+            border: 1px solid var(--rule);
+            border-radius: 12px;
+            background: #ffffff;
             overflow: hidden;
-            min-height: 820px;
-            height: 80vh;
+            min-height: 460px;
         }
 
         #chart {
             width: 100%;
             height: 100%;
+            position: absolute;
+            inset: 0;
         }
 
         svg {
@@ -112,621 +206,769 @@
             user-select: none;
         }
 
-        svg:active {
-            cursor: grabbing;
-        }
+        svg:active { cursor: grabbing; }
+
+        /* ── Nodes ───────────────────────────────────────── */
 
         .node circle {
-            stroke: var(--stroke);
-            stroke-width: 1.2px;
-            transition: stroke 160ms ease, stroke-width 160ms ease, opacity 160ms ease;
+            stroke: rgba(255,255,255,.18);
+            stroke-width: 1px;
+            transition: stroke 140ms ease, stroke-width 140ms ease, opacity 200ms ease;
         }
 
-        .node:hover circle {
-            stroke: rgba(15, 23, 42, 0.85);
-            stroke-width: 2px;
-        }
+        .node:hover circle { stroke: rgba(255,255,255,.7); stroke-width: 1.5px; }
 
         .node text {
             pointer-events: none;
             text-anchor: middle;
             dominant-baseline: middle;
-            fill: rgba(255, 255, 255, 0.98);
-            font-weight: 700;
+            fill: rgba(255,255,255,.95);
+            font-family: var(--sans);
+            font-weight: 500;
             letter-spacing: -0.01em;
             paint-order: stroke;
-            stroke: rgba(15, 23, 42, 0.22);
+            stroke: rgba(0,0,0,.18);
             stroke-linejoin: round;
-            transition: opacity 120ms ease;
+            transition: opacity 200ms ease;
         }
+
+        /* ── Breadcrumb ───────────────────────────────────── */
+
+        #breadcrumb {
+            position: absolute;
+            top: 14px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-6px);
+            display: flex;
+            align-items: center;
+            background: rgba(255,255,255,0.94);
+            border: 1px solid var(--rule);
+            border-radius: 8px;
+            padding: 6px 14px;
+            font-size: 0.80rem;
+            color: var(--ink-mid);
+            max-width: 65%;
+            overflow: hidden;
+            white-space: nowrap;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 200ms ease, transform 200ms ease;
+            z-index: 6;
+            backdrop-filter: blur(8px);
+        }
+
+        #breadcrumb.visible {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .bc-seg { color: var(--ink); font-weight: 500; }
+        .bc-seg.active { color: var(--accent); }
+        .bc-sep { color: var(--ink-low); margin: 0 7px; }
+
+        /* ── Search count badge ───────────────────────────── */
+
+        #searchCount {
+            position: absolute;
+            top: 14px;
+            right: 16px;
+            background: var(--accent);
+            color: #fff;
+            border-radius: 6px;
+            padding: 4px 10px;
+            font-size: 0.76rem;
+            font-weight: 500;
+            pointer-events: none;
+            opacity: 0;
+            transform: translateY(-4px);
+            transition: opacity 180ms ease, transform 180ms ease;
+            z-index: 6;
+        }
+
+        #searchCount.visible { opacity: 1; transform: translateY(0); }
+
+        /* ── Stats panel ─────────────────────────────────── */
+
+        #stats {
+            position: absolute;
+            left: 16px;
+            bottom: 16px;
+            background: rgba(255,255,255,0.94);
+            border: 1px solid var(--rule);
+            border-radius: 10px;
+            padding: 12px 16px;
+            font-size: 0.78rem;
+            color: var(--ink-mid);
+            min-width: 185px;
+            z-index: 4;
+            backdrop-filter: blur(8px);
+            line-height: 1.6;
+        }
+
+        #stats .s-title {
+            font-size: 0.68rem;
+            font-weight: 600;
+            letter-spacing: .11em;
+            text-transform: uppercase;
+            color: var(--ink-low);
+            margin-bottom: 7px;
+        }
+
+        #stats .s-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+        }
+
+        #stats .s-row strong { color: var(--ink); font-weight: 600; }
+
+        #stats hr {
+            border: none;
+            border-top: 1px solid var(--rule);
+            margin: 9px 0;
+        }
+
+        #stats .top-list { list-style: none; display: flex; flex-direction: column; gap: 3px; }
+
+        #stats .top-list li {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+        }
+
+        #stats .top-name {
+            width: 88px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            color: var(--ink);
+            font-size: 0.76rem;
+        }
+
+        #stats .bar-wrap {
+            flex: 1;
+            height: 3px;
+            background: rgba(17,16,16,.07);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        #stats .bar {
+            height: 100%;
+            background: var(--accent);
+            border-radius: 2px;
+            opacity: 0.6;
+        }
+
+        #stats .top-val {
+            color: var(--ink-low);
+            font-size: 0.72rem;
+            min-width: 20px;
+            text-align: right;
+        }
+
+        /* ── Tooltip ─────────────────────────────────────── */
 
         .tooltip {
             position: absolute;
             pointer-events: none;
-            background: rgba(15, 23, 42, 0.96);
-            color: white;
-            border-radius: 14px;
-            padding: 12px 14px;
-            font-size: 0.9rem;
-            line-height: 1.45;
-            box-shadow: 0 12px 28px rgba(2, 6, 23, 0.25);
-            max-width: 380px;
+            background: var(--ink);
+            color: #f8f6f1;
+            border-radius: 8px;
+            padding: 12px 16px;
+            font-size: 0.84rem;
+            line-height: 1.55;
+            max-width: 340px;
             opacity: 0;
-            transform: translateY(4px);
-            transition: opacity 140ms ease, transform 140ms ease;
-            z-index: 5;
+            transform: translateY(6px);
+            transition: opacity 130ms ease, transform 130ms ease;
+            z-index: 10;
         }
 
-        .tooltip.visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
+        .tooltip.visible { opacity: 1; transform: translateY(0); }
+        .tooltip strong { font-weight: 600; }
 
         .tooltip .path {
-            color: #cbd5e1;
-            font-size: 0.8rem;
-            margin-top: 4px;
+            color: #a09e9e;
+            font-size: 0.76rem;
+            margin-top: 6px;
             word-break: break-word;
+            border-top: 1px solid rgba(255,255,255,.10);
+            padding-top: 6px;
         }
+
+        /* ── Legend ──────────────────────────────────────── */
 
         .legend {
             position: absolute;
-            left: 18px;
-            bottom: 18px;
-            background: rgba(255, 255, 255, 0.92);
-            border: 1px solid rgba(148, 163, 184, 0.25);
-            border-radius: 14px;
-            padding: 10px 12px;
-            box-shadow: var(--shadow);
-            color: var(--muted);
-            font-size: 0.88rem;
-            backdrop-filter: blur(8px);
-            z-index: 4;
+            right: 16px;
+            bottom: 16px;
+            color: var(--ink-low);
+            font-size: 0.72rem;
+            letter-spacing: .03em;
+            pointer-events: none;
+            text-align: right;
+            line-height: 1.85;
         }
 
-        .loading,
-        .error {
-            padding: 40px 28px;
-            color: var(--muted);
-            font-size: 1rem;
-        }
+        /* ── States ──────────────────────────────────────── */
 
-        .error {
-            color: #991b1b;
-        }
+        .loading, .error { padding: 48px 36px; color: var(--ink-mid); font-size: 0.95rem; }
+        .error { color: #991b1b; }
 
-        @media (max-width: 900px) {
-            .header {
-                flex-direction: column;
-                align-items: start;
-            }
-
-            .card {
-                min-height: 640px;
-                height: 72vh;
-            }
+        @media (max-width: 860px) {
+            .page { padding: 18px 18px 14px; }
+            .header { flex-direction: column; align-items: flex-start; }
+            .title-block { flex-direction: column; gap: 4px; }
+            #searchInput { width: 130px; }
         }
     </style>
 </head>
 
 <body>
-    <div class="page">
-        <div class="header">
-            <div class="title-block">
-                <h1>Treemap circulaire PREVYO</h1>
-                <p>Visualisation hiérarchique des événements à partir de <code>export.events.json</code></p>
-            </div>
+<div class="page">
 
-            <div class="controls">
-                <label for="fieldSelect">Champ</label>
-                <select id="fieldSelect">
-                    <option value="type" selected>type</option>
-                    <option value="domain">domain</option>
-                    <option value="subdomain">subdomain</option>
-                    <option value="risk">risk</option>
-                    <option value="riskCarac">riskCarac</option>
-                    <option value="nodes.labels">nodes.labels</option>
-                    <option value="edges.type">edges.type</option>
-                </select>
-                <button id="resetZoomBtn" type="button">Réinitialiser la vue</button>
-            </div>
+    <div class="header">
+        <div class="title-block">
+            <h1>Treemap circulaire PREVYO</h1>
+            <span class="eyebrow">Visualisation hiérarchique · export.events.json</span>
         </div>
 
-        <div class="card" id="card">
-            <div id="chart"></div>
-            <div id="tooltip" class="tooltip"></div>
-            <div class="legend">Molette pour zoomer, glisser pour déplacer, clic sur un cercle pour centrer</div>
+        <div class="controls">
+            <label for="fieldSelect">Champ</label>
+            <select id="fieldSelect">
+                <option value="type" selected>type</option>
+                <option value="domain">domain</option>
+                <option value="subdomain">subdomain</option>
+                <option value="risk">risk</option>
+                <option value="riskCarac">riskCarac</option>
+                <option value="nodes.labels">nodes.labels</option>
+                <option value="edges.type">edges.type</option>
+            </select>
+
+            <div class="divider"></div>
+
+            <div class="search-wrap">
+                <svg class="search-icon" width="14" height="14" viewBox="0 0 14 14" fill="none">
+                    <circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.4"/>
+                    <path d="M10 10l2.5 2.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+                </svg>
+                <input id="searchInput" type="text" placeholder="Rechercher…" autocomplete="off" spellcheck="false" />
+                <button id="searchClear" type="button" title="Effacer">✕</button>
+            </div>
+
+            <div class="divider"></div>
+            <button id="resetZoomBtn" type="button">Réinitialiser</button>
         </div>
     </div>
 
-    <script>
-        const filePath = "../data/export.events.json";
+    <div class="card" id="card">
+        <div id="chart"></div>
+        <div id="breadcrumb"></div>
+        <div id="searchCount"></div>
+        <div id="tooltip" class="tooltip"></div>
 
-        const chartEl = document.getElementById("chart");
-        const cardEl = document.getElementById("card");
-        const tooltipEl = document.getElementById("tooltip");
-        const fieldSelect = document.getElementById("fieldSelect");
-        const resetZoomBtn = document.getElementById("resetZoomBtn");
+        <div id="stats">
+            <div class="s-title">Statistiques</div>
+            <div class="s-row"><span>Événements</span><strong id="statTotal">—</strong></div>
+            <div class="s-row"><span>Profondeur max</span><strong id="statDepth">—</strong></div>
+            <hr>
+            <div class="s-title" id="statsTopLabel">Top 5</div>
+            <ul class="top-list" id="statTopList"></ul>
+        </div>
 
-        let cachedEvents = null;
-        let currentSvg = null;
-        let currentZoom = null;
-        let resizeTimer = null;
+        <div class="legend">
+            Molette · zoomer<br>
+            Glisser · déplacer<br>
+            Clic · centrer
+        </div>
+    </div>
 
-        function prettifyLabel(label) {
-            const map = {
-                "nodes.labels": "Labels des nœuds",
-                "edges.type": "Types de liens",
-                "riskCarac": "Caractéristiques du risque",
-                "type": "Type",
-                "domain": "Domaine",
-                "subdomain": "Sous-domaine"
-            };
-            return map[label] || label;
+</div>
+
+<script>
+    const filePath = "../data/export.events.json";
+
+    const chartEl       = document.getElementById("chart");
+    const cardEl        = document.getElementById("card");
+    const tooltipEl     = document.getElementById("tooltip");
+    const fieldSelect   = document.getElementById("fieldSelect");
+    const resetZoomBtn  = document.getElementById("resetZoomBtn");
+    const breadcrumbEl  = document.getElementById("breadcrumb");
+    const searchInput   = document.getElementById("searchInput");
+    const searchClear   = document.getElementById("searchClear");
+    const searchCountEl = document.getElementById("searchCount");
+    const statTotal     = document.getElementById("statTotal");
+    const statDepth     = document.getElementById("statDepth");
+    const statTopList   = document.getElementById("statTopList");
+    const statsTopLabel = document.getElementById("statsTopLabel");
+
+    let cachedEvents  = null;
+    let currentSvg    = null;
+    let currentZoom   = null;
+    let resizeTimer   = null;
+    let searchQuery   = "";
+    let currentNodes  = null;
+
+    /* ── Label helpers ───────────────────────────────────── */
+
+    function prettifyLabel(label) {
+        const map = {
+            "nodes.labels": "Labels des nœuds",
+            "edges.type":   "Types de liens",
+            "riskCarac":    "Caractéristiques du risque",
+            "type":         "Type",
+            "domain":       "Domaine",
+            "subdomain":    "Sous-domaine"
+        };
+        return map[label] || label;
+    }
+
+    /* ── Data loading ────────────────────────────────────── */
+
+    async function loadJsonFlexible(path) {
+        const raw = await fetch(path).then(r => {
+            if (!r.ok) throw new Error(`Impossible de charger ${path} (${r.status})`);
+            return r.text();
+        });
+        try {
+            const parsed = JSON.parse(raw);
+            if (Array.isArray(parsed))                   return parsed;
+            if (parsed && Array.isArray(parsed.events))  return parsed.events;
+            if (parsed && Array.isArray(parsed.data))    return parsed.data;
+            throw new Error("Format JSON non reconnu");
+        } catch (e) {
+            const lines = raw.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+            const parsedLines = lines.map(l => JSON.parse(l));
+            if (parsedLines.length) return parsedLines;
+            throw e;
+        }
+    }
+
+    /* ── Tree building ───────────────────────────────────── */
+
+    function createTreeNode(name) { return { name, children: new Map(), value: 0 }; }
+
+    function addPath(root, parts) {
+        if (!parts?.length) return;
+        let node = root;
+        node.value += 1;
+        for (const part of parts) {
+            if (!part) continue;
+            if (!node.children.has(part)) node.children.set(part, createTreeNode(part));
+            node = node.children.get(part);
+            node.value += 1;
+        }
+    }
+
+    function finalizeTree(node) {
+        const children = Array.from(node.children.values()).map(finalizeTree);
+        if (children.length) return { name: node.name, children };
+        return { name: node.name, value: node.value };
+    }
+
+    function getPathsForField(event, field) {
+        if (field === "nodes.labels") {
+            const out = [];
+            for (const node of event.nodes || [])
+                for (const label of node.labels || [])
+                    if (typeof label === "string" && label.trim())
+                        out.push(label.split("/").filter(Boolean));
+            return out;
+        }
+        if (field === "edges.type") {
+            const out = [];
+            for (const edge of event.edges || [])
+                if (typeof edge.type === "string" && edge.type.trim())
+                    out.push([edge.type.trim()]);
+            return out;
+        }
+        const value = event[field];
+        if (typeof value === "string" && value.trim())
+            return [value.split("/").filter(Boolean)];
+        return [];
+    }
+
+    function buildHierarchy(events, field) {
+        const root = createTreeNode(prettifyLabel(field));
+        for (const event of events) {
+            const paths = getPathsForField(event, field);
+            for (const path of paths) addPath(root, path);
+        }
+        return finalizeTree(root);
+    }
+
+    function nodePath(d) {
+        return d.ancestors().reverse().map(x => x.data.name).join(" / ");
+    }
+
+    /* ── Colour ──────────────────────────────────────────── */
+
+    function colorForNode(d, maxDepth) {
+        if (d.depth === 0) return "#0e2237";
+        const t = d.depth / Math.max(maxDepth, 1);
+        const c = d3.interpolateRgbBasis([
+            "#0e2237","#1a3a5c","#2c6193","#5a9dc4","#b6d9ee"
+        ])(0.1 + t * 0.85);
+        const hsl = d3.hsl(c);
+        if (d.children) { hsl.s = Math.min(0.70, hsl.s + 0.04); hsl.l = Math.max(0.22, hsl.l - 0.02); }
+        else            { hsl.s = Math.max(0.16, hsl.s - 0.08); hsl.l = Math.min(0.88, hsl.l + 0.02); }
+        return hsl.formatHex();
+    }
+
+    /* ── Text helpers ────────────────────────────────────── */
+
+    function truncateLabel(text, maxLength = 18) {
+        if (!text) return "";
+        return text.length > maxLength ? text.slice(0, maxLength - 1) + "…" : text;
+    }
+
+    function estimateTextWidth(text, fontSize) { return text.length * fontSize * 0.56; }
+
+    function fitLabel(text, maxWidth, fontSize) {
+        if (!text) return "";
+        if (estimateTextWidth(text, fontSize) <= maxWidth) return text;
+        const maxChars = Math.max(4, Math.floor(maxWidth / (fontSize * 0.56)));
+        return text.length <= maxChars ? text : text.slice(0, Math.max(1, maxChars - 1)) + "…";
+    }
+
+    function rectsOverlap(a, b) {
+        return !(a.x + a.w < b.x || b.x + b.w < a.x || a.y + a.h < b.y || b.y + b.h < a.y);
+    }
+
+    /* ── Breadcrumb ──────────────────────────────────────── */
+
+    function showBreadcrumb(d) {
+        const parts = d.ancestors().reverse();
+        breadcrumbEl.innerHTML = parts.map((p, i) => {
+            const isLast = i === parts.length - 1;
+            return (i > 0 ? '<span class="bc-sep">›</span>' : '')
+                + `<span class="bc-seg${isLast ? " active" : ""}">${p.data.name}</span>`;
+        }).join("");
+        breadcrumbEl.classList.add("visible");
+    }
+
+    function hideBreadcrumb() { breadcrumbEl.classList.remove("visible"); }
+
+    /* ── Stats ───────────────────────────────────────────── */
+
+    function updateStats(events, field, rootNode) {
+        statTotal.textContent = events.length.toLocaleString("fr-FR");
+        statDepth.textContent = rootNode.height;
+        statsTopLabel.textContent = `Top 5 · ${prettifyLabel(field)}`;
+
+        const counts = new Map();
+        for (const event of events) {
+            for (const path of getPathsForField(event, field)) {
+                const key = path[path.length - 1];
+                if (key) counts.set(key, (counts.get(key) || 0) + 1);
+            }
         }
 
-        async function loadJsonFlexible(path) {
-            const raw = await fetch(path).then(r => {
-                if (!r.ok) {
-                    throw new Error(`Impossible de charger ${path} (${r.status})`);
-                }
-                return r.text();
+        const sorted = [...counts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 5);
+        const maxVal = sorted[0]?.[1] || 1;
+
+        statTopList.innerHTML = sorted.map(([name, val]) => `
+            <li>
+                <span class="top-name" title="${name}">${name}</span>
+                <div class="bar-wrap"><div class="bar" style="width:${(val / maxVal * 100).toFixed(1)}%"></div></div>
+                <span class="top-val">${val}</span>
+            </li>
+        `).join("");
+    }
+
+    /* ── Search ──────────────────────────────────────────── */
+
+    function applySearch(q) {
+        searchQuery = q.toLowerCase().trim();
+        searchClear.classList.toggle("visible", q.length > 0);
+
+        if (!currentNodes) return;
+
+        if (!searchQuery) {
+            currentNodes.selectAll("circle").style("opacity", null);
+            currentNodes.selectAll("text").style("opacity", null);
+            searchCountEl.classList.remove("visible");
+            return;
+        }
+
+        let matchCount = 0;
+
+        currentNodes.each(function(d) {
+            const selfMatch     = d.data.name.toLowerCase().includes(searchQuery);
+            const ancestorMatch = d.ancestors().some(a => a.data.name.toLowerCase().includes(searchQuery));
+            const descMatch     = d.descendants().some(a => a.data.name.toLowerCase().includes(searchQuery));
+            const matches = selfMatch || ancestorMatch || descMatch;
+
+            d3.select(this).select("circle").style("opacity", matches ? null : 0.08);
+            d3.select(this).select("text").style("opacity",   matches ? null : 0);
+
+            if (selfMatch && d.depth > 0) matchCount++;
+        });
+
+        searchCountEl.textContent = `${matchCount} résultat${matchCount !== 1 ? "s" : ""}`;
+        searchCountEl.classList.add("visible");
+    }
+
+    /* ── Tooltip ─────────────────────────────────────────── */
+
+    function showTooltip(event, d) {
+        const percentage = d.parent
+            ? ((d.value / d.parent.value) * 100).toFixed(1)
+            : "100.0";
+        tooltipEl.innerHTML = `
+            <div><strong>${d.data.name}</strong></div>
+            <div>Occurrences&nbsp;: <strong>${d.value}</strong></div>
+            <div>Part du parent&nbsp;: <strong>${percentage}%</strong></div>
+            <div class="path">${nodePath(d)}</div>
+        `;
+        moveTooltip(event);
+        tooltipEl.classList.add("visible");
+    }
+
+    function moveTooltip(event) {
+        const cr = cardEl.getBoundingClientRect();
+        const tr = tooltipEl.getBoundingClientRect();
+        let x = event.clientX - cr.left + 16;
+        let y = event.clientY - cr.top  + 16;
+        x = Math.max(12, Math.min(x, cr.width  - tr.width  - 12));
+        y = Math.max(12, Math.min(y, cr.height - tr.height - 12));
+        tooltipEl.style.left = `${x}px`;
+        tooltipEl.style.top  = `${y}px`;
+    }
+
+    function hideTooltip() { tooltipEl.classList.remove("visible"); }
+
+    /* ── Chart ───────────────────────────────────────────── */
+
+    function clearChart() {
+        chartEl.innerHTML = "";
+        hideTooltip();
+        hideBreadcrumb();
+        searchCountEl.classList.remove("visible");
+        currentSvg   = null;
+        currentZoom  = null;
+        currentNodes = null;
+    }
+
+    function renderChart(treeData, selectedField) {
+        clearChart();
+
+        const rect  = cardEl.getBoundingClientRect();
+        const width  = Math.max(400, rect.width);
+        const height = Math.max(400, rect.height);
+        const outerMargin  = 24;
+        const size         = Math.max(260, Math.min(width, height) - outerMargin * 2);
+        const innerPadding = 16;
+        const originX  = (width  - size) / 2 + innerPadding;
+        const originY  = (height - size) / 2 + innerPadding;
+        const packSize = size - innerPadding * 2;
+
+        const root = d3.hierarchy(treeData)
+            .sum(d => d.value || 0)
+            .sort((a, b) => b.value - a.value);
+
+        const pack = d3.pack().size([packSize, packSize]).padding(4);
+        pack(root);
+
+        const maxDepth = root.height + 1;
+
+        if (cachedEvents) updateStats(cachedEvents, selectedField, root);
+
+        const svg = d3.select("#chart")
+            .append("svg")
+            .attr("viewBox", `0 0 ${width} ${height}`)
+            .attr("preserveAspectRatio", "xMidYMid meet")
+            .attr("role", "img")
+            .attr("aria-label", `Treemap circulaire PREVYO — champ ${selectedField}`);
+
+        currentSvg = svg;
+
+        svg.append("rect")
+            .attr("width", width)
+            .attr("height", height)
+            .attr("fill", "transparent")
+            .on("click", () => {
+                hideBreadcrumb();
+                svg.transition().duration(650).call(currentZoom.transform, d3.zoomIdentity);
             });
 
-            try {
-                const parsed = JSON.parse(raw);
-                if (Array.isArray(parsed)) return parsed;
-                if (parsed && Array.isArray(parsed.events)) return parsed.events;
-                if (parsed && Array.isArray(parsed.data)) return parsed.data;
-                throw new Error("Format JSON non reconnu");
-            } catch (e) {
-                const lines = raw
-                    .split(/\r?\n/)
-                    .map(line => line.trim())
-                    .filter(Boolean);
+        const zoomLayer  = svg.append("g");
+        const graphLayer = zoomLayer.append("g")
+            .attr("transform", `translate(${originX}, ${originY})`);
 
-                const parsedLines = lines.map(line => JSON.parse(line));
-                if (parsedLines.length) return parsedLines;
-                throw e;
-            }
-        }
+        const nodes = root.descendants();
 
-        function createTreeNode(name) {
+        const node = graphLayer.selectAll("g.node")
+            .data(nodes)
+            .join("g")
+            .attr("class", "node")
+            .attr("transform", d => `translate(${d.x},${d.y})`)
+            .on("mouseenter", (event, d) => showTooltip(event, d))
+            .on("mousemove",  moveTooltip)
+            .on("mouseleave", hideTooltip)
+            .on("click", (event, d) => {
+                event.stopPropagation();
+                showBreadcrumb(d);
+                centerOnNode(d);
+            });
+
+        currentNodes = node;
+
+        const circles = node.append("circle")
+            .attr("r", d => d.r)
+            .attr("fill", d => colorForNode(d, maxDepth))
+            .attr("fill-opacity", d => d.depth === 0 ? 1 : d.children ? 0.96 : 0.90);
+
+        const labels = node.append("text")
+            .attr("class", "node-label")
+            .style("display", "none")
+            .style("opacity", 0)
+            .text("");
+
+        // Re-apply active search after re-render
+        if (searchQuery) applySearch(searchInput.value);
+
+        function getScreenNode(d, transform) {
             return {
-                name,
-                children: new Map(),
-                value: 0
+                x: transform.applyX(originX + d.x),
+                y: transform.applyY(originY + d.y),
+                r: d.r * transform.k
             };
         }
 
-        function addPath(root, parts) {
-            if (!parts || !parts.length) return;
-
-            let node = root;
-            node.value += 1;
-
-            for (const part of parts) {
-                if (!part) continue;
-                if (!node.children.has(part)) {
-                    node.children.set(part, createTreeNode(part));
-                }
-                node = node.children.get(part);
-                node.value += 1;
-            }
+        function isInViewport(p) {
+            return p.x + p.r > 0 && p.x - p.r < width &&
+                   p.y + p.r > 0 && p.y - p.r < height;
         }
 
-        function finalizeTree(node) {
-            const children = Array.from(node.children.values()).map(finalizeTree);
-            if (children.length) {
-                return {
-                    name: node.name,
-                    children
-                };
-            }
-            return {
-                name: node.name,
-                value: node.value
-            };
+        function labelFontSize(r) {
+            if (r > 180) return 30;
+            if (r > 120) return 24;
+            if (r >  80) return 18;
+            if (r >  52) return 14;
+            if (r >  32) return 11;
+            return 0;
         }
 
-        function getPathsForField(event, field) {
-            if (field === "nodes.labels") {
-                const out = [];
-                for (const node of event.nodes || []) {
-                    for (const label of node.labels || []) {
-                        if (typeof label === "string" && label.trim()) {
-                            out.push(label.split("/").filter(Boolean));
-                        }
-                    }
-                }
-                return out;
-            }
+        function updateLabels(transform = d3.zoomIdentity) {
+            const k = transform.k || 1;
+            const depthLimit =
+                k < 0.9 ? 2 : k < 1.5 ? 3 : k < 2.5 ? 4 : k < 4 ? 5 : Infinity;
 
-            if (field === "edges.type") {
-                const out = [];
-                for (const edge of event.edges || []) {
-                    if (typeof edge.type === "string" && edge.type.trim()) {
-                        out.push([edge.type.trim()]);
-                    }
-                }
-                return out;
-            }
+            const candidates = [];
 
-            const value = event[field];
-            if (typeof value === "string" && value.trim()) {
-                return [value.split("/").filter(Boolean)];
-            }
-
-            return [];
-        }
-
-        function buildHierarchy(events, field) {
-            const root = createTreeNode(prettifyLabel(field));
-
-            for (const event of events) {
-                const paths = getPathsForField(event, field);
-                for (const path of paths) {
-                    addPath(root, path);
-                }
-            }
-
-            return finalizeTree(root);
-        }
-
-        function nodePath(d) {
-            return d.ancestors().reverse().map(x => x.data.name).join(" / ");
-        }
-
-        function colorForNode(d, maxDepth) {
-            if (d.depth === 0) return "#123b64";
-
-            const t = d.depth / Math.max(maxDepth, 1);
-            const c = d3.interpolateRgbBasis([
-                "#123b64",
-                "#1f5f99",
-                "#3b86c6",
-                "#78b0dc",
-                "#cfe7f7"
-            ])(0.1 + t * 0.85);
-
-            const hsl = d3.hsl(c);
-
-            if (d.children) {
-                hsl.s = Math.min(0.72, hsl.s + 0.04);
-                hsl.l = Math.max(0.24, hsl.l - 0.02);
-            } else {
-                hsl.s = Math.max(0.18, hsl.s - 0.08);
-                hsl.l = Math.min(0.88, hsl.l + 0.02);
-            }
-
-            return hsl.formatHex();
-        }
-
-        function truncateLabel(text, maxLength = 18) {
-            if (!text) return "";
-            return text.length > maxLength ? text.slice(0, maxLength - 1) + "…" : text;
-        }
-
-        function estimateTextWidth(text, fontSize) {
-            return text.length * fontSize * 0.56;
-        }
-
-        function fitLabel(text, maxWidth, fontSize) {
-            if (!text) return "";
-            const estimated = estimateTextWidth(text, fontSize);
-            if (estimated <= maxWidth) return text;
-
-            const maxChars = Math.max(4, Math.floor(maxWidth / (fontSize * 0.56)));
-            if (text.length <= maxChars) return text;
-            return text.slice(0, Math.max(1, maxChars - 1)) + "…";
-        }
-
-        function rectsOverlap(a, b) {
-            return !(
-                a.x + a.w < b.x ||
-                b.x + b.w < a.x ||
-                a.y + a.h < b.y ||
-                b.y + b.h < a.y
-            );
-        }
-
-        function showTooltip(event, d) {
-            const percentage = d.parent
-                ? ((d.value / d.parent.value) * 100).toFixed(1)
-                : "100.0";
-
-            tooltipEl.innerHTML = `
-        <div><strong>${d.data.name}</strong></div>
-        <div>Occurrences : <strong>${d.value}</strong></div>
-        <div>Part du parent : <strong>${percentage}%</strong></div>
-        <div class="path">${nodePath(d)}</div>
-      `;
-
-            moveTooltip(event);
-            tooltipEl.classList.add("visible");
-        }
-
-        function moveTooltip(event) {
-            const cardRect = cardEl.getBoundingClientRect();
-            const tooltipRect = tooltipEl.getBoundingClientRect();
-
-            let x = event.clientX - cardRect.left + 16;
-            let y = event.clientY - cardRect.top + 16;
-
-            const maxX = cardRect.width - tooltipRect.width - 12;
-            const maxY = cardRect.height - tooltipRect.height - 12;
-
-            x = Math.max(12, Math.min(x, maxX));
-            y = Math.max(12, Math.min(y, maxY));
-
-            tooltipEl.style.left = `${x}px`;
-            tooltipEl.style.top = `${y}px`;
-        }
-
-        function hideTooltip() {
-            tooltipEl.classList.remove("visible");
-        }
-
-        function clearChart() {
-            chartEl.innerHTML = "";
-            hideTooltip();
-            currentSvg = null;
-            currentZoom = null;
-        }
-
-        function renderChart(treeData, selectedField) {
-            clearChart();
-
-            const rect = cardEl.getBoundingClientRect();
-            const width = Math.max(400, rect.width);
-            const height = Math.max(400, rect.height);
-            const outerMargin = 24;
-            const size = Math.max(260, Math.min(width, height) - outerMargin * 2);
-            const innerPadding = 16;
-
-            const originX = (width - size) / 2 + innerPadding;
-            const originY = (height - size) / 2 + innerPadding;
-            const packSize = size - innerPadding * 2;
-
-            const root = d3.hierarchy(treeData)
-                .sum(d => d.value || 0)
-                .sort((a, b) => b.value - a.value);
-
-            const pack = d3.pack()
-                .size([packSize, packSize])
-                .padding(4);
-
-            pack(root);
-
-            const maxDepth = root.height + 1;
-
-            const svg = d3.select("#chart")
-                .append("svg")
-                .attr("viewBox", `0 0 ${width} ${height}`)
-                .attr("preserveAspectRatio", "xMidYMid meet")
-                .attr("role", "img")
-                .attr("aria-label", `Treemap circulaire PREVYO basé sur le champ ${selectedField}`);
-
-            currentSvg = svg;
-
-            svg.append("rect")
-                .attr("width", width)
-                .attr("height", height)
-                .attr("fill", "transparent")
-                .on("click", () => {
-                    svg.transition()
-                        .duration(650)
-                        .call(currentZoom.transform, d3.zoomIdentity);
+            nodes.forEach(d => {
+                if (d.depth === 0 || d.depth > depthLimit) return;
+                const p = getScreenNode(d, transform);
+                if (!isInViewport(p) || p.r < 18) return;
+                const fontSize = labelFontSize(p.r);
+                if (fontSize === 0) return;
+                const maxLabelWidth = Math.min(p.r * 1.45, 220);
+                const text = fitLabel(truncateLabel(d.data.name, 36), maxLabelWidth, fontSize);
+                if (!text || text.length < 2) return;
+                const textWidth  = Math.min(estimateTextWidth(text, fontSize), maxLabelWidth);
+                const textHeight = fontSize * 1.15;
+                if (textWidth > p.r * 1.55 || textHeight > p.r * 0.95) return;
+                candidates.push({
+                    d, r: p.r, fontSize, text,
+                    rect: { x: p.x - textWidth / 2, y: p.y - textHeight / 2, w: textWidth, h: textHeight }
                 });
+            });
 
-            const zoomLayer = svg.append("g");
+            candidates.sort((a, b) => b.r - a.r);
+            const placed  = [];
+            const visible = new Set();
 
-            const graphLayer = zoomLayer.append("g")
-                .attr("transform", `translate(${originX}, ${originY})`);
-
-            const nodes = root.descendants();
-
-            const node = graphLayer.selectAll("g.node")
-                .data(nodes)
-                .join("g")
-                .attr("class", "node")
-                .attr("transform", d => `translate(${d.x},${d.y})`)
-                .on("mouseenter", (event, d) => showTooltip(event, d))
-                .on("mousemove", moveTooltip)
-                .on("mouseleave", hideTooltip)
-                .on("click", (event, d) => {
-                    event.stopPropagation();
-                    centerOnNode(d);
-                });
-
-            const circles = node.append("circle")
-                .attr("r", d => d.r)
-                .attr("fill", d => colorForNode(d, maxDepth))
-                .attr("fill-opacity", d => d.depth === 0 ? 1 : d.children ? 0.96 : 0.9);
-
-            const labels = node.append("text")
-                .attr("class", "node-label")
-                .style("display", "none")
-                .style("opacity", 0)
-                .text("");
-
-            function getScreenNode(d, transform) {
-                const x = transform.applyX(originX + d.x);
-                const y = transform.applyY(originY + d.y);
-                const r = d.r * transform.k;
-                return { x, y, r };
+            for (const c of candidates) {
+                if (placed.some(p => rectsOverlap(c.rect, p.rect))) continue;
+                placed.push(c);
+                visible.add(c.d);
+                c.d._labelMeta = c;
             }
 
-            function isInViewport(p) {
-                return (
-                    p.x + p.r > 0 &&
-                    p.x - p.r < width &&
-                    p.y + p.r > 0 &&
-                    p.y - p.r < height
-                );
-            }
+            labels
+                .style("display",      d => visible.has(d) ? "inline" : "none")
+                .style("opacity",      d => visible.has(d) ? 1 : 0)
+                .style("font-size",    d => `${d._labelMeta?.fontSize || 12}px`)
+                .style("stroke-width", d => `${Math.max(1.2, (d._labelMeta?.fontSize || 12) * 0.12)}px`)
+                .attr("transform",     `scale(${1 / k})`)
+                .text(d => d._labelMeta?.text || "");
 
-            function labelFontSize(screenRadius) {
-                if (screenRadius > 180) return 30;
-                if (screenRadius > 120) return 24;
-                if (screenRadius > 80) return 18;
-                if (screenRadius > 52) return 14;
-                if (screenRadius > 32) return 11;
-                return 0;
-            }
+            circles.style("stroke-width", `${Math.max(0.7, 1.2 / k)}px`);
+        }
 
-            function updateLabels(transform = d3.zoomIdentity) {
-                const k = transform.k || 1;
+        function centerOnNode(d) {
+            const targetScale = Math.max(1, Math.min(8, (size * 0.30) / d.r));
+            const tx = width  / 2 - (originX + d.x) * targetScale;
+            const ty = height / 2 - (originY + d.y) * targetScale;
+            svg.transition().duration(650)
+               .call(currentZoom.transform, d3.zoomIdentity.translate(tx, ty).scale(targetScale));
+        }
 
-                const depthLimit =
-                    k < 0.9 ? 2 :
-                        k < 1.5 ? 3 :
-                            k < 2.5 ? 4 :
-                                k < 4 ? 5 : Infinity;
+        currentZoom = d3.zoom()
+            .scaleExtent([0.35, 12])
+            .translateExtent([[-width * 4, -height * 4], [width * 5, height * 5]])
+            .on("zoom", (event) => {
+                zoomLayer.attr("transform", event.transform);
+                updateLabels(event.transform);
+            });
 
-                const candidates = [];
+        svg.call(currentZoom);
+        svg.on("dblclick.zoom", null);
 
-                nodes.forEach(d => {
-                    if (d.depth === 0) return;
-                    if (d.depth > depthLimit) return;
+        resetZoomBtn.onclick = () => {
+            hideBreadcrumb();
+            svg.transition().duration(650).call(currentZoom.transform, d3.zoomIdentity);
+        };
 
-                    const p = getScreenNode(d, transform);
-                    if (!isInViewport(p)) return;
-                    if (p.r < 18) return;
+        updateLabels(d3.zoomIdentity);
+    }
 
-                    const fontSize = labelFontSize(p.r);
-                    if (fontSize === 0) return;
+    /* ── Search events ───────────────────────────────────── */
 
-                    const maxLabelWidth = Math.min(p.r * 1.45, 220);
-                    const text = fitLabel(truncateLabel(d.data.name, 36), maxLabelWidth, fontSize);
-                    if (!text || text.length < 2) return;
+    searchInput.addEventListener("input", () => applySearch(searchInput.value));
+    searchClear.addEventListener("click", () => {
+        searchInput.value = "";
+        applySearch("");
+        searchInput.focus();
+    });
 
-                    const textWidth = Math.min(estimateTextWidth(text, fontSize), maxLabelWidth);
-                    const textHeight = fontSize * 1.15;
+    /* ── Init ────────────────────────────────────────────── */
 
-                    if (textWidth > p.r * 1.55) return;
-                    if (textHeight > p.r * 0.95) return;
+    async function init() {
+        chartEl.innerHTML = `<div class="loading">Chargement de ${filePath}…</div>`;
+        try {
+            cachedEvents = await loadJsonFlexible(filePath);
 
-                    candidates.push({
-                        d,
-                        r: p.r,
-                        fontSize,
-                        text,
-                        rect: {
-                            x: p.x - textWidth / 2,
-                            y: p.y - textHeight / 2,
-                            w: textWidth,
-                            h: textHeight
-                        }
-                    });
-                });
-
-                candidates.sort((a, b) => b.r - a.r);
-
-                const placed = [];
-                const visible = new Set();
-
-                for (const c of candidates) {
-                    let collide = false;
-
-                    for (const p of placed) {
-                        if (rectsOverlap(c.rect, p.rect)) {
-                            collide = true;
-                            break;
-                        }
-                    }
-
-                    if (collide) continue;
-
-                    placed.push(c);
-                    visible.add(c.d);
-                    c.d._labelMeta = c;
-                }
-
-                labels
-                    .style("display", d => visible.has(d) ? "inline" : "none")
-                    .style("opacity", d => visible.has(d) ? 1 : 0)
-                    .style("font-size", d => `${d._labelMeta?.fontSize || 12}px`)
-                    .style("stroke-width", d => `${Math.max(1.2, (d._labelMeta?.fontSize || 12) * 0.12)}px`)
-                    .attr("transform", `scale(${1 / k})`)
-                    .text(d => d._labelMeta?.text || "");
-
-                circles.style("stroke-width", `${Math.max(0.7, 1.2 / k)}px`);
-            }
-
-            function centerOnNode(d) {
-                const targetScale = Math.max(1, Math.min(8, (size * 0.30) / d.r));
-                const tx = width / 2 - (originX + d.x) * targetScale;
-                const ty = height / 2 - (originY + d.y) * targetScale;
-
-                svg.transition()
-                    .duration(650)
-                    .call(
-                        currentZoom.transform,
-                        d3.zoomIdentity.translate(tx, ty).scale(targetScale)
-                    );
-            }
-
-            currentZoom = d3.zoom()
-                .scaleExtent([0.35, 12])
-                .translateExtent([
-                    [-width * 4, -height * 4],
-                    [width * 5, height * 5]
-                ])
-                .on("zoom", (event) => {
-                    zoomLayer.attr("transform", event.transform);
-                    updateLabels(event.transform);
-                });
-
-            svg.call(currentZoom);
-            svg.on("dblclick.zoom", null);
-
-            resetZoomBtn.onclick = () => {
-                svg.transition()
-                    .duration(650)
-                    .call(currentZoom.transform, d3.zoomIdentity);
+            const renderCurrent = () => {
+                const field = fieldSelect.value;
+                renderChart(buildHierarchy(cachedEvents, field), field);
             };
 
-            updateLabels(d3.zoomIdentity);
+            renderCurrent();
+            fieldSelect.onchange = renderCurrent;
+
+            window.addEventListener("resize", () => {
+                clearTimeout(resizeTimer);
+                resizeTimer = setTimeout(() => {
+                    if (!cachedEvents) return;
+                    renderChart(buildHierarchy(cachedEvents, fieldSelect.value), fieldSelect.value);
+                }, 180);
+            });
+
+        } catch (error) {
+            console.error(error);
+            chartEl.innerHTML = `
+                <div class="error">
+                    Erreur lors du chargement de <code>${filePath}</code><br><br>
+                    ${String(error.message || error)}
+                </div>
+            `;
         }
+    }
 
-        async function init() {
-            chartEl.innerHTML = `<div class="loading">Chargement de ${filePath}...</div>`;
-
-            try {
-                cachedEvents = await loadJsonFlexible(filePath);
-
-                const renderCurrent = () => {
-                    const field = fieldSelect.value;
-                    const hierarchy = buildHierarchy(cachedEvents, field);
-                    renderChart(hierarchy, field);
-                };
-
-                renderCurrent();
-
-                fieldSelect.onchange = renderCurrent;
-
-                window.addEventListener("resize", () => {
-                    clearTimeout(resizeTimer);
-                    resizeTimer = setTimeout(() => {
-                        if (!cachedEvents) return;
-                        const hierarchy = buildHierarchy(cachedEvents, fieldSelect.value);
-                        renderChart(hierarchy, fieldSelect.value);
-                    }, 180);
-                });
-
-            } catch (error) {
-                console.error(error);
-                chartEl.innerHTML = `
-          <div class="error">
-            Erreur lors du chargement ou du traitement de <code>${filePath}</code><br><br>
-            ${String(error.message || error)}
-          </div>
-        `;
-            }
-        }
-
-        init();
-    </script>
+    init();
+</script>
 </body>
 </html>
