@@ -2,9 +2,9 @@
 
 <div align="center">
 
-#  PREVYO : Analyse de Graphe de Connaissances
+# PREVYO : Analyse de Graphe de Connaissances
 
-**Un outil interactif d'analyse de données et de détection d'anomalies basé sur la base de connaissances NLP d'EMVISTA. Développé pendant le Marathon du Web !**
+**Un outil interactif d'analyse de données et de détection d'anomalies basé sur la base de connaissances NLP d'EMVISTA, développé pendant le Marathon du Web.**
 
 <img src="figures/prevyo.png" alt="Logo PREVYO" width="250" />
 
@@ -12,80 +12,107 @@
 
 ## 📃 Table des matières
 
-- [ À propos du projet](#-à-propos-du-projet)
-- [ Fonctionnalités](#️-fonctionnalités)
-- [ Stack Technique](#-stack-technique)
-- [ Installation & Configuration](#-installation--configuration)
-- [ Version Dashboard](#-version-dashboard)
-- [ Équipe du Projet](#-équipe-du-projet)
+- [📌 À propos du projet](#-à-propos-du-projet)
+- [⚙️ Fonctionnalités](#️-fonctionnalités)
+- [🛠️ Stack technique](#️-stack-technique)
+- [🚀 Installation et configuration](#-installation-et-configuration)
+- [🏗️ Architecture du site](#️-architecture-du-site)
+- [👥 Équipe du projet](#-équipe-du-projet)
 
 ## 📌 À propos du projet
 
-**PREVYO Analytics** est un projet open-source d'analyse de données développé lors d'un hackathon de 48h (Marathon du Web) en collaboration avec l'entreprise EMVISTA. L'objectif de ce projet est d'analyser la base de connaissances complexe PREVYO, générée par des algorithmes NLP à partir de textes bruts, afin d'en extraire des informations exploitables.
+**PREVYO Analytics** est un projet open-source d'analyse de données développé lors d'un hackathon de 48 heures, le Marathon du Web, en collaboration avec l'entreprise **EMVISTA**.
 
-Plutôt que d'extraire le texte nous-mêmes, nous avons construit un pipeline de données complet pour auditer le graphe existant, détecter les anomalies structurelles, trouver des similarités sémantiques entre les événements et visualiser l'ensemble du réseau dans un tableau de bord interactif.
+L'objectif du projet était d'analyser une base de connaissances complexe générée par des algorithmes de NLP à partir de textes bruts, afin d'en extraire des informations exploitables.
 
-##  Fonctionnalités
+Plutôt que d'extraire nous-mêmes les données textuelles, nous avons conçu un pipeline complet permettant :
 
--  **Parsing JSON vers Graphe** : Aplatissement automatisé des données JSON imbriquées vers des formats tabulaires exploitables.
--  **Intégration ArangoDB** : Mise en place d'une base de données orientée graphe pour la visualisation et l'exploration des sous-graphes.
--  **Analyse Exploratoire des Données (EDA)** : Treemaps, Heatmaps et analyse temporelle des distributions d'événements.
--  **Détection d'Anomalies** : Algorithmes de machine learning non-supervisé pour identifier les nœuds isolés et les valeurs aberrantes structurelles.
--  **Similarité & Clustering** : Regroupement d'événements similaires et détection de quasi-doublons grâce à des embeddings sémantiques avancés.
--  **Tableau de Bord Interactif** : Une interface Streamlit intuitive pour explorer les KPIs, les clusters et les alertes en temps réel.
+- d'auditer le graphe existant
+- de détecter les anomalies structurelles
+- d'identifier des similarités sémantiques entre événements
+- de visualiser l'ensemble du réseau dans un tableau de bord interactif
 
+## ⚙️ Fonctionnalités
 
+- **Parsing JSON vers graphe**  
+  Transformation automatisée de données JSON imbriquées en formats tabulaires exploitables.
 
-## Stack Technique
+- **Intégration ArangoDB**  
+  Mise en place d'une base orientée graphe pour visualiser et explorer les sous-graphes.
 
-| Composant        | Technologie Utilisée             |
-|------------------|-----------------------------|
-|  **Langage** | Python 3.10+                |
-|  **Préparation Data** | pandas, networkx |
-|  **NLP & ML** | scikit-learn (Isolation Forest, DBSCAN), sentence-transformers, hdbscan, umap-learn |
-|  **Base de données** | ArangoDB                    |
-|  **Dataviz** | Plotly Express, Folium |
-|  **App/UI** | Streamlit       |
+- **Analyse exploratoire des données**  
+  Treemaps, heatmaps et analyses temporelles des distributions d'événements.
 
+- **Détection d'anomalies**  
+  Utilisation d'algorithmes non supervisés pour identifier les nœuds isolés et les structures atypiques.
 
-##  Installation & Configuration
+- **Similarité et clustering**  
+  Regroupement d'événements similaires et détection de quasi-doublons à l'aide d'embeddings sémantiques.
 
-*[Section en cours de rédaction]*
+- **Tableau de bord interactif**  
+  Interface permettant d'explorer les indicateurs clés, les clusters et les alertes.
 
-##  Version Dashboard
+## 🛠️ Stack technique
 
-*[Section en cours de rédaction]*
+| Composant | Technologie utilisée |
+|----------|----------------------|
+| **Langage** | Python 3.10+ |
+| **Préparation des données** | pandas, networkx |
+| **NLP et Machine Learning** | scikit-learn, sentence-transformers, hdbscan, umap-learn |
+| **Base de données** | ArangoDB |
+| **Datavisualisation** | Plotly Express, Folium |
+| **Application / UI** | Streamlit |
 
----
+## 🚀 Installation et configuration
 
-## 👥 Équipe du Projet
+```bash
+git clone https://github.com/LounasBdldso/PREVYO_Marathon_du_web.git
+cd PREVYO_Marathon_du_web
+```
 
-Ce projet a été réalisé par une équipe pluridisciplinaire réunissant des étudiants en Data Science (MIASHS) et en Communication (INFOCOM).
+Pour lancer le projet, ouvrez le fichier `index.html` dans votre navigateur ou utilisez une extension comme Live Server dans VS Code.
 
-| Nom                     | Rôle / Expertise                                      |
-|--------------------------|-------------------------------------------------------|
-| **Lounas Chikhi** |  Chef de Projet & Data Analytics                  |
-| **Combes-Aguéra Anthony** |  Data Engineering & Intégration ArangoDB           |
-| **Akkouh Ayoub** | Machine Learning (Détection d'Anomalies & Clustering) |
-| **Mekki Ryan** |  Dataviz & Développement Dashboard Streamlit         |
-| **Équipe INFOCOM** |  UI/UX, Trailer Vidéo, Pitch & Communication Print  |
+### Remarques
 
----
-## Architecture du site 
+- Vérifier que tous les fichiers CSS et JavaScript sont bien présents dans les dossiers `css/` et `js/`
+- Vérifier que les chemins vers les ressources statiques sont corrects
+- En cas de problème d'affichage, lancer le projet via un serveur local plutôt qu'en double-cliquant directement sur `index.html`
 
-prevyo/
+## 🏗️ Architecture du site
+
+L'architecture front-end du projet est organisée comme suit :
+
+```bash
+PREVYO_Marathon_du_web/
 ├── index.html
 ├── css/
-│   ├── variables.css    → variables CSS + reset
-│   ├── layout.css       → navbar, home, visu, footer, animations, responsive
-│   ├── demo.css         → sidebar, graphe, inspect panel, badges
-│   └── treemap.css      → tout ce qui concerne le treemap
+│   ├── variables.css
+│   ├── layout.css
+│   ├── demo.css
+│   └── treemap.css
 └── js/
-    ├── state.js         → état global + constantes
-    ├── nav.js           → navigation + animation hero canvas
-    ├── data.js          → chargement fichiers, parsing
-    ├── articles.js      → liste articles, sidebar panels
-    ├── graph.js         → construction + rendu graphe, contrôles
-    ├── inspect.js       → panel d'inspection nœuds/arêtes
-    ├── visu.js          → stats + charts Chart.js
-    └── treemap.js       → treemap D3 complet
+    ├── state.js
+    ├── nav.js
+    ├── data.js
+    ├── articles.js
+    ├── graph.js
+    ├── inspect.js
+    ├── visu.js
+    └── treemap.js
+```
+
+## 👥 Équipe du projet
+
+Ce projet a été réalisé par une équipe pluridisciplinaire réunissant des étudiants en Data Science et en Communication.
+
+| Nom | Rôle / Expertise |
+|------|-------------------|
+| **Lounas Chikhi** | Chef de projet et Data Analytics |
+| **Anthony Combes-Aguéra** | Data Engineering et développeur plateforme |
+| **Ayoub Akkouh** | Machine Learning, détection d'anomalies et clustering |
+| **Ryan Mekki** | Datavisualisation et développement du dashboard |
+| **Équipe INFOCOM** | UI/UX, trailer vidéo, pitch et communication print |
+
+---
+
+<p align="right">(<a href="#readme-top">retour en haut</a>)</p>
