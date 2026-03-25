@@ -31,13 +31,14 @@ FRENCH_STOPWORDS = {
 }
 
 # ── Config ────────────────────────────────────────────────────────────────────
-BASE         = Path("/Users/mekkiryan/marathon_web")
-INPUT_FILE   = BASE / "export.events.json"
-EMBED_CACHE  = BASE / "embeddings.npy"
-OUTPUT_CSV   = BASE / "clustering.csv"
-OUTPUT_JSON  = BASE / "events_clustering.json"
-OUTPUT_HTML  = BASE / "umap_clusters.html"
-QUASI_CSV    = BASE / "quasi_doublons.csv"
+BASE          = Path("/Users/mekkiryan/Desktop/marathon_web")
+INPUT_FILE    = BASE / "export.events.json"
+EMBED_CACHE   = BASE / "embeddings.npy"
+OUTPUT_CSV    = BASE / "clustering.csv"
+OUTPUT_JSON   = BASE / "events_clustering.json"
+OUTPUT_HTML   = BASE / "treemap_clusters.html"
+OUTPUT_BUBBLE = BASE / "bubble_clusters.html"
+QUASI_CSV     = BASE / "quasi_doublons.csv"
 
 QUASI_THRESHOLD = 0.90    # seuil Sij pour quasi-doublon
 COS_PREFILTER   = 0.80    # filtre rapide avant calcul sim_structure
@@ -196,38 +197,89 @@ def main():
         if c < 5 or c % 20 == 0:
             print(f"  Cluster {c:3d} ({len(texts):5d} events) : {cluster_keywords[c]}")
 
-    # ── 3. UMAP 2D -> Plotly ──────────────────────────────────────────────────
-    print("\nUMAP 2D depuis 50D...")
-    reducer_2d = umap.UMAP(n_components=2, random_state=42, n_jobs=1,
-                            n_neighbors=15, min_dist=0.1)
-    emb_2d = reducer_2d.fit_transform(emb_50d)
+    # ── 3. Treemap Plotly ─────────────────────────────────────────────────────
+    print("Export treemap Plotly...")
 
-    print("Export HTML Plotly...")
-    cluster_names = [cluster_keywords.get(int(l), f"cluster_{l}") for l in labels]
+    # Construire un DataFrame 1 ligne par cluster (hors label=-1)
+    cluster_rows = []
+    for c in sorted(set(labels)):
+        if c == -1:
+            continue
+        idxs_c = [i for i in range(n) if labels[i] == c]
+        # Type dominant niveau 2 (ex: Thing/Abstract → "Abstract")
+        def type_l2(e):
+            parts = get_type(e).split("/")
+            return parts[1] if len(parts) > 1 else (parts[0] or "Inconnu")
+        type_l2_list = [type_l2(events[i]) for i in idxs_c]
+        dominant = max(set(type_l2_list), key=type_l2_list.count)
+        exemple = next((contexts[i] for i in idxs_c if contexts[i]), "")
+        cluster_rows.append({
+            "cluster_id"  : c,
+            "label"       : cluster_keywords.get(c, f"cluster_{c}"),
+            "n_events"    : len(idxs_c),
+            "type_l2"     : dominant,
+            "exemple"     : exemple[:150],
+        })
 
-    df_plot = pd.DataFrame({
-        "x"       : emb_2d[:, 0],
-        "y"       : emb_2d[:, 1],
-        "cluster" : [str(int(l)) for l in labels],
-        "label"   : cluster_names,
-        "type"    : [get_type(e) for e in events],
-        "context" : [c[:120] for c in contexts],
-        "id"      : ids,
-    })
+    df_tree = pd.DataFrame(cluster_rows).sort_values("n_events", ascending=False)
 
-    fig = px.scatter(
-        df_plot, x="x", y="y",
-        color="cluster",
-        hover_data={
-            "label": True, "type": True, "context": True, "id": True,
-            "x": False, "y": False,
-        },
-        title=f"UMAP 2D — {n_clusters} clusters HDBSCAN ({n} events)",
-        width=1400, height=900,
+    fig = px.treemap(
+        df_tree,
+        path=[px.Constant("Tous les clusters"), "type_l2", "label"],
+        values="n_events",
+        color="n_events",
+        color_continuous_scale="Blues",
+        color_continuous_midpoint=df_tree["n_events"].median(),
+        hover_data={"exemple": True, "cluster_id": True},
+        title=f"{n_clusters} clusters HDBSCAN — {n} events ({n_noise} non-clusterés)",
+        width=1400, height=850,
     )
-    fig.update_traces(marker=dict(size=4, opacity=0.65))
+    fig.update_traces(
+        textinfo="label+value",
+        hovertemplate="<b>%{label}</b><br>Events: %{value}<br>%{customdata[0]}<extra></extra>",
+    )
     fig.write_html(str(OUTPUT_HTML))
-    print(f"HTML -> {OUTPUT_HTML.name}")
+    print(f"Treemap -> {OUTPUT_HTML.name}")
+
+    # ── Bubble chart : top 50 clusters ────────────────────────────────────────
+    print("Export bubble chart Plotly...")
+
+    TOP_N = 50
+    df_top = df_tree.head(TOP_N).copy()
+
+    # Position x : rang dans chaque groupe type_l2 (pour espacer les bulles)
+    df_top = df_top.sort_values(["type_l2", "n_events"], ascending=[True, False])
+    df_top["x_rank"] = df_top.groupby("type_l2").cumcount()
+
+    # Ordre y : types triés par total events décroissant
+    type_totals = df_top.groupby("type_l2")["n_events"].sum().sort_values(ascending=False)
+    type_order_bubble = type_totals.index.tolist()
+
+    fig2 = px.scatter(
+        df_top,
+        x="x_rank",
+        y="type_l2",
+        size="n_events",
+        color="type_l2",
+        hover_name="label",
+        hover_data={"n_events": True, "exemple": True, "cluster_id": True,
+                    "x_rank": False, "type_l2": False},
+        size_max=70,
+        category_orders={"type_l2": type_order_bubble},
+        title=f"Top {TOP_N} clusters — taille = nombre d'events",
+        labels={"x_rank": "", "type_l2": "Catégorie", "n_events": "Events"},
+        width=1300, height=700,
+    )
+    fig2.update_traces(marker=dict(opacity=0.80, line=dict(width=1, color="white")))
+    fig2.update_xaxes(showticklabels=False, showgrid=False, zeroline=False)
+    fig2.update_yaxes(showgrid=True, gridcolor="#e8e8e8")
+    fig2.update_layout(
+        plot_bgcolor="white",
+        showlegend=False,
+        font=dict(size=13),
+    )
+    fig2.write_html(str(OUTPUT_BUBBLE))
+    print(f"Bubble chart -> {OUTPUT_BUBBLE.name}")
 
     # ── 4. Export CSV + JSON ──────────────────────────────────────────────────
     quasi_set = set(p["id_1"] for p in quasi_pairs) | set(p["id_2"] for p in quasi_pairs)
@@ -243,8 +295,6 @@ def main():
             "cluster_label" : kw_i,
             "is_noise"      : label_i == -1,
             "is_quasi_dup"  : ids[i] in quasi_set,
-            "x_umap2d"      : round(float(emb_2d[i, 0]), 4),
-            "y_umap2d"      : round(float(emb_2d[i, 1]), 4),
         })
         e["cluster_id"]    = label_i
         e["cluster_label"] = kw_i

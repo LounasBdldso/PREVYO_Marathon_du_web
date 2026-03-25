@@ -44,6 +44,13 @@ def load_quasi():
     return pd.read_csv(BASE / "quasi_doublons.csv")
 
 @st.cache_data
+def load_doublons_articles():
+    p = BASE / "doublons_articles.csv"
+    if p.exists():
+        return pd.read_csv(p)
+    return pd.DataFrame()
+
+@st.cache_data
 def load_events():
     with open(BASE / "events_anomalies.json", encoding="utf-8") as f:
         return json.load(f)
@@ -252,7 +259,7 @@ elif vue == "Similarité":
     c4.metric("Quasi-doublons (Sij > 0.90)", f"{len(df_q):,}")
 
     st.divider()
-    tab1, tab2, tab3 = st.tabs(["Treemap", "Bubble chart", "Quasi-doublons"])
+    tab1, tab2, tab3, tab4 = st.tabs(["Treemap", "Bubble chart", "Quasi-doublons", "Doublons intra-cluster"])
 
     # ── Treemap ──
     with tab1:
@@ -348,6 +355,86 @@ elif vue == "Similarité":
                 "sim_structure": st.column_config.NumberColumn("Struct", format="%.4f"),
             },
         )
+
+    # ── Doublons intra-cluster ──
+    with tab4:
+        df_da = load_doublons_articles()
+        if df_da.empty:
+            st.warning(
+                "Fichier `doublons_articles.csv` introuvable. "
+                "Lance d'abord : `python intra_cluster_doublons.py`"
+            )
+        else:
+            st.markdown(
+                f"**{len(df_da):,} paires d'articles similaires** détectées à l'intérieur des clusters "
+                f"(similarité cosinus ≥ 0.50 entre embeddings d'articles du même cluster)"
+            )
+            st.divider()
+
+            # Sélection du cluster
+            clusters_with_pairs = (
+                df_da.groupby(["cluster_id", "cluster_label"])
+                .size()
+                .reset_index(name="n_paires")
+                .sort_values("n_paires", ascending=False)
+            )
+            clusters_with_pairs["label_display"] = (
+                clusters_with_pairs["cluster_label"]
+                + "  (" + clusters_with_pairs["n_paires"].astype(str) + " paires)"
+            )
+
+            col_sel, col_thr = st.columns([3, 1])
+            with col_thr:
+                thr = st.slider("Seuil cosinus", 0.50, 1.0, 0.75, 0.01, key="da_thr")
+            with col_sel:
+                options = ["Tous les clusters"] + clusters_with_pairs["label_display"].tolist()
+                choice  = st.selectbox("Cluster à explorer", options)
+
+            # Filtrage
+            df_filt = df_da[df_da["cosine"] >= thr].copy()
+            if choice != "Tous les clusters":
+                selected_label = choice.rsplit("  (", 1)[0]
+                df_filt = df_filt[df_filt["cluster_label"] == selected_label]
+
+            df_filt = df_filt.reset_index(drop=True)
+            st.markdown(f"**{len(df_filt):,} paires** affichées")
+
+            if df_filt.empty:
+                st.info("Aucune paire à ce seuil pour ce cluster.")
+            else:
+                # ── Paire sélectionnée ──────────────────────────────────────
+                pair_options = [
+                    f"#{i+1}  cosine={row['cosine']:.4f}  —  {row['cluster_label']}"
+                    for i, row in df_filt.iterrows()
+                ]
+                selected_pair = st.selectbox("Paire à afficher", pair_options, index=0, key="da_pair")
+                pair_idx = pair_options.index(selected_pair)
+                row = df_filt.iloc[pair_idx]
+
+                c_left, c_right = st.columns(2)
+                with c_left:
+                    st.markdown(f"**Article 1** — `{row['article_id_1']}`")
+                    st.info(row["context_1"] if pd.notna(row["context_1"]) else "*(contexte vide)*")
+                with c_right:
+                    st.markdown(f"**Article 2** — `{row['article_id_2']}`")
+                    st.info(row["context_2"] if pd.notna(row["context_2"]) else "*(contexte vide)*")
+
+                st.divider()
+
+                # Tableau récapitulatif
+                st.dataframe(
+                    df_filt[["cluster_label", "article_id_1", "article_id_2", "cosine"]],
+                    use_container_width=True,
+                    height=280,
+                    column_config={
+                        "cosine": st.column_config.ProgressColumn(
+                            "Similarité", min_value=0.50, max_value=1.0, format="%.4f"
+                        ),
+                        "cluster_label": st.column_config.TextColumn("Cluster", width="medium"),
+                        "article_id_1": st.column_config.TextColumn("Article 1", width="medium"),
+                        "article_id_2": st.column_config.TextColumn("Article 2", width="medium"),
+                    },
+                )
 
 
 # ══════════════════════════════════════════════════════════════════════════════
