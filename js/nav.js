@@ -6,11 +6,33 @@ function showPage(id) {
   document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
   document.getElementById('page-' + id).classList.add('active');
   document.getElementById('nav-' + id).classList.add('active');
+  if (id === 'home' && typeof updateHomeMetrics === 'function') updateHomeMetrics();
   if (id === 'visu' && state.events.length > 0) {
     buildVisuCharts();
+    if (typeof resizeVisuCharts === 'function') resizeVisuCharts();
     buildTreemap();
   }
+  if (id === 'demo' && typeof refreshGraphLayout === 'function') refreshGraphLayout();
 }
+
+function hydrateGraphLegend() {
+  const legend = document.querySelector('.anomaly-legend');
+  if (!legend) return;
+
+  legend.innerHTML = `
+    <div class="legend-item"><div class="legend-shape event"></div>Evenement</div>
+    <div class="legend-item"><div class="legend-shape time"></div>Temps</div>
+    <div class="legend-item"><div class="legend-shape person"></div>Personne</div>
+    <div class="legend-item"><div class="legend-shape object"></div>Objet</div>
+    <div class="legend-item"><div class="legend-shape other"></div>Autre</div>
+    <div class="legend-item"><div class="legend-tone normal"></div>Normal</div>
+    <div class="legend-item"><div class="legend-tone suspect"></div>Suspect</div>
+    <div class="legend-item"><div class="legend-tone anomaly"></div>Critique</div>
+    <div class="legend-item"><div class="legend-line"></div>Quasi-doublon</div>
+  `;
+}
+
+document.addEventListener('DOMContentLoaded', hydrateGraphLegend);
 
 // ═══════════════════════════════════════════════════════════
 // HERO CANVAS ANIMATION

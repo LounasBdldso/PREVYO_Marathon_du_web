@@ -3,18 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Prevyo — Outils de Détection</title>
+  <title>Prevyo — Outils de détection</title>
 
-  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;600;700&display=swap" rel="stylesheet">
 
-  <!-- Librairies JS tierces -->
   <script src="https://d3js.org/d3.v7.min.js"></script>
   <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
-  <!-- Styles -->
   <link rel="stylesheet" href="css/variables.css">
   <link rel="stylesheet" href="css/layout.css">
   <link rel="stylesheet" href="css/demo.css">
@@ -22,197 +19,534 @@
 </head>
 <body>
 
-<!-- ═══════════════ NAVBAR ══════════════════════════════════ -->
 <nav>
   <div class="nav-logo" onclick="showPage('home')">
     <svg viewBox="0 0 110 54" xmlns="http://www.w3.org/2000/svg">
-      <path d="M12,7 Q28,1 44,7 Q60,13 76,7 Q88,3 96,7"   stroke="#8412dd" fill="none" stroke-width="3.2" stroke-linecap="round"/>
+      <path d="M12,7 Q28,1 44,7 Q60,13 76,7 Q88,3 96,7" stroke="#8412dd" fill="none" stroke-width="3.2" stroke-linecap="round"/>
       <path d="M8,15 Q24,9 40,15 Q56,21 72,15 Q84,11 92,15" stroke="#8412dd" fill="none" stroke-width="2.8" stroke-linecap="round"/>
       <path d="M4,23 Q20,17 36,23 Q52,29 68,23 Q80,19 88,23" stroke="#bd33d1" fill="none" stroke-width="2.2" stroke-linecap="round" opacity="0.7"/>
       <text x="4" y="48" font-family="Lexend,sans-serif" font-size="20" font-weight="600" fill="#8412dd">prevyo</text>
     </svg>
   </div>
+
+  <span class="nav-badge">Marathon du Web</span>
+
   <div class="nav-links">
     <button class="nav-link active" onclick="showPage('home')" id="nav-home">Accueil</button>
-    <button class="nav-link" onclick="showPage('visu')"  id="nav-visu">Visualisation</button>
-    <button class="nav-link" onclick="showPage('demo')"  id="nav-demo">Démo Outil</button>
+    <button class="nav-link" onclick="showPage('visu')" id="nav-visu">Visualisation</button>
+    <button class="nav-link" onclick="showPage('demo')" id="nav-demo">Démo outil</button>
+    <button class="nav-link" onclick="showPage('location')" id="nav-location">Correction lieux</button>
   </div>
-  <span class="nav-badge">Marathon du Web</span>
 </nav>
 
-
-<!-- ═══════════════ PAGE : ACCUEIL ══════════════════════════ -->
 <div class="page active" id="page-home">
-
   <div class="hero">
     <canvas id="hero-canvas"></canvas>
-    <div class="hero-content">
-      <div class="hero-eyebrow fade-in"><span></span>EMVISTA × PREVYO — Marathon du Web</div>
-      <h1 class="hero-title fade-in delay-1">Sur la piste<br>des événements</h1>
-      <p class="hero-sub fade-in delay-2">Exploration intelligente de graphes de connaissances.<br>Détection d'anomalies, quasi-doublons et tendances à grande échelle.</p>
-      <div class="hero-btns fade-in delay-3">
-        <button class="btn-primary"  onclick="showPage('demo')">🔍 Lancer l'analyse</button>
-        <button class="btn-outline"  onclick="showPage('visu')">📊 Voir les tendances</button>
+
+    <div class="hero-grid">
+      <div class="hero-copy">
+        <div class="hero-eyebrow fade-in"><span></span>EMVISTA × PREVYO · pipeline connaissance</div>
+        <h1 class="hero-title fade-in delay-1">Du texte brut<br><span>au graphe corrigé</span></h1>
+        <p class="hero-sub fade-in delay-2">
+          Le dépôt réunit l’exploration de données, le scoring d’anomalies, la détection de quasi-doublons,
+          plusieurs approches de clustering et maintenant un module dédié à la correction des lieux.
+          Cette interface sert de hub pour comprendre la pipeline et agir sur les graphes extraits par Prevyo.
+        </p>
+
+        <div class="hero-chip-row fade-in delay-2">
+          <span class="hero-chip" style="color:var(--teal)">Isolation Forest + score local</span>
+          <span class="hero-chip" style="color:var(--blue)">UMAP / HDBSCAN / TF-IDF</span>
+          <span class="hero-chip" style="color:var(--quasi)">Quasi-doublons & fusion</span>
+          <span class="hero-chip" style="color:var(--purple)">Modules interactifs du dépôt</span>
+        </div>
+
+        <div class="hero-btns fade-in delay-3">
+          <button class="btn-primary" onclick="showPage('demo')">Explorer le graphe</button>
+          <button class="btn-outline" onclick="showPage('visu')">Voir l’atlas analytique</button>
+          <button class="btn-outline" onclick="showPage('location')">Tester le correcteur de lieux</button>
+        </div>
+
+        <div class="hero-footnotes fade-in delay-3">
+          <div id="home-summary-line">2 273 articles reconstruits, 659 clusters actifs et plus d’un millier de relations de quasi-doublons.</div>
+          <div id="home-signal-line">Le dépôt couvre l’EDA, la détection d’anomalies, la similarité, le clustering multi-approche et la correction des données.</div>
+        </div>
+      </div>
+
+      <div class="hero-panel fade-in delay-2">
+        <div class="hero-panel-card">
+          <h3>Signal live du dataset chargé</h3>
+          <div class="hero-metrics">
+            <div class="hero-metric">
+              <span class="label">Événements</span>
+              <div class="value" id="hero-total-events">—</div>
+            </div>
+            <div class="hero-metric">
+              <span class="label">Articles</span>
+              <div class="value" id="hero-total-articles">—</div>
+            </div>
+            <div class="hero-metric">
+              <span class="label">Alertes</span>
+              <div class="value" id="hero-total-alerts">—</div>
+            </div>
+            <div class="hero-metric">
+              <span class="label">Clusters</span>
+              <div class="value" id="hero-total-clusters">—</div>
+            </div>
+          </div>
+
+          <div class="hero-signal-list">
+            <div class="hero-signal-row">
+              <div class="hero-signal-index">01</div>
+              <div class="hero-signal-content">
+                <strong>Lecture et normalisation</strong>
+                <p>Les notebooks EDA partent des exports Mongo, restructurent les champs techniques et reconstruisent le contexte local autour de chaque événement.</p>
+              </div>
+            </div>
+            <div class="hero-signal-row">
+              <div class="hero-signal-index">02</div>
+              <div class="hero-signal-content">
+                <strong>Scoring et regroupements</strong>
+                <p>Le dépôt combine anomalies structurelles, similarité sémantique, clustering d’events et clustering d’articles selon plusieurs méthodes.</p>
+              </div>
+            </div>
+            <div class="hero-signal-row">
+              <div class="hero-signal-index">03</div>
+              <div class="hero-signal-content">
+                <strong>Inspection et correction</strong>
+                <p>Le graphe interactif sert à inspecter, le 4e onglet prépare la correction de lieux, et les dashboards annexes aident à comprendre les familles d’erreurs.</p>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 
   <div class="kpi-strip">
-    <div class="kpi-item fade-in"><div class="kpi-value">820 000</div><div class="kpi-label">Lignes JSON analysées</div></div>
-    <div class="kpi-item fade-in delay-1"><div class="kpi-value">~12 000</div><div class="kpi-label">Événements extraits</div></div>
-    <div class="kpi-item fade-in delay-2"><div class="kpi-value">2</div><div class="kpi-label">Algorithmes d'anomalies</div></div>
-    <div class="kpi-item fade-in delay-3"><div class="kpi-value">100%</div><div class="kpi-label">Sources ouvertes & fermées</div></div>
+    <div class="kpi-item fade-in">
+      <div class="kpi-value" id="home-kpi-events">—</div>
+      <div class="kpi-label">Événements annotés dans le dataset actif</div>
+    </div>
+    <div class="kpi-item fade-in delay-1">
+      <div class="kpi-value" id="home-kpi-articles">—</div>
+      <div class="kpi-label">Articles reconstruits via <code>resultAnalyseId</code></div>
+    </div>
+    <div class="kpi-item fade-in delay-2">
+      <div class="kpi-value" id="home-kpi-critical">—</div>
+      <div class="kpi-label">Événements critiques détectés</div>
+    </div>
+    <div class="kpi-item fade-in delay-3">
+      <div class="kpi-value" id="home-kpi-links">—</div>
+      <div class="kpi-label">Liens de quasi-doublons disponibles</div>
+    </div>
   </div>
 
   <section class="section">
     <span class="section-tag">Contexte</span>
-    <h2 class="section-title">EMVISTA & la solution Prevyo</h2>
-    <p class="section-desc">Prevyo est développé par EMVISTA pour structurer et visualiser les informations autour d'événements extraits de sources textuelles massives.</p>
-    <div class="cards-grid">
-      <div class="card">
-        <div class="card-icon teal">🏢</div>
-        <div class="card-title">EMVISTA</div>
-        <div class="card-text">Entreprise spécialisée dans le traitement automatique du langage naturel (TALN). Développe des solutions d'analyse sémantique pour structurer des données non-structurées à grande échelle.</div>
-      </div>
-      <div class="card">
-        <div class="card-icon blue">🔭</div>
-        <div class="card-title">Prevyo</div>
-        <div class="card-text">Plateforme d'extraction et de visualisation d'événements. Analyse médias, RSN, rapports et emails pour identifier des événements clés — catastrophes, festivals, actes — avec leurs acteurs, lieux et dates.</div>
-      </div>
-      <div class="card">
-        <div class="card-icon purple">🚀</div>
-        <div class="card-title">Notre Projet</div>
-        <div class="card-text">Développement d'un outil de détection d'anomalies sur les graphes de connaissances Prevyo. Isolation Forest, quasi-doublons, clustering — pour guider les décisions de correction.</div>
-      </div>
-    </div>
-  </section>
-
-  <section class="section" style="border-top:1px solid var(--border)">
-    <span class="section-tag">Fonctionnalités</span>
-    <h2 class="section-title">Ce que fait l'outil</h2>
-    <p class="section-desc">Trois capacités majeures pour explorer et qualifier les graphes d'événements.</p>
-    <div class="cards-grid" style="margin-top:2.5rem">
-      <div class="card">
-        <div class="card-icon teal">🔗</div>
-        <div class="card-title">Exploration de Graphes</div>
-        <div class="card-text">Visualisation interactive des nœuds (événements, acteurs, lieux, dates) et des arêtes (relations sémantiques). Vue par article ou fusion globale avec déduplication stricte.</div>
-      </div>
-      <div class="card">
-        <div class="card-icon blue">⚠️</div>
-        <div class="card-title">Détection d'Anomalies</div>
-        <div class="card-text">Isolation Forest signale les graphes atypiques. Chaque événement reçoit un score, un niveau (Normal / Suspect / Anomalie) et une explication textuelle. Visualisation directement sur le graphe.</div>
-      </div>
-      <div class="card">
-        <div class="card-icon purple">🔁</div>
-        <div class="card-title">Quasi-Doublons</div>
-        <div class="card-text">Identification des événements quasi-identiques entre articles (similarité cosinus ≥ seuil). Mise en évidence pour faciliter la déduplication future et améliorer la qualité du graphe.</div>
-      </div>
-    </div>
-  </section>
-
-  <section class="section" style="border-top:1px solid var(--border)">
-    <span class="section-tag">Pipeline</span>
-    <h2 class="section-title">Du texte au graphe enrichi</h2>
-    <div class="timeline">
-      <div class="tl-item"><div class="tl-step">01</div><div class="tl-content"><div class="tl-title">Ingestion des sources</div><div class="tl-desc">Articles, mails, rapports — open source ou closed. Textes bruts de toutes natures.</div></div></div>
-      <div class="tl-item"><div class="tl-step">02</div><div class="tl-content"><div class="tl-title">Extraction TALN (Prevyo)</div><div class="tl-desc">Identification des événements, acteurs, lieux, dates et relations sémantiques.</div></div></div>
-      <div class="tl-item"><div class="tl-step">03</div><div class="tl-content"><div class="tl-title">Construction du graphe JSON</div><div class="tl-desc">Chaque événement devient un graphe de nœuds et arêtes typés. 820 000 lignes.</div></div></div>
-      <div class="tl-item"><div class="tl-step">04</div><div class="tl-content"><div class="tl-title">Scoring d'anomalies (ML)</div><div class="tl-desc">Isolation Forest + analyse des quasi-doublons. Score et niveau attribués à chaque entrée.</div></div></div>
-      <div class="tl-item"><div class="tl-step">05</div><div class="tl-content"><div class="tl-title">Visualisation & Décision</div><div class="tl-desc">Notre outil permet d'explorer, de filtrer et d'identifier les entrées à corriger.</div></div></div>
-    </div>
-  </section>
-
-  <footer>Projet Marathon du Web — <a href="https://emvista.com" target="_blank">EMVISTA</a> × Promo 2025/2026 &nbsp;|&nbsp; Construit avec Prevyo</footer>
-</div>
-
-
-<!-- ═══════════════ PAGE : VISUALISATION ════════════════════ -->
-<div class="page" id="page-visu">
-
-  <div class="visu-header">
-    <span class="section-tag">Analyse</span>
-    <h2 class="section-title">Tendances & Distribution</h2>
-    <p class="section-desc">Statistiques agrégées sur le dataset d'événements Prevyo. Chargez un fichier JSON dans l'outil pour voir vos propres données.</p>
-  </div>
-
-  <div class="stat-row" id="visu-stats">
-    <div class="stat-mini"><div class="dot" style="background:var(--teal)"></div><div><div class="val" id="stat-total">—</div><div class="lbl">Événements</div></div></div>
-    <div class="stat-mini"><div class="dot" style="background:var(--anomaly)"></div><div><div class="val" id="stat-anomalies">—</div><div class="lbl">Anomalies</div></div></div>
-    <div class="stat-mini"><div class="dot" style="background:var(--quasi)"></div><div><div class="val" id="stat-quasi">—</div><div class="lbl">Quasi-doublons</div></div></div>
-    <div class="stat-mini"><div class="dot" style="background:var(--blue)"></div><div><div class="val" id="stat-articles">—</div><div class="lbl">Articles</div></div></div>
-    <div class="stat-mini"><div class="dot" style="background:var(--dark-blue)"></div><div><div class="val" id="stat-clusters">—</div><div class="lbl">Clusters</div></div></div>
-  </div>
-
-  <div id="visu-empty" style="text-align:center;padding:4rem 2rem;color:var(--muted)">
-    <div style="font-size:3rem;margin-bottom:1rem">📁</div>
-    <p style="font-size:0.9rem;font-weight:300;max-width:400px;margin:0 auto;line-height:1.7">
-      Chargez un fichier <strong style="color:var(--teal)">export.events.json</strong> dans l'onglet Démo Outil pour alimenter cette page avec vos données réelles.
+    <h2 class="section-title">Une interface qui raconte enfin la vraie pipeline du dépôt</h2>
+    <p class="section-desc">
+      Le projet ne se limite pas à un simple visualiseur. Le dépôt assemble des notebooks d’exploration,
+      des scripts de scoring, des moteurs de similarité, plusieurs essais de clustering et des apps HTML / Streamlit.
+      L’objectif de cette refonte est de rendre cette profondeur visible dans l’interface principale.
     </p>
-    <button class="btn-primary" style="margin-top:1.5rem" onclick="showPage('demo')">Aller à l'outil →</button>
-  </div>
 
-  <div class="visu-grid" id="visu-charts" style="display:none">
-    <div class="chart-card"><h3>Types d'événements — Top 10</h3><canvas id="chart-types"></canvas></div>
-    <div class="chart-card"><h3>Niveau d'anomalie</h3><canvas id="chart-anomaly"></canvas></div>
-    <div class="chart-card wide"><h3>Score d'anomalie par article</h3><canvas id="chart-scores"></canvas></div>
-    <div class="chart-card"><h3>Distribution clusters (Top 15)</h3><canvas id="chart-clusters"></canvas></div>
-    <div class="chart-card"><h3>Nœuds par événement</h3><canvas id="chart-nodes"></canvas></div>
-  </div>
+    <div class="story-grid">
+      <article class="story-card wide">
+        <h3>De PREVYO vers le hub d’audit</h3>
+        <p>
+          EMVISTA / PREVYO extrait des événements, entités, lieux, dates et relations depuis des sources textuelles.
+          Notre travail dans le Marathon du Web a consisté à reprendre cet export, l’analyser, détecter les points faibles
+          du graphe et proposer des outils de lecture puis de correction directement exploitables.
+        </p>
+        <div class="story-stat-row">
+          <div class="story-stat">
+            <span>Densité moyenne</span>
+            <strong id="home-metric-density">—</strong>
+          </div>
+          <div class="story-stat">
+            <span>Couverture domaine</span>
+            <strong id="home-metric-coverage">—</strong>
+          </div>
+        </div>
+      </article>
 
-  <div class="treemap-card">
-    <h3 style="font-size:0.9rem;font-weight:600;color:var(--muted);margin-bottom:1rem;letter-spacing:0.04em">
-      Treemap hiérarchique des événements
-    </h3>
-    <div class="treemap-toolbar">
-      <label for="treemap-field">Champ</label>
-      <select id="treemap-field" class="treemap-select">
-        <option value="type"        selected>type</option>
-        <option value="domain">domain</option>
-        <option value="subdomain">subdomain</option>
-        <option value="risk">risk</option>
-        <option value="riskCarac">riskCarac</option>
-        <option value="nodes.labels">nodes.labels</option>
-        <option value="edges.type">edges.type</option>
-      </select>
-      <input id="treemap-search" class="treemap-search" type="text" placeholder="Rechercher…">
-      <button id="treemap-reset" class="treemap-btn" type="button">Réinitialiser</button>
+      <article class="story-card">
+        <h3>Axe 1 · Détection d’anomalies</h3>
+        <p>
+          Le scoring s’appuie sur des features hybrides : embeddings, structure des sous-graphes et profondeur taxonomique.
+          Le résultat combine un score global et un signal local pour distinguer normal, suspect et critique.
+        </p>
+      </article>
+
+      <article class="story-card">
+        <h3>Axe 2 · Similarité & clustering</h3>
+        <p>
+          Le dépôt contient un clustering au niveau événement, un clustering reconstruit au niveau article
+          et une version avancée qui compare HDBSCAN, NMF et Louvain pour documenter les regroupements.
+        </p>
+      </article>
     </div>
-    <div class="treemap-wrap" id="treemap-wrap">
-      <div id="treemap-chart"></div>
-      <div id="treemap-breadcrumb"></div>
-      <div id="treemap-search-count"></div>
-      <div id="treemap-tooltip"></div>
-      <div id="treemap-stats">
-        <div class="s-title">Statistiques</div>
-        <div class="s-row"><span>Événements</span><strong id="treemap-stat-total">—</strong></div>
-        <div class="s-row"><span>Profondeur max</span><strong id="treemap-stat-depth">—</strong></div>
-        <hr>
-        <div class="s-title" id="treemap-top-label">Top 5</div>
-        <ul id="treemap-top-list"></ul>
-      </div>
-      <div class="treemap-legend">
-        Molette · zoomer<br>
-        Glisser · déplacer<br>
-        Clic · centrer
-      </div>
-    </div>
-  </div>
+  </section>
 
-  <footer style="margin-top:2rem">Projet Marathon du Web — <a href="https://emvista.com" target="_blank">EMVISTA</a></footer>
+  <section class="section">
+    <span class="section-tag">Pipeline</span>
+    <h2 class="section-title">Six étapes lisibles, depuis les notebooks jusqu’aux outils d’action</h2>
+    <p class="section-desc">
+      Cette synthèse condense ce que racontent les notebooks, scripts et dashboards présents dans le dépôt.
+    </p>
+
+    <div class="pipeline-grid">
+      <article class="pipeline-step">
+        <div class="index">01</div>
+        <h3>EDA & parsing</h3>
+        <p>Lecture des exports, normalisation Mongo, premiers profils statistiques et contrôle de la structure des graphes.</p>
+      </article>
+      <article class="pipeline-step">
+        <div class="index">02</div>
+        <h3>Reconstruction contexte</h3>
+        <p>Assemblage des sous-graphes locaux, relecture par événement et graphe de contexte pour comprendre l’environnement de chaque cas.</p>
+      </article>
+      <article class="pipeline-step">
+        <div class="index">03</div>
+        <h3>Score anomalie</h3>
+        <p>Isolation Forest + score local de voisinage sémantique, puis explications textuelles et niveaux d’alerte.</p>
+      </article>
+      <article class="pipeline-step">
+        <div class="index">04</div>
+        <h3>Quasi-doublons</h3>
+        <p>Embeddings MiniLM, similarité cosinus, fusion stricte et rapports de déduplication pour nettoyer les événements proches.</p>
+      </article>
+      <article class="pipeline-step">
+        <div class="index">05</div>
+        <h3>Clustering</h3>
+        <p>UMAP / HDBSCAN, labels TF-IDF, reconstruction article et variantes avancées NMF / Louvain / grid search.</p>
+      </article>
+      <article class="pipeline-step">
+        <div class="index">06</div>
+        <h3>Inspection & correction</h3>
+        <p>Graphe interactif, dashboards d’analyse, rapport technique et module beta de correction des anomalies de lieux.</p>
+      </article>
+    </div>
+  </section>
+
+  <section class="section">
+    <span class="section-tag">Cartographie du dépôt</span>
+    <h2 class="section-title">Les briques projet remises au bon niveau dans l’interface</h2>
+    <p class="section-desc">
+      Cette sélection est générée depuis le dépôt pour mettre en avant les assets et scripts qui structurent vraiment la démarche.
+    </p>
+    <div class="module-grid" id="home-repo-grid"></div>
+  </section>
+
+  <section class="section">
+    <span class="section-tag">Lancements rapides</span>
+    <h2 class="section-title">Entrer par le graphe, l’analyse ou la correction</h2>
+    <p class="section-desc">
+      On garde une navigation simple, mais chaque entrée a maintenant un rôle clair dans la chaîne de travail.
+    </p>
+    <div class="module-grid" id="home-launch-grid"></div>
+  </section>
+
+  <footer>
+    Projet Marathon du Web — <a href="https://emvista.com" target="_blank" rel="noopener">EMVISTA</a> × promo 2025/2026
+  </footer>
 </div>
 
+<div class="page" id="page-visu">
+  <div class="visu-shell">
+    <div class="visu-header">
+      <span class="section-tag">Atlas analytique</span>
+      <h2 class="section-title">Visualisation, repères métier et réemploi des analyses du dépôt</h2>
+      <p class="section-desc">
+        L’onglet ne se contente plus d’afficher quelques graphiques. Il synthétise le dataset chargé,
+        les axes d’analyse déjà présents dans les scripts et les figures du dépôt qui méritaient d’être visibles directement ici.
+      </p>
+      <div class="visu-meta-row">
+        <span class="visu-pill">Dataset actif enrichi</span>
+        <span class="visu-pill">Croisement anomalies / clusters / similarité</span>
+        <span class="visu-pill">Réemploi des figures exploratoires du dépôt</span>
+      </div>
+      <p class="section-desc" id="visu-header-meta">
+        Chargement des indicateurs du dataset actif…
+      </p>
+    </div>
 
-<!-- ═══════════════ PAGE : DÉMO OUTIL ═══════════════════════ -->
+    <div class="stat-row" id="visu-stats">
+      <div class="stat-mini"><div class="dot" style="background:var(--teal)"></div><div><div class="val" id="stat-total">—</div><div class="lbl">Événements</div></div></div>
+      <div class="stat-mini"><div class="dot" style="background:var(--anomaly)"></div><div><div class="val" id="stat-anomalies">—</div><div class="lbl">Alertes</div></div></div>
+      <div class="stat-mini"><div class="dot" style="background:var(--quasi)"></div><div><div class="val" id="stat-quasi">—</div><div class="lbl">Events quasi</div></div></div>
+      <div class="stat-mini"><div class="dot" style="background:var(--blue)"></div><div><div class="val" id="stat-articles">—</div><div class="lbl">Articles</div></div></div>
+      <div class="stat-mini"><div class="dot" style="background:var(--dark-blue)"></div><div><div class="val" id="stat-clusters">—</div><div class="lbl">Clusters</div></div></div>
+    </div>
+
+    <div class="visu-insight-grid">
+      <article class="insight-card">
+        <span>Signal critique</span>
+        <strong id="visu-insight-alerts">—</strong>
+        <p>Volume immédiatement prioritaire pour une revue humaine ou une correction de qualité.</p>
+      </article>
+      <article class="insight-card">
+        <span>Quasi-doublons</span>
+        <strong id="visu-insight-links">—</strong>
+        <p>Liens similaires déjà exploitables dans le graphe fusionné et la lecture qualité.</p>
+      </article>
+      <article class="insight-card">
+        <span>Densité du graphe</span>
+        <strong id="visu-insight-density">—</strong>
+        <p>Moyenne des noeuds par événement pour mesurer la complexité des sous-graphes extraits.</p>
+      </article>
+      <article class="insight-card">
+        <span>Couverture métier</span>
+        <strong id="visu-insight-coverage">—</strong>
+        <p>Part des événements déjà enrichis par les champs métier utiles à l’analyse aval.</p>
+      </article>
+      <article class="insight-card">
+        <span>Type dominant</span>
+        <strong id="visu-insight-types">—</strong>
+        <p>Le type le plus fréquent ressort comme repère utile pour lire les regroupements et distributions.</p>
+      </article>
+    </div>
+
+    <div id="visu-empty" style="text-align:center;padding:3.6rem 2rem;color:var(--muted)">
+      <div style="font-size:3rem;margin-bottom:1rem">📁</div>
+      <p style="font-size:0.9rem;font-weight:300;max-width:480px;margin:0 auto;line-height:1.8">
+        Chargez ou laissez le site ouvrir <strong style="color:var(--teal)">export.events.clean.json</strong>
+        pour alimenter cette page avec les données enrichies du projet.
+      </p>
+      <button class="btn-primary" style="margin-top:1.5rem" onclick="showPage('demo')">Aller au graphe →</button>
+    </div>
+
+    <div class="visu-grid" id="visu-charts" style="display:none">
+      <div class="chart-card">
+        <h3>Top types d’événements</h3>
+        <p>Lecture rapide des familles d’événements les plus présentes dans le dataset actif.</p>
+        <canvas id="chart-types"></canvas>
+      </div>
+      <div class="chart-card">
+        <h3>Niveaux d’alerte</h3>
+        <p>Répartition entre normal, suspect et critique sur les événements annotés.</p>
+        <canvas id="chart-anomaly"></canvas>
+      </div>
+      <div class="chart-card">
+        <h3>Articles les plus exposés</h3>
+        <p>Articles avec le plus de signaux suspects / critiques dans le dataset chargé.</p>
+        <canvas id="chart-article-alerts"></canvas>
+      </div>
+      <div class="chart-card span-12">
+        <h3>Histogramme des scores d’anomalie</h3>
+        <p>Distribution continue des scores pour mieux voir la coupure entre normal, suspect et critique.</p>
+        <canvas id="chart-scores"></canvas>
+      </div>
+      <div class="chart-card span-6">
+        <h3>Clusters les plus peuplés</h3>
+        <p>Regroupements dominants présents dans les annotations de clustering.</p>
+        <canvas id="chart-clusters"></canvas>
+      </div>
+      <div class="chart-card">
+        <h3>Complexité des sous-graphes</h3>
+        <p>Distribution du nombre de noeuds par événement.</p>
+        <canvas id="chart-nodes"></canvas>
+      </div>
+      <div class="chart-card">
+        <h3>Relations sémantiques</h3>
+        <p>Types d’arêtes les plus fréquents dans les sous-graphes extraits.</p>
+        <canvas id="chart-edges"></canvas>
+      </div>
+      <div class="chart-card span-6">
+        <h3>Top labels de noeuds</h3>
+        <p>Lecture synthétique des catégories d’entités qui structurent le graphe.</p>
+        <canvas id="chart-labels"></canvas>
+      </div>
+    </div>
+
+    <section class="section" style="padding-left:0;padding-right:0;padding-top:2rem;padding-bottom:0">
+      <span class="section-tag">Treemap</span>
+      <h2 class="section-title" style="max-width:760px">Navigation hiérarchique dans les taxonomies et métadonnées</h2>
+      <p class="section-desc">
+        La treemap D3 permet de basculer rapidement entre type, domaine, risque, labels de noeuds et types d’arêtes.
+      </p>
+
+      <div class="treemap-card">
+        <h3 style="font-size:0.9rem;font-weight:600;color:var(--muted);margin-bottom:1rem;letter-spacing:0.04em">
+          Treemap hiérarchique des événements
+        </h3>
+        <div class="treemap-toolbar">
+          <label for="treemap-field">Champ</label>
+          <select id="treemap-field" class="treemap-select">
+            <option value="type" selected>type</option>
+            <option value="domain">domain</option>
+            <option value="subdomain">subdomain</option>
+            <option value="risk">risk</option>
+            <option value="riskCarac">riskCarac</option>
+            <option value="nodes.labels">nodes.labels</option>
+            <option value="edges.type">edges.type</option>
+          </select>
+          <input id="treemap-search" class="treemap-search" type="text" placeholder="Rechercher…">
+          <button id="treemap-reset" class="treemap-btn" type="button">Réinitialiser</button>
+        </div>
+        <div class="treemap-wrap" id="treemap-wrap">
+          <div id="treemap-chart"></div>
+          <div id="treemap-breadcrumb"></div>
+          <div id="treemap-search-count"></div>
+          <div id="treemap-tooltip"></div>
+          <div id="treemap-stats">
+            <div class="s-title">Statistiques</div>
+            <div class="s-row"><span>Événements</span><strong id="treemap-stat-total">—</strong></div>
+            <div class="s-row"><span>Profondeur max</span><strong id="treemap-stat-depth">—</strong></div>
+            <hr>
+            <div class="s-title" id="treemap-top-label">Top 5</div>
+            <ul id="treemap-top-list"></ul>
+          </div>
+          <div class="treemap-legend">
+            Molette · zoomer<br>
+            Glisser · déplacer<br>
+            Clic · centrer
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" style="padding-left:0;padding-right:0;padding-bottom:0">
+      <span class="section-tag">Figures du dépôt</span>
+      <h2 class="section-title" style="max-width:860px">Les graphiques exploratoires qui méritaient d’être remontés dans l’interface</h2>
+      <p class="section-desc">
+        Cette galerie réutilise directement les visuels générés pendant l’analyse exploratoire pour éviter qu’ils restent enfouis dans le dépôt.
+      </p>
+
+      <div class="figure-gallery">
+        <article class="figure-card">
+          <img src="figures/01_distribution_graphique.png" alt="Distribution graphique" loading="lazy">
+          <div class="figure-body">
+            <h3>Distribution graphique globale</h3>
+            <p>Vue macro sur la structure du dataset et la dispersion des observations sur le graphe de connaissances.</p>
+          </div>
+        </article>
+        <article class="figure-card">
+          <img src="figures/02_top_types_evenements.png" alt="Top types d'événements" loading="lazy">
+          <div class="figure-body">
+            <h3>Top types d’événements</h3>
+            <p>Complément utile aux charts dynamiques pour replacer la hiérarchie des classes métiers observées pendant l’EDA.</p>
+          </div>
+        </article>
+        <article class="figure-card">
+          <img src="figures/03_top_labels_noeuds.png" alt="Top labels de noeuds" loading="lazy">
+          <div class="figure-body">
+            <h3>Top labels de noeuds</h3>
+            <p>Repérage des familles d’entités qui dominent les sous-graphes et structurent les contextes extraits.</p>
+          </div>
+        </article>
+        <article class="figure-card">
+          <img src="figures/04c_top_formes_par_type.png" alt="Formes dominantes par type" loading="lazy">
+          <div class="figure-body">
+            <h3>Formes dominantes par type</h3>
+            <p>Très utile pour relier les conventions visuelles du graphe interactif aux grandes familles d’objets métier présentes dans le dépôt.</p>
+          </div>
+        </article>
+        <article class="figure-card">
+          <img src="figures/05_top_types_aretes.png" alt="Top types d'arêtes" loading="lazy">
+          <div class="figure-body">
+            <h3>Top types d’arêtes</h3>
+            <p>Lecture orientée relations sémantiques, utile pour comprendre pourquoi certains sous-graphes sont plus denses que d’autres.</p>
+          </div>
+        </article>
+        <article class="figure-card">
+          <img src="figures/06_proprietes_linguistiques.png" alt="Propriétés linguistiques" loading="lazy">
+          <div class="figure-body">
+            <h3>Propriétés linguistiques</h3>
+            <p>Signal complémentaire sur la matière textuelle qui sert ensuite au scoring, aux embeddings et aux regroupements.</p>
+          </div>
+        </article>
+        <article class="figure-card">
+          <img src="figures/07_heatmap_evenement_x_arete.png" alt="Heatmap événements x arêtes" loading="lazy">
+          <div class="figure-body">
+            <h3>Heatmap événements × arêtes</h3>
+            <p>Carte technique très parlante pour repérer les relations dominantes et les combinaisons d’arêtes qui créent des sous-graphes atypiques.</p>
+          </div>
+        </article>
+        <article class="figure-card">
+          <img src="figures/08_heatmap_evenement_x_noeud.png" alt="Heatmap événements x noeuds" loading="lazy">
+          <div class="figure-body">
+            <h3>Heatmap événements × noeuds</h3>
+            <p>Vue plus technique pour repérer les zones de concentration et les structures atypiques dans la matrice événement / entité.</p>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" style="padding-left:0;padding-right:0">
+      <span class="section-tag">Modules sources</span>
+      <h2 class="section-title" style="max-width:840px">Dashboards et apps annexes qui nourrissent cette interface</h2>
+      <p class="section-desc">
+        Ces pages existent déjà dans le dépôt. Elles restent utiles comme références, comme modules spécialisés ou comme base pour de futurs onglets.
+      </p>
+      <div class="module-grid" id="visu-source-grid"></div>
+    </section>
+  </div>
+
+  <footer>
+    Projet Marathon du Web — <a href="https://emvista.com" target="_blank" rel="noopener">EMVISTA</a>
+  </footer>
+</div>
+
+<div class="page" id="page-location">
+  <div class="lab-shell">
+    <div class="lab-head">
+      <span class="section-tag">Module beta</span>
+      <h2 class="section-title">Correction des anomalies de lieux</h2>
+      <p class="section-desc">
+        Ce quatrième onglet prépare l’intégration du correcteur de lieux déjà présent dans le dépôt.
+        Le module détecte les coordonnées anormales, propose des corrections manuelles ou assistées,
+        et exporte un JSON corrigé sans casser le reste de la chaîne.
+      </p>
+      <div class="lab-actions">
+        <a class="module-action link" href="app/location_fixer.html" target="_blank" rel="noopener">Ouvrir en plein écran</a>
+        <button class="module-action" type="button" onclick="showPage('demo')">Revenir au graphe principal</button>
+      </div>
+    </div>
+
+    <div class="lab-highlights">
+      <article class="lab-highlight">
+        <span>Détection</span>
+        <strong>Coordonnées incohérentes</strong>
+        <p>Le module cible les locations aberrantes comme les coordonnées nulles et les cas mal formés à corriger prioritairement.</p>
+      </article>
+      <article class="lab-highlight">
+        <span>Correction</span>
+        <strong>Recherche assistée</strong>
+        <p>Correction manuelle, recherche externe, suppression ciblée de noeud ou retrait d’article entier au moment de l’export.</p>
+      </article>
+      <article class="lab-highlight">
+        <span>Sortie</span>
+        <strong>JSON réinjectable</strong>
+        <p>Le module produit un export corrigé qui peut ensuite rejoindre la chaîne qualité et les vues de visualisation.</p>
+      </article>
+    </div>
+
+    <div class="lab-frame-wrap">
+      <iframe class="lab-frame" src="app/location_fixer.html" title="Correcteur de lieux Prevyo" loading="lazy"></iframe>
+    </div>
+  </div>
+
+  <footer>
+    Module beta de correction — source : <a href="app/location_fixer.html" target="_blank" rel="noopener">app/location_fixer.html</a>
+  </footer>
+</div>
+
 <div class="page" id="page-demo">
   <div class="demo-layout">
-
-    <!-- ── SIDEBAR ──────────────────────────────────────── -->
     <div class="demo-sidebar">
-
       <div class="sidebar-section">
-        <h4>Données</h4>
-        <div id="file-loaded" style="display:block;font-size:0.78rem;color:var(--teal);text-align:center;line-height:1.6">
-          Chargement automatique de <strong>data/export.events.clean.json</strong>…
+        <h4>Jeu de données</h4>
+        <div class="upload-zone" id="upload-zone" onclick="document.getElementById('file-input').click()" ondragover="handleDragOver(event)" ondragleave="document.getElementById('upload-zone').classList.remove('drag-over')" ondrop="handleDrop(event)">
+          <input id="file-input" type="file" accept=".json" onchange="handleFileSelect(event)">
+          <div class="upload-icon">📂</div>
+          <div class="upload-text">
+            Déposer un fichier <strong>export.events.json</strong><br>
+            ou cliquer pour charger vos données
+          </div>
+        </div>
+        <div id="file-loaded" style="margin-top:0.75rem;font-size:0.75rem;color:var(--muted);line-height:1.6">
+          Chargement automatique de <strong style="color:var(--teal)">data/export.events.clean.json</strong> au démarrage.
         </div>
       </div>
 
@@ -220,7 +554,7 @@
         <h4>Mode de vue</h4>
         <div class="view-toggle">
           <button class="view-btn active" id="view-selected" onclick="setView('selected')">Articles sélectionnés</button>
-          <button class="view-btn"        id="view-merged"   onclick="setView('merged')">Graphe global fusionné</button>
+          <button class="view-btn" id="view-merged" onclick="setView('merged')">Graphe global fusionné</button>
         </div>
       </div>
 
@@ -231,7 +565,7 @@
           <div class="article-controls">
             <button class="btn-sm teal" onclick="selectAll()">Tout cocher</button>
             <button class="btn-sm muted" onclick="deselectAll()">Tout décocher</button>
-            <button class="btn-sm red"  onclick="filterAnomalies()">⚠ Anomalies</button>
+            <button class="btn-sm red" onclick="filterAnomalies()">⚠ Anomalies</button>
           </div>
         </div>
         <div class="global-controls" id="global-controls">
@@ -241,7 +575,7 @@
             <div class="range-value" id="max-nodes-value">500 sommets</div>
           </div>
           <div class="range-row">
-            <label for="max-edges-range">Nombre max d'arêtes</label>
+            <label for="max-edges-range">Nombre max d’arêtes</label>
             <input type="range" id="max-edges-range" min="50" max="3000" step="50" value="1000" oninput="updateRangeLabels()">
             <div class="range-value" id="max-edges-value">1000 arêtes</div>
           </div>
@@ -271,13 +605,10 @@
           <div id="quasi-list"></div>
         </div>
       </div>
+    </div>
 
-    </div><!-- /demo-sidebar -->
-
-    <!-- ── MAIN ─────────────────────────────────────────── -->
     <div class="demo-main">
       <div class="demo-main-content">
-
         <div class="demo-topbar">
           <span class="tb-title" id="view-label">Graphe — Articles sélectionnés</span>
           <div class="graph-stats">
@@ -287,12 +618,12 @@
           </div>
           <div style="flex:1"></div>
           <div class="graph-controls">
-            <button class="ctrl-btn"    onclick="graphFit()"              title="Recentrer">⊙ Centrer</button>
-            <button class="ctrl-btn"    onclick="graphStabilize()"        title="Stabiliser">⟳ Stabiliser</button>
-            <button class="ctrl-btn on" id="ctrl-physics"         onclick="togglePhysics()"          title="Physique">⚡ Physique</button>
-            <button class="ctrl-btn on" id="ctrl-labels"          onclick="toggleLabels()"           title="Labels">🏷 Labels</button>
+            <button class="ctrl-btn" onclick="graphFit()" title="Recentrer">⊙ Centrer</button>
+            <button class="ctrl-btn" onclick="graphStabilize()" title="Stabiliser">⟳ Stabiliser</button>
+            <button class="ctrl-btn on" id="ctrl-physics" onclick="togglePhysics()" title="Physique">⚡ Physique</button>
+            <button class="ctrl-btn on" id="ctrl-labels" onclick="toggleLabels()" title="Labels">🏷 Labels</button>
             <button class="ctrl-btn on" id="ctrl-anomaly-highlight" onclick="toggleAnomalyHighlight()" title="Anomalies">⚠ Anomalies</button>
-            <button class="ctrl-btn"    onclick="generateGraph()"          title="Générer">▶ Générer</button>
+            <button class="ctrl-btn" onclick="generateGraph()" title="Générer">▶ Générer</button>
           </div>
         </div>
 
@@ -305,17 +636,8 @@
           <div id="article-bubbles"></div>
         </div>
 
-        <div class="anomaly-legend">
-          <div class="legend-item"><div class="legend-dot" style="background:#1bae9f"></div>Événement</div>
-          <div class="legend-item"><div class="legend-dot" style="background:#09a4e8"></div>Temps</div>
-          <div class="legend-item"><div class="legend-dot" style="background:#bd33d1"></div>Personne</div>
-          <div class="legend-item"><div class="legend-dot" style="background:#625eec"></div>Objet</div>
-          <div class="legend-item"><div class="legend-dot" style="background:#6b84a3"></div>Autre</div>
-          <div class="legend-item"><div class="legend-dot" style="background:var(--anomaly);box-shadow:0 0 6px var(--anomaly)"></div>Anomalie</div>
-          <div class="legend-item"><div class="legend-dot" style="background:var(--quasi);box-shadow:0 0 6px var(--quasi)"></div>Quasi-doublon</div>
-        </div>
-
-      </div><!-- /demo-main-content -->
+        <div class="anomaly-legend"></div>
+      </div>
 
       <div class="inspect-panel hidden" id="inspect-panel">
         <div class="inspect-header">
@@ -324,14 +646,12 @@
         </div>
         <div class="inspect-body" id="inspect-body"></div>
       </div>
+    </div>
+  </div>
+</div>
 
-    </div><!-- /demo-main -->
-  </div><!-- /demo-layout -->
-</div><!-- /page-demo -->
-
-
-<!-- ═══════════════ SCRIPTS ══════════════════════════════════ -->
 <script src="js/state.js"></script>
+<script src="js/home.js"></script>
 <script src="js/nav.js"></script>
 <script src="js/data.js"></script>
 <script src="js/articles.js"></script>
@@ -340,7 +660,6 @@
 <script src="js/visu.js"></script>
 <script src="js/treemap.js"></script>
 <script>
-  // ── Init ──────────────────────────────────────────────────
   document.addEventListener('DOMContentLoaded', () => {
     if (typeof Chart !== 'undefined') {
       Chart.defaults.color = '#6b84a3';

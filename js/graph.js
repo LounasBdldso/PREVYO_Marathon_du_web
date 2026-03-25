@@ -1,6 +1,37 @@
 // ═══════════════════════════════════════════════════════════
 // GRAPH UTILITIES
 // ═══════════════════════════════════════════════════════════
+const NODE_TYPE_CONFIG = {
+  event:   { shape: 'diamond', size: 22, label: 'Événement' },
+  time:    { shape: 'triangle', size: 20, label: 'Temps' },
+  person:  { shape: 'hexagon', size: 21, label: 'Personne' },
+  object:  { shape: 'square', size: 20, label: 'Objet' },
+  other:   { shape: 'dot', size: 18, label: 'Autre' }
+};
+
+const ANOMALY_LEVEL_CONFIG = {
+  Normal: {
+    background: 'rgba(46,213,115,0.12)',
+    border: '#2ed573',
+    shadow: 'rgba(46,213,115,0.25)'
+  },
+  Suspect: {
+    background: 'rgba(255,165,2,0.12)',
+    border: '#ffa502',
+    shadow: 'rgba(255,165,2,0.28)'
+  },
+  Critique: {
+    background: 'rgba(255,71,87,0.14)',
+    border: '#ff4757',
+    shadow: 'rgba(255,71,87,0.32)'
+  },
+  Inconnu: {
+    background: 'rgba(107,132,163,0.16)',
+    border: '#6b84a3',
+    shadow: null
+  }
+};
+
 function normalizeId(value) {
   if (value == null) return '';
   if (typeof value === 'string') return value;
@@ -14,32 +45,198 @@ function normalizeId(value) {
 
 function canonicalize(properties) {
   if (!properties) return '{}';
-  const sorted = Object.keys(properties).sort().reduce((acc, k) => { acc[k] = properties[k]; return acc; }, {});
+  const sorted = Object.keys(properties).sort().reduce((acc, key) => {
+    acc[key] = properties[key];
+    return acc;
+  }, {});
   return JSON.stringify(sorted);
 }
 
-function getNodeColor(labels, isAnomaly, isQuasi) {
-  if (!labels || !labels.length) {
-    return { bg: 'rgba(107,132,163,0.22)', border: '#8899aa', accentBorder: '#8899aa', font: '#dde8f5', shadow: null };
+function getEventId(event) {
+  return normalizeId(event?._id) || `${event?.resultAnalyseId || 'unknown'}:${normalizeId(event?.sourceNodeId)}`;
+}
+
+function getEventAnomalyLevel(event) {
+  return normalizeAnomalyLevel(event?.anomaly?.niveau, event?.anomaly?.is_anomaly);
+}
+
+function getNodeKind(labels) {
+  const allLabels = Array.isArray(labels) ? labels : [];
+
+  if (allLabels.some(label => label.includes('Event'))) return 'event';
+  if (allLabels.some(label => label.includes('Time'))) return 'time';
+  if (allLabels.some(label => label.includes('Human') || label.includes('Animate') || label.includes('Organization'))) return 'person';
+  if (allLabels.some(label => label.includes('Inanimate') || label.includes('Product'))) return 'object';
+  return 'other';
+}
+
+function getDominantAnomalyLevel(levelCounts) {
+  const entries = Object.entries(levelCounts || {});
+  if (!entries.length) return 'Inconnu';
+
+  return entries.sort((a, b) => {
+    if (b[1] !== a[1]) return b[1] - a[1];
+    return getAnomalyLevelRank(b[0]) - getAnomalyLevelRank(a[0]);
+  })[0][0];
+}
+
+function getNodeVisualStyle(level, highlightEnabled = true) {
+  if (!highlightEnabled) {
+    return {
+      background: 'rgba(107,132,163,0.18)',
+      border: '#6b84a3',
+      shadow: null,
+      borderWidth: 1.8
+    };
   }
 
-  const l = labels[0];
-  let baseBorder = '#8899aa';
-  let baseBg = 'rgba(107,132,163,0.22)';
+  const palette = ANOMALY_LEVEL_CONFIG[level] || ANOMALY_LEVEL_CONFIG.Inconnu;
+  return {
+    background: palette.background,
+    border: palette.border,
+    shadow: palette.shadow,
+    borderWidth: level === 'Normal' ? 2 : 3.2
+  };
+}
 
-  if (l.includes('Event'))                           { baseBg = 'rgba(27,174,159,0.22)';  baseBorder = '#1bae9f'; }
-  else if (l.includes('Time'))                       { baseBg = 'rgba(9,164,232,0.22)';   baseBorder = '#09a4e8'; }
-  else if (l.includes('Human') || l.includes('Animate'))   { baseBg = 'rgba(189,51,209,0.22)';  baseBorder = '#bd33d1'; }
-  else if (l.includes('Inanimate') || l.includes('Product')){ baseBg = 'rgba(98,94,236,0.22)';   baseBorder = '#625eec'; }
+function getEventAnchorNode(event) {
+  const nodes = event?.nodes || [];
+  const sourceNodeId = normalizeId(event?.sourceNodeId);
 
-  let accentBorder = baseBorder;
-  let shadow = null;
+  if (sourceNodeId) {
+    const sourceNode = nodes.find(node => normalizeId(node._id) === sourceNodeId);
+    if (sourceNode) return sourceNode;
+  }
 
-  if (isAnomaly && isQuasi) { accentBorder = '#ffffff'; shadow = 'rgba(255,255,255,0.35)'; }
-  else if (isAnomaly)       { accentBorder = '#ff4757'; shadow = 'rgba(255,71,87,0.35)'; }
-  else if (isQuasi)         { accentBorder = '#ffa502'; shadow = 'rgba(255,165,2,0.35)'; }
+  const eventNode = nodes.find(node => (node.labels || []).some(label => label.includes('Event')));
+  if (eventNode) return eventNode;
 
-  return { bg: baseBg, border: baseBorder, accentBorder, font: '#dde8f5', shadow };
+  return nodes[0] || null;
+}
+
+function buildNodeTitle(visNode) {
+  const node = visNode._data?.node;
+  const articles = visNode._data?.articleIds ? [...visNode._data.articleIds] : [];
+  const dominantLevel = visNode._data?.dominantLevel || 'Inconnu';
+  const baseLines = [
+    node?.form || normalizeId(node?._id) || 'Sans libellé',
+    (node?.labels || []).join(', '),
+    `Type: ${NODE_TYPE_CONFIG[visNode._data?.kind || 'other'].label}`,
+    `Niveau dominant: ${dominantLevel}`
+  ];
+
+  if (visNode._data?.events?.length > 1) {
+    baseLines.push(`Occurrences fusionnées: ${visNode._data.events.length}`);
+  }
+  if (articles.length > 1) {
+    baseLines.push(`Articles: ${articles.length}`);
+  }
+
+  return baseLines.filter(Boolean).join('\n');
+}
+
+function applyVisualStyleToNode(visNode, compact) {
+  const kind = visNode._data?.kind || 'other';
+  const typeConfig = NODE_TYPE_CONFIG[kind];
+  const dominantLevel = getDominantAnomalyLevel(visNode._data?.levelCounts);
+  const visualStyle = getNodeVisualStyle(dominantLevel, state.anomalyHighlight);
+  const node = visNode._data?.node;
+
+  visNode._data.dominantLevel = dominantLevel;
+  visNode.shape = typeConfig.shape;
+  visNode.size = typeConfig.size;
+  visNode.label = (!state.labelsOn || compact)
+    ? ''
+    : String(node?.form || normalizeId(node?._id) || 'Sans libellé').slice(0, 20);
+  visNode.title = buildNodeTitle(visNode);
+  visNode.font = { color: '#dde8f5', size: 11, face: 'Lexend' };
+  visNode.color = {
+    background: visualStyle.background,
+    border: visualStyle.border,
+    highlight: { background: visualStyle.background, border: visualStyle.border },
+    hover: { background: visualStyle.background, border: visualStyle.border }
+  };
+  visNode.borderWidth = visualStyle.borderWidth;
+  visNode.shadow = visualStyle.shadow
+    ? { enabled: true, color: visualStyle.shadow, size: dominantLevel === 'Critique' ? 12 : 8, x: 0, y: 0 }
+    : false;
+}
+
+function addSemanticEdge(edgeMap, fromKey, toKey, edge, event, compact) {
+  const key = `semantic:${fromKey}:${toKey}:${edge.type || ''}`;
+  if (edgeMap.has(key)) {
+    edgeMap.get(key)._data.occurrences += 1;
+    return;
+  }
+
+  edgeMap.set(key, {
+    id: key,
+    from: fromKey,
+    to: toKey,
+    label: compact ? '' : (edge.type || ''),
+    font: { size: 9, color: '#6b84a3', face: 'Lexend', align: 'middle' },
+    color: { color: 'rgba(107,132,163,0.42)', highlight: '#1bae9f', hover: '#1bae9f' },
+    width: 1.2,
+    arrows: { to: { enabled: true, scaleFactor: 0.5 } },
+    smooth: { type: 'dynamic' },
+    _data: {
+      kind: 'semantic',
+      edge,
+      event,
+      occurrences: 1
+    }
+  });
+}
+
+function addQuasiDuplicateEdge(quasiEdgeMap, fromKey, toKey, duplicate, event) {
+  if (!fromKey || !toKey || fromKey === toKey) return;
+
+  const [left, right] = [fromKey, toKey].sort();
+  const key = `quasi:${left}:${right}`;
+  const score = Number(duplicate.similarity_score || duplicate.cosine_similarity || 0);
+
+  if (quasiEdgeMap.has(key)) {
+    const existing = quasiEdgeMap.get(key);
+    existing._data.occurrences += 1;
+    existing._data.score = Math.max(existing._data.score, score);
+    existing.width = Math.max(existing.width, 1.4 + Math.max(0, Math.min(2.8, (score - 0.85) * 10)));
+    existing._data.matches.push({
+      duplicateOf: duplicate.duplicate_of,
+      similarity: score,
+      cosine: Number(duplicate.cosine_similarity || 0)
+    });
+    return;
+  }
+
+  quasiEdgeMap.set(key, {
+    id: key,
+    from: left,
+    to: right,
+    label: '',
+    font: { size: 8, color: '#ffd166', face: 'Lexend', align: 'middle' },
+    color: { color: 'rgba(255,165,2,0.95)', highlight: '#ffd166', hover: '#ffd166' },
+    width: 1.4 + Math.max(0, Math.min(2.8, (score - 0.85) * 10)),
+    dashes: [8, 6],
+    arrows: {
+      to: { enabled: false },
+      from: { enabled: false },
+      middle: { enabled: false }
+    },
+    smooth: { type: 'curvedCW', roundness: 0.16 },
+    physics: false,
+    _data: {
+      kind: 'quasi',
+      edge: { type: 'Quasi-duplicate' },
+      event,
+      occurrences: 1,
+      score,
+      matches: [{
+        duplicateOf: duplicate.duplicate_of,
+        similarity: score,
+        cosine: Number(duplicate.cosine_similarity || 0)
+      }]
+    }
+  });
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -50,121 +247,214 @@ function buildGraphData() {
   if (!ids.length) return null;
 
   const events = [];
-  ids.forEach(id => (state.articleMap[id] || []).forEach(e => events.push(e)));
+  ids.forEach(id => (state.articleMap[id] || []).forEach(event => events.push(event)));
 
   const MAX_NODES = state.currentView === 'merged' ? state.maxNodes : 500;
   const MAX_EDGES = state.currentView === 'merged' ? state.maxEdges : 1000;
   const compact = events.length > 50 || (state.currentView === 'merged' && (events.length > 20 || state.maxNodes < 400));
 
   const nodeMap = {};
-  const edgeSet = new Set();
-  const visNodes = [];
-  const visEdges = [];
+  const semanticEdgeMap = new Map();
+  const quasiEdgeMap = new Map();
   const articleNodeMap = {};
+  const eventAnchorById = {};
 
-  function nodeKey(n, ev) {
-    const rawId = normalizeId(n._id) || n.form || Math.random().toString(36).slice(2);
-    if (state.currentView !== 'merged') return `${rawId}_${ev.resultAnalyseId || 'unknown'}`;
-    return `${n.form || rawId}__${[...(n.labels || [])].sort().join('|')}__${canonicalize(n.properties)}`;
+  function nodeKey(node, event) {
+    const rawId = normalizeId(node._id) || node.form || Math.random().toString(36).slice(2);
+    if (state.currentView !== 'merged') return `${rawId}_${event.resultAnalyseId || 'unknown'}`;
+    return `${node.form || rawId}__${[...(node.labels || [])].sort().join('|')}__${canonicalize(node.properties)}`;
   }
 
-  events.forEach(ev => {
-    const aid = ev.resultAnalyseId || 'unknown';
-    const isAnomaly = ev.anomaly?.is_anomaly === true;
-    const isQuasi = (ev.quasi_duplicates?.length > 0);
+  events.forEach(event => {
+    const articleId = event.resultAnalyseId || 'unknown';
+    const level = getEventAnomalyLevel(event);
+    if (!articleNodeMap[articleId]) articleNodeMap[articleId] = [];
 
-    if (!articleNodeMap[aid]) articleNodeMap[aid] = [];
+    const anchorNode = getEventAnchorNode(event);
+    if (anchorNode) {
+      eventAnchorById[getEventId(event)] = nodeKey(anchorNode, event);
+    }
 
-    (ev.nodes || []).forEach(n => {
-      const key = nodeKey(n, ev);
+    (event.nodes || []).forEach(node => {
+      const key = nodeKey(node, event);
       if (!nodeMap[key]) {
-        const col = getNodeColor(n.labels, isAnomaly, isQuasi);
-        const visNode = {
+        nodeMap[key] = {
           id: key,
-          label: compact ? '' : String(n.form || normalizeId(n._id)).slice(0, 20),
-          title: `${n.form}\n${(n.labels || []).join(', ')}`,
-          color: {
-            background: col.bg, border: col.accentBorder,
-            highlight: { background: col.bg, border: col.accentBorder }
-          },
-          font: { color: col.font || '#dde8f5', size: 11, face: 'Lexend' },
-          size: 16,
-          borderWidth: (isAnomaly || isQuasi) ? 4 : 1.8,
-          _data: { node: n, event: ev, key }
+          _data: {
+            key,
+            node,
+            event,
+            events: [],
+            articleIds: new Set(),
+            rawNodeIds: new Set(),
+            levelCounts: {},
+            kind: getNodeKind(node.labels)
+          }
         };
-        if ((isAnomaly || isQuasi) && state.anomalyHighlight && col.shadow) {
-          visNode.shadow = { enabled: true, color: col.shadow, size: 10, x: 0, y: 0 };
-        }
-        nodeMap[key] = visNode;
-        visNodes.push(visNode);
       }
-      articleNodeMap[aid].push(key);
+
+      const meta = nodeMap[key]._data;
+      meta.events.push(event);
+      meta.articleIds.add(articleId);
+      meta.rawNodeIds.add(normalizeId(node._id));
+      meta.levelCounts[level] = (meta.levelCounts[level] || 0) + 1;
+      articleNodeMap[articleId].push(key);
     });
 
-    (ev.edges || []).forEach(edge => {
-      const srcId = normalizeId(edge.source);
-      const tgtId = normalizeId(edge.target);
-      const srcN = (ev.nodes || []).find(n => normalizeId(n._id) === srcId);
-      const tgtN = (ev.nodes || []).find(n => normalizeId(n._id) === tgtId);
+    (event.edges || []).forEach(edge => {
+      const sourceId = normalizeId(edge.source);
+      const targetId = normalizeId(edge.target);
+      const sourceNode = (event.nodes || []).find(node => normalizeId(node._id) === sourceId);
+      const targetNode = (event.nodes || []).find(node => normalizeId(node._id) === targetId);
 
-      if (!srcN || !tgtN) {
-        console.warn('Arête ignorée: source/target introuvable', { edge, availableNodeIds: (ev.nodes || []).map(n => normalizeId(n._id)) });
+      if (!sourceNode || !targetNode) {
+        console.warn('Arête ignorée: source/target introuvable', {
+          edge,
+          availableNodeIds: (event.nodes || []).map(node => normalizeId(node._id))
+        });
         return;
       }
 
-      const srcKey = nodeKey(srcN, ev);
-      const tgtKey = nodeKey(tgtN, ev);
-      const eKey = srcKey + '>' + tgtKey + ':' + edge.type;
-      if (!edgeSet.has(eKey)) {
-        edgeSet.add(eKey);
-        visEdges.push({
-          from: srcKey, to: tgtKey,
-          label: compact ? '' : (edge.type || ''),
-          font: { size: 9, color: '#6b84a3', face: 'Lexend', align: 'middle' },
-          color: { color: 'rgba(107,132,163,0.4)', highlight: '#1bae9f' },
-          width: 1.2,
-          arrows: { to: { enabled: true, scaleFactor: 0.5 } },
-          _data: { edge, event: ev }
-        });
-      }
+      addSemanticEdge(
+        semanticEdgeMap,
+        nodeKey(sourceNode, event),
+        nodeKey(targetNode, event),
+        edge,
+        event,
+        compact
+      );
     });
   });
 
-  // Élagage si trop grand
-  let finalNodes = visNodes, finalEdges = visEdges;
-  if (visNodes.length > MAX_NODES) {
-    const degMap = {};
-    visEdges.forEach(e => {
-      degMap[e.from] = (degMap[e.from] || 0) + 1;
-      degMap[e.to] = (degMap[e.to] || 0) + 1;
-    });
-    const sorted = visNodes.slice().sort((a, b) => {
-      const aA = a._data?.event?.anomaly?.is_anomaly ? 10000 : 0;
-      const bA = b._data?.event?.anomaly?.is_anomaly ? 10000 : 0;
-      return (bA + (degMap[b.id] || 0)) - (aA + (degMap[a.id] || 0));
-    });
-    const kept = new Set(sorted.slice(0, MAX_NODES).map(n => n.id));
-    finalNodes = visNodes.filter(n => kept.has(n.id));
-    finalEdges = visEdges.filter(e => kept.has(e.from) && kept.has(e.to));
-  }
-  if (finalEdges.length > MAX_EDGES) finalEdges = finalEdges.slice(-MAX_EDGES);
+  events.forEach(event => {
+    const fromKey = eventAnchorById[getEventId(event)];
+    if (!fromKey) return;
 
-  return { visNodes: finalNodes, visEdges: finalEdges, articleNodeMap, ids };
+    (event.quasi_duplicates || []).forEach(duplicate => {
+      const toKey = eventAnchorById[normalizeId(duplicate.duplicate_of)];
+      addQuasiDuplicateEdge(quasiEdgeMap, fromKey, toKey, duplicate, event);
+    });
+  });
+
+  let visNodes = Object.values(nodeMap);
+  visNodes.forEach(node => applyVisualStyleToNode(node, compact));
+
+  let visEdges = [
+    ...semanticEdgeMap.values(),
+    ...quasiEdgeMap.values()
+  ];
+
+  if (visNodes.length > MAX_NODES) {
+    const degreeMap = {};
+    visEdges.forEach(edge => {
+      degreeMap[edge.from] = (degreeMap[edge.from] || 0) + 1;
+      degreeMap[edge.to] = (degreeMap[edge.to] || 0) + 1;
+    });
+
+    const sortedNodes = visNodes.slice().sort((a, b) => {
+      const aLevel = getAnomalyRank(a._data?.dominantLevel);
+      const bLevel = getAnomalyRank(b._data?.dominantLevel);
+      const aScore = aLevel * 1000 + (degreeMap[a.id] || 0);
+      const bScore = bLevel * 1000 + (degreeMap[b.id] || 0);
+      return bScore - aScore;
+    });
+
+    const keptNodeIds = new Set(sortedNodes.slice(0, MAX_NODES).map(node => node.id));
+    visNodes = visNodes.filter(node => keptNodeIds.has(node.id));
+    visEdges = visEdges.filter(edge => keptNodeIds.has(edge.from) && keptNodeIds.has(edge.to));
+  }
+
+  if (visEdges.length > MAX_EDGES) {
+    const quasiEdges = visEdges.filter(edge => edge._data?.kind === 'quasi');
+    const semanticEdges = visEdges.filter(edge => edge._data?.kind !== 'quasi');
+    const remainingSlots = Math.max(0, MAX_EDGES - quasiEdges.length);
+    visEdges = [...quasiEdges, ...semanticEdges.slice(0, remainingSlots)].slice(0, MAX_EDGES);
+  }
+
+  return { visNodes, visEdges, articleNodeMap, ids };
+}
+
+function refreshGraphLayout({ fit = false } = {}) {
+  if (!state.network) return;
+
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      if (!state.network) return;
+      state.network.redraw();
+      if (fit) {
+        state.network.fit({ animation: { duration: 500, easingFunction: 'easeInOutQuad' } });
+      }
+      updateArticleBubbles();
+    });
+  });
+}
+
+function syncGraphNodeStyles() {
+  if (!state.network || !state.currentNodes?.data?.length) return;
+
+  const compact = state.currentNodes.data.length > 220;
+  const updates = state.currentNodes.data.map(node => {
+    applyVisualStyleToNode(node, compact);
+    return {
+      id: node.id,
+      shape: node.shape,
+      size: node.size,
+      label: node.label,
+      title: node.title,
+      color: node.color,
+      borderWidth: node.borderWidth,
+      shadow: node.shadow
+    };
+  });
+
+  state.network.body.data.nodes.update(updates);
+  refreshGraphLayout();
+}
+
+function resetGraphView() {
+  if (state.network) {
+    state.network.destroy();
+    state.network = null;
+  }
+
+  state.currentNodes = null;
+  state.currentEdges = null;
+  state.currentGraphMeta = null;
+
+  const container = document.getElementById('graph-canvas');
+  const bubbles = document.getElementById('article-bubbles');
+  const placeholder = document.getElementById('graph-placeholder');
+
+  if (container) container.innerHTML = '';
+  if (bubbles) bubbles.innerHTML = '';
+  if (placeholder) placeholder.style.display = 'flex';
+
+  ['gs-nodes', 'gs-edges', 'gs-articles'].forEach(id => {
+    const element = document.getElementById(id);
+    if (element) element.textContent = '0';
+  });
+
+  if (typeof closeInspect === 'function') closeInspect();
 }
 
 // ═══════════════════════════════════════════════════════════
 // GENERATE + RENDER GRAPH
 // ═══════════════════════════════════════════════════════════
 function generateGraph() {
-  if (!state.events.length) { alert('Chargez un fichier JSON d\'abord.'); return; }
-  if (state.currentView === 'selected' && !state.selectedIds.size) { alert('Sélectionnez au moins un article.'); return; }
+  if (!state.events.length) {
+    alert('Chargez un fichier JSON d\'abord.');
+    return;
+  }
+
+  if (state.currentView === 'selected' && !state.selectedIds.size) {
+    alert('Sélectionnez au moins un article.');
+    return;
+  }
 
   const data = buildGraphData();
   if (!data) return;
 
   const { visNodes, visEdges, articleNodeMap, ids } = data;
-
-  console.log('Graph data:', { articles: ids.length, nodes: visNodes.length, edges: visEdges.length, sampleNode: visNodes[0], sampleEdge: visEdges[0] });
 
   document.getElementById('graph-placeholder').style.display = 'none';
   document.getElementById('gs-nodes').textContent = visNodes.length;
@@ -172,7 +462,9 @@ function generateGraph() {
   document.getElementById('gs-articles').textContent = ids.length;
 
   state.currentNodes = { data: visNodes, map: {} };
-  visNodes.forEach(n => state.currentNodes.map[n.id] = n);
+  state.currentEdges = { data: visEdges };
+  state.currentGraphMeta = { articleNodeMap, ids };
+  visNodes.forEach(node => { state.currentNodes.map[node.id] = node; });
 
   const container = document.getElementById('graph-canvas');
   container.innerHTML = '';
@@ -185,12 +477,18 @@ function generateGraph() {
   const options = {
     physics: {
       enabled: state.physicsOn,
-      stabilization: { iterations: 150 },
-      barnesHut: { gravitationalConstant: -3000, springLength: 120, damping: 0.4 }
+      stabilization: { iterations: 160 },
+      barnesHut: { gravitationalConstant: -2600, springLength: 118, damping: 0.42 }
     },
-    interaction: { hover: true, tooltipDelay: 200, navigationButtons: false, keyboard: false },
-    nodes: { shape: 'dot', scaling: { min: 10, max: 24 } },
-    edges: { smooth: { type: 'dynamic' } },
+    interaction: { hover: true, tooltipDelay: 180, navigationButtons: false, keyboard: false },
+    nodes: {
+      scaling: { min: 12, max: 30 },
+      shapeProperties: { borderDashes: false }
+    },
+    edges: {
+      smooth: { type: 'dynamic' },
+      selectionWidth: 2
+    },
     layout: { randomSeed: 42 }
   };
 
@@ -200,26 +498,8 @@ function generateGraph() {
   if (state.network) state.network.destroy();
   state.network = new vis.Network(container, dataset, options);
 
-  requestAnimationFrame(() => {
-    requestAnimationFrame(() => {
-      state.network.redraw();
-      state.network.fit({ animation: { duration: 500, easingFunction: 'easeInOutQuad' } });
-      console.log('Container size after redraw:', { width: container.clientWidth, height: container.clientHeight });
-    });
-  });
+  refreshGraphLayout({ fit: true });
 
-  // Bulles articles (2-10 articles)
-  if (ids.length >= 2 && ids.length <= 10) {
-    state.network.once('stabilizationIterationsDone', () => updateArticleBubbles(articleNodeMap, ids));
-    state.network.on('dragEnd', () => updateArticleBubbles(articleNodeMap, ids));
-    state.network.on('zoom', () => updateArticleBubbles(articleNodeMap, ids));
-    state.network.on('stabilizationIterationsDone', () => updateArticleBubbles(articleNodeMap, ids));
-    setTimeout(() => updateArticleBubbles(articleNodeMap, ids), 1200);
-  } else {
-    document.getElementById('article-bubbles').innerHTML = '';
-  }
-
-  // Événements de clic
   state.network.on('click', params => {
     if (params.nodes.length > 0) inspectNode(params.nodes[0], state.currentNodes.map);
     else if (params.edges.length > 0) inspectEdge(params.edges[0], visEdges);
@@ -230,41 +510,25 @@ function generateGraph() {
 // ═══════════════════════════════════════════════════════════
 // ARTICLE BUBBLES
 // ═══════════════════════════════════════════════════════════
-function updateArticleBubbles(articleNodeMap, ids) {
-  if (!state.network) return;
+function updateArticleBubbles() {
   const bubblesDiv = document.getElementById('article-bubbles');
-  bubblesDiv.innerHTML = '';
-
-  ids.forEach((aid, i) => {
-    const nodeIds = (articleNodeMap[aid] || []).filter(nid => {
-      try { state.network.getPosition(nid); return true; } catch { return false; }
-    });
-    if (!nodeIds.length) return;
-
-    let cx = 0, cy = 0;
-    nodeIds.forEach(nid => { const pos = state.network.getPosition(nid); cx += pos.x; cy += pos.y; });
-    cx /= nodeIds.length; cy /= nodeIds.length;
-
-    const domPos = state.network.canvasToDOM({ x: cx, y: cy });
-    const color = ARTICLE_COLORS[i % ARTICLE_COLORS.length];
-
-    const bubble = document.createElement('div');
-    bubble.className = 'art-bubble';
-    bubble.style.left = domPos.x + 'px';
-    bubble.style.top = (domPos.y - 24) + 'px';
-    bubble.style.borderColor = color + '66';
-    bubble.style.color = color;
-    bubble.textContent = '📰 ' + aid.slice(-8);
-    bubblesDiv.appendChild(bubble);
-  });
+  if (bubblesDiv) bubblesDiv.innerHTML = '';
 }
 
 // ═══════════════════════════════════════════════════════════
 // GRAPH CONTROLS
 // ═══════════════════════════════════════════════════════════
-function graphFit() { if (state.network) state.network.fit({ animation: true }); }
+function graphFit() {
+  if (!state.network) return;
+  state.network.fit({ animation: true });
+  setTimeout(() => refreshGraphLayout(), 200);
+}
 
-function graphStabilize() { if (state.network) state.network.stabilize(100); }
+function graphStabilize() {
+  if (!state.network) return;
+  state.network.stabilize(100);
+  setTimeout(() => refreshGraphLayout(), 150);
+}
 
 function togglePhysics() {
   state.physicsOn = !state.physicsOn;
@@ -275,13 +539,13 @@ function togglePhysics() {
 function toggleLabels() {
   state.labelsOn = !state.labelsOn;
   document.getElementById('ctrl-labels').classList.toggle('on', state.labelsOn);
+
   if (state.network && state.currentNodes) {
-    const updates = state.currentNodes.data.map(n => ({
-      id: n.id,
-      label: state.labelsOn
-        ? String(n._data?.node?.form || normalizeId(n._data?.node?._id) || '').slice(0, 20)
-        : ''
-    }));
+    const compact = state.currentNodes.data.length > 220;
+    const updates = state.currentNodes.data.map(node => {
+      applyVisualStyleToNode(node, compact);
+      return { id: node.id, label: node.label, title: node.title };
+    });
     state.network.body.data.nodes.update(updates);
   }
 }
@@ -289,14 +553,16 @@ function toggleLabels() {
 function toggleAnomalyHighlight() {
   state.anomalyHighlight = !state.anomalyHighlight;
   document.getElementById('ctrl-anomaly-highlight').classList.toggle('on', state.anomalyHighlight);
+  syncGraphNodeStyles();
 }
 
 function updateRangeLabels() {
-  const n = document.getElementById('max-nodes-range');
-  const e = document.getElementById('max-edges-range');
-  if (!n || !e) return;
-  state.maxNodes = Number(n.value);
-  state.maxEdges = Number(e.value);
+  const nodeRange = document.getElementById('max-nodes-range');
+  const edgeRange = document.getElementById('max-edges-range');
+  if (!nodeRange || !edgeRange) return;
+
+  state.maxNodes = Number(nodeRange.value);
+  state.maxEdges = Number(edgeRange.value);
   document.getElementById('max-nodes-value').textContent = `${state.maxNodes} sommets`;
   document.getElementById('max-edges-value').textContent = `${state.maxEdges} arêtes`;
 }
@@ -308,3 +574,8 @@ function toggleSummary(kind) {
   content.classList.toggle('visible');
   toggle.classList.toggle('open');
 }
+
+window.addEventListener('resize', () => {
+  if (!document.getElementById('page-demo')?.classList.contains('active')) return;
+  refreshGraphLayout();
+});
