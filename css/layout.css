@@ -5,7 +5,7 @@ nav {
   right: 0;
   z-index: 1000;
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: auto 1fr;
   align-items: center;
   gap: 1rem;
   padding: 0 1.5rem;
@@ -30,29 +30,24 @@ nav {
   height: 44px;
 }
 
-.nav-badge {
-  justify-self: center;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.55rem;
-  padding: 0.45rem 0.85rem;
-  border-radius: 999px;
-  background: linear-gradient(135deg, rgba(132, 18, 221, 0.16), rgba(9, 164, 232, 0.14));
-  border: 1px solid rgba(132, 18, 221, 0.24);
-  color: #f4f7fb;
-  font-size: 0.74rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+.nav-logo-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.08rem;
 }
 
-.nav-badge::before {
-  content: '';
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, var(--teal), var(--blue));
-  box-shadow: 0 0 10px rgba(9, 164, 232, 0.45);
+.nav-logo-copy strong {
+  color: #f7fbff;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.nav-logo-copy span {
+  color: var(--muted);
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
 .nav-links {
@@ -967,8 +962,12 @@ footer a {
     flex-wrap: wrap;
   }
 
+  .nav-logo-copy {
+    display: none;
+  }
+
   .page {
-    padding-top: 156px;
+    padding-top: 132px;
   }
 
   .hero-grid {

@@ -2,11 +2,11 @@
 // GRAPH UTILITIES
 // ═══════════════════════════════════════════════════════════
 const NODE_TYPE_CONFIG = {
-  event:   { shape: 'diamond', size: 22, label: 'Événement' },
-  time:    { shape: 'triangle', size: 20, label: 'Temps' },
-  person:  { shape: 'hexagon', size: 21, label: 'Personne' },
-  object:  { shape: 'square', size: 20, label: 'Objet' },
-  other:   { shape: 'dot', size: 18, label: 'Autre' }
+  event: { shape: 'diamond', size: 22, label: 'Événement' },
+  time: { shape: 'triangle', size: 20, label: 'Temps' },
+  person: { shape: 'hexagon', size: 21, label: 'Personne' },
+  object: { shape: 'square', size: 20, label: 'Objet' },
+  other: { shape: 'dot', size: 18, label: 'Autre' }
 };
 
 const ANOMALY_LEVEL_CONFIG = {
@@ -112,6 +112,20 @@ function getEventAnchorNode(event) {
   if (eventNode) return eventNode;
 
   return nodes[0] || null;
+}
+
+function buildGlobalNodeIndex(events) {
+  const index = new Map();
+
+  (events || []).forEach(event => {
+    (event.nodes || []).forEach(node => {
+      const nodeId = normalizeId(node._id);
+      if (!nodeId || index.has(nodeId)) return;
+      index.set(nodeId, { node, event });
+    });
+  });
+
+  return index;
 }
 
 function buildNodeTitle(visNode) {
@@ -258,56 +272,88 @@ function buildGraphData() {
   const quasiEdgeMap = new Map();
   const articleNodeMap = {};
   const eventAnchorById = {};
+  const globalNodeIndex = buildGlobalNodeIndex(state.events || []);
 
-  function nodeKey(node, event) {
+  function nodeKey(node, event, options = {}) {
     const rawId = normalizeId(node._id) || node.form || Math.random().toString(36).slice(2);
-    if (state.currentView !== 'merged') return `${rawId}_${event.resultAnalyseId || 'unknown'}`;
+    if (state.currentView !== 'merged') {
+      if (options.external) return `${rawId}__external`;
+      return `${rawId}_${event.resultAnalyseId || 'unknown'}`;
+    }
     return `${node.form || rawId}__${[...(node.labels || [])].sort().join('|')}__${canonicalize(node.properties)}`;
+  }
+
+  function ensureNode(node, carrierEvent, options = {}) {
+    if (!node) return null;
+
+    const ownerEvent = options.ownerEvent || carrierEvent;
+    const articleId = ownerEvent?.resultAnalyseId || carrierEvent?.resultAnalyseId || 'unknown';
+    const level = getEventAnomalyLevel(ownerEvent || carrierEvent);
+    const key = nodeKey(node, carrierEvent, options);
+
+    if (!nodeMap[key]) {
+      nodeMap[key] = {
+        id: key,
+        _data: {
+          key,
+          node,
+          event: ownerEvent || carrierEvent,
+          events: [],
+          articleIds: new Set(),
+          rawNodeIds: new Set(),
+          levelCounts: {},
+          kind: getNodeKind(node.labels),
+          external: Boolean(options.external)
+        }
+      };
+    }
+
+    const meta = nodeMap[key]._data;
+    meta.events.push(ownerEvent || carrierEvent);
+    meta.articleIds.add(articleId);
+    meta.rawNodeIds.add(normalizeId(node._id));
+    meta.levelCounts[level] = (meta.levelCounts[level] || 0) + 1;
+
+    if (!options.external) {
+      if (!articleNodeMap[articleId]) articleNodeMap[articleId] = [];
+      articleNodeMap[articleId].push(key);
+    }
+
+    return key;
+  }
+
+  function resolveNodeByReference(event, refId) {
+    if (!refId) return null;
+
+    const localNode = (event.nodes || []).find(node => normalizeId(node._id) === refId);
+    if (localNode) return { node: localNode, event, external: false };
+
+    const globalMatch = globalNodeIndex.get(refId);
+    if (globalMatch) return { ...globalMatch, external: true };
+
+    return null;
   }
 
   events.forEach(event => {
     const articleId = event.resultAnalyseId || 'unknown';
-    const level = getEventAnomalyLevel(event);
     if (!articleNodeMap[articleId]) articleNodeMap[articleId] = [];
 
     const anchorNode = getEventAnchorNode(event);
     if (anchorNode) {
-      eventAnchorById[getEventId(event)] = nodeKey(anchorNode, event);
+      eventAnchorById[getEventId(event)] = ensureNode(anchorNode, event) || nodeKey(anchorNode, event);
     }
 
     (event.nodes || []).forEach(node => {
-      const key = nodeKey(node, event);
-      if (!nodeMap[key]) {
-        nodeMap[key] = {
-          id: key,
-          _data: {
-            key,
-            node,
-            event,
-            events: [],
-            articleIds: new Set(),
-            rawNodeIds: new Set(),
-            levelCounts: {},
-            kind: getNodeKind(node.labels)
-          }
-        };
-      }
-
-      const meta = nodeMap[key]._data;
-      meta.events.push(event);
-      meta.articleIds.add(articleId);
-      meta.rawNodeIds.add(normalizeId(node._id));
-      meta.levelCounts[level] = (meta.levelCounts[level] || 0) + 1;
-      articleNodeMap[articleId].push(key);
+      ensureNode(node, event);
     });
 
     (event.edges || []).forEach(edge => {
       const sourceId = normalizeId(edge.source);
       const targetId = normalizeId(edge.target);
-      const sourceNode = (event.nodes || []).find(node => normalizeId(node._id) === sourceId);
-      const targetNode = (event.nodes || []).find(node => normalizeId(node._id) === targetId);
+      const sourceRef = resolveNodeByReference(event, sourceId);
+      const targetRef = resolveNodeByReference(event, targetId);
 
-      if (!sourceNode || !targetNode) {
+      if (!sourceRef || !targetRef) {
         console.warn('Arête ignorée: source/target introuvable', {
           edge,
           availableNodeIds: (event.nodes || []).map(node => normalizeId(node._id))
@@ -315,10 +361,19 @@ function buildGraphData() {
         return;
       }
 
+      const fromKey = ensureNode(sourceRef.node, event, {
+        external: sourceRef.external,
+        ownerEvent: sourceRef.event
+      });
+      const toKey = ensureNode(targetRef.node, event, {
+        external: targetRef.external,
+        ownerEvent: targetRef.event
+      });
+
       addSemanticEdge(
         semanticEdgeMap,
-        nodeKey(sourceNode, event),
-        nodeKey(targetNode, event),
+        fromKey,
+        toKey,
         edge,
         event,
         compact

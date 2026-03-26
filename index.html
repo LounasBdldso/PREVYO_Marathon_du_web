@@ -27,9 +27,11 @@
       <path d="M4,23 Q20,17 36,23 Q52,29 68,23 Q80,19 88,23" stroke="#bd33d1" fill="none" stroke-width="2.2" stroke-linecap="round" opacity="0.7"/>
       <text x="4" y="48" font-family="Lexend,sans-serif" font-size="20" font-weight="600" fill="#8412dd">prevyo</text>
     </svg>
+    <div class="nav-logo-copy">
+      <strong>Plateforme d'analyse</strong>
+      <span>Graphes de connaissance événementiels</span>
+    </div>
   </div>
-
-  <span class="nav-badge">Marathon du Web</span>
 
   <div class="nav-links">
     <button class="nav-link active" onclick="showPage('home')" id="nav-home">Accueil</button>
@@ -50,7 +52,8 @@
         <p class="hero-sub fade-in delay-2">
           Le dépôt réunit l’exploration de données, le scoring d’anomalies, la détection de quasi-doublons,
           plusieurs approches de clustering et maintenant un module dédié à la correction des lieux.
-          Cette interface sert de hub pour comprendre la pipeline et agir sur les graphes extraits par Prevyo.
+          Cette interface centralise les principaux éléments de lecture, d'analyse et de correction
+          appliqués aux graphes de connaissance extraits par PREVYO.
         </p>
 
         <div class="hero-chip-row fade-in delay-2">
@@ -62,7 +65,7 @@
 
         <div class="hero-btns fade-in delay-3">
           <button class="btn-primary" onclick="showPage('demo')">Explorer le graphe</button>
-          <button class="btn-outline" onclick="showPage('visu')">Voir l’atlas analytique</button>
+          <button class="btn-outline" onclick="showPage('visu')">Consulter le tableau de bord</button>
           <button class="btn-outline" onclick="showPage('location')">Tester le correcteur de lieux</button>
         </div>
 
@@ -74,7 +77,7 @@
 
       <div class="hero-panel fade-in delay-2">
         <div class="hero-panel-card">
-          <h3>Signal live du dataset chargé</h3>
+          <h3>Indicateurs du dataset chargé</h3>
           <div class="hero-metrics">
             <div class="hero-metric">
               <span class="label">Événements</span>
@@ -143,20 +146,20 @@
 
   <section class="section">
     <span class="section-tag">Contexte</span>
-    <h2 class="section-title">Une interface qui raconte enfin la vraie pipeline du dépôt</h2>
+    <h2 class="section-title">Une plateforme de lecture, d'analyse et d'aide à la décision</h2>
     <p class="section-desc">
-      Le projet ne se limite pas à un simple visualiseur. Le dépôt assemble des notebooks d’exploration,
-      des scripts de scoring, des moteurs de similarité, plusieurs essais de clustering et des apps HTML / Streamlit.
-      L’objectif de cette refonte est de rendre cette profondeur visible dans l’interface principale.
+      Cette interface réunit les principaux livrables du projet dans une lecture cohérente:
+      compréhension du corpus, qualification des anomalies, repérage des similarités, analyse des regroupements
+      et préparation des correctifs sur les graphes de connaissance produits par PREVYO.
     </p>
 
     <div class="story-grid">
       <article class="story-card wide">
-        <h3>De PREVYO vers le hub d’audit</h3>
+        <h3>De PREVYO à la supervision qualité</h3>
         <p>
           EMVISTA / PREVYO extrait des événements, entités, lieux, dates et relations depuis des sources textuelles.
-          Notre travail dans le Marathon du Web a consisté à reprendre cet export, l’analyser, détecter les points faibles
-          du graphe et proposer des outils de lecture puis de correction directement exploitables.
+          Le site consolide ce travail en une démonstration structurée, pensée pour présenter le contexte,
+          les analyses produites sur le corpus et les leviers d'action disponibles pour améliorer la qualité du graphe.
         </p>
         <div class="story-stat-row">
           <div class="story-stat">
@@ -192,7 +195,8 @@
     <span class="section-tag">Pipeline</span>
     <h2 class="section-title">Six étapes lisibles, depuis les notebooks jusqu’aux outils d’action</h2>
     <p class="section-desc">
-      Cette synthèse condense ce que racontent les notebooks, scripts et dashboards présents dans le dépôt.
+      Cette vue synthétise les briques d'analyse et de correction mobilisées pour passer de l'export brut
+      à une lecture exploitable du graphe de connaissance.
     </p>
 
     <div class="pipeline-grid">
@@ -233,22 +237,24 @@
     <span class="section-tag">Cartographie du dépôt</span>
     <h2 class="section-title">Les briques projet remises au bon niveau dans l’interface</h2>
     <p class="section-desc">
-      Cette sélection est générée depuis le dépôt pour mettre en avant les assets et scripts qui structurent vraiment la démarche.
+      Cette sélection met en avant les notebooks, scripts et modules qui structurent la démarche analytique
+      et la chaîne de traitement du projet.
     </p>
     <div class="module-grid" id="home-repo-grid"></div>
   </section>
 
   <section class="section">
-    <span class="section-tag">Lancements rapides</span>
-    <h2 class="section-title">Entrer par le graphe, l’analyse ou la correction</h2>
+    <span class="section-tag">Accès directs</span>
+    <h2 class="section-title">Accéder rapidement aux modules de démonstration</h2>
     <p class="section-desc">
-      On garde une navigation simple, mais chaque entrée a maintenant un rôle clair dans la chaîne de travail.
+      Chaque entrée donne accès à un niveau de lecture complémentaire:
+      exploration du graphe, tableau de bord analytique ou correction ciblée.
     </p>
     <div class="module-grid" id="home-launch-grid"></div>
   </section>
 
   <footer>
-    Projet Marathon du Web — <a href="https://emvista.com" target="_blank" rel="noopener">EMVISTA</a> × promo 2025/2026
+    Plateforme de démonstration PREVYO — <a href="https://emvista.com" target="_blank" rel="noopener">EMVISTA</a> × promo 2025/2026
   </footer>
 </div>
 
@@ -258,8 +264,8 @@
       <span class="section-tag">Atlas analytique</span>
       <h2 class="section-title">Visualisation, repères métier et réemploi des analyses du dépôt</h2>
       <p class="section-desc">
-        L’onglet ne se contente plus d’afficher quelques graphiques. Il synthétise le dataset chargé,
-        les axes d’analyse déjà présents dans les scripts et les figures du dépôt qui méritaient d’être visibles directement ici.
+        Cet espace réunit les principaux indicateurs du corpus et les visualisations utiles à l'analyse:
+        niveaux d'alerte, typologies d'événements, structures de sous-graphes, clusters et similarités.
       </p>
       <div class="visu-meta-row">
         <span class="visu-pill">Dataset actif enrichi</span>
@@ -484,7 +490,7 @@
   </div>
 
   <footer>
-    Projet Marathon du Web — <a href="https://emvista.com" target="_blank" rel="noopener">EMVISTA</a>
+    Plateforme de démonstration PREVYO — <a href="https://emvista.com" target="_blank" rel="noopener">EMVISTA</a>
   </footer>
 </div>
 
@@ -494,12 +500,12 @@
       <span class="section-tag">Module beta</span>
       <h2 class="section-title">Correction des anomalies de lieux</h2>
       <p class="section-desc">
-        Ce quatrième onglet prépare l’intégration du correcteur de lieux déjà présent dans le dépôt.
-        Le module détecte les coordonnées anormales, propose des corrections manuelles ou assistées,
-        et exporte un JSON corrigé sans casser le reste de la chaîne.
+        Cette version intègre le correcteur de lieux dans l’esthétique PREVYO, avec une hiérarchie visuelle plus lisible,
+        des cartes homogènes avec le reste du site, une meilleure mise en avant des actions de correction
+        et une continuité graphique avec les autres modules d’analyse.
       </p>
       <div class="lab-actions">
-        <a class="module-action link" href="app/location_fixer.html" target="_blank" rel="noopener">Ouvrir en plein écran</a>
+        <a class="module-action link" href="app/location_fixer.html" target="_blank" rel="noopener">Ouvrir le module complet</a>
         <button class="module-action" type="button" onclick="showPage('demo')">Revenir au graphe principal</button>
       </div>
     </div>
@@ -508,17 +514,17 @@
       <article class="lab-highlight">
         <span>Détection</span>
         <strong>Coordonnées incohérentes</strong>
-        <p>Le module cible les locations aberrantes comme les coordonnées nulles et les cas mal formés à corriger prioritairement.</p>
+        <p>Les anomalies sont hiérarchisées visuellement pour accélérer la revue humaine et prioriser les cas à fort impact.</p>
       </article>
       <article class="lab-highlight">
         <span>Correction</span>
         <strong>Recherche assistée</strong>
-        <p>Correction manuelle, recherche externe, suppression ciblée de noeud ou retrait d’article entier au moment de l’export.</p>
+        <p>Les panneaux de correction utilisent désormais la même logique de cartes, de contrastes et d’actions que le reste de l’interface.</p>
       </article>
       <article class="lab-highlight">
         <span>Sortie</span>
         <strong>JSON réinjectable</strong>
-        <p>Le module produit un export corrigé qui peut ensuite rejoindre la chaîne qualité et les vues de visualisation.</p>
+        <p>L’export final reste compatible avec la chaîne qualité tout en offrant une expérience de correction nettement plus intégrée.</p>
       </article>
     </div>
 
@@ -526,10 +532,6 @@
       <iframe class="lab-frame" src="app/location_fixer.html" title="Correcteur de lieux Prevyo" loading="lazy"></iframe>
     </div>
   </div>
-
-  <footer>
-    Module beta de correction — source : <a href="app/location_fixer.html" target="_blank" rel="noopener">app/location_fixer.html</a>
-  </footer>
 </div>
 
 <div class="page" id="page-demo">
