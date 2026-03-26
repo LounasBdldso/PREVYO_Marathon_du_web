@@ -308,7 +308,6 @@ function updateVisuStats() {
     'stat-anomalies': metrics.alertCount.toLocaleString('fr-FR'),
     'stat-quasi': metrics.quasiEventCount.toLocaleString('fr-FR'),
     'stat-articles': metrics.totalArticles.toLocaleString('fr-FR'),
-    'stat-clusters': metrics.clusterCount.toLocaleString('fr-FR'),
     'visu-insight-alerts': `${metrics.criticalCount.toLocaleString('fr-FR')} critiques`,
     'visu-insight-links': `${metrics.quasiLinkCount.toLocaleString('fr-FR')} liens`,
     'visu-insight-density': `${metrics.avgNodesPerEvent.toFixed(1)} noeuds / event`,
@@ -326,7 +325,6 @@ function updateVisuStats() {
     headerMeta.textContent =
       `${metrics.totalEvents.toLocaleString('fr-FR')} événements analysés, ` +
       `${metrics.totalArticles.toLocaleString('fr-FR')} articles reconstruits, ` +
-      `${metrics.clusterCount.toLocaleString('fr-FR')} clusters exploitables et ` +
       `${metrics.quasiLinkCount.toLocaleString('fr-FR')} relations de quasi-doublon.`;
   }
 }

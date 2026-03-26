@@ -43,13 +43,81 @@
       color: var(--text);
     }
 
-    #page-home {
-      background: var(--bg);
-      color: var(--text);
+    /* ===== HOME - charts plus compacts et mieux stylés ===== */
+
+    #page-home .chart-card {
+      background: linear-gradient(180deg, rgba(11,26,48,0.96), rgba(8,20,38,0.96));
+      border: 1px solid rgba(27,174,159,0.12);
+      border-radius: 18px;
+      padding: 1rem 1rem 0.9rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+      min-height: auto;
+      box-shadow: 0 12px 28px rgba(0,0,0,0.18);
     }
 
-    #page-home *, #page-home *::before, #page-home *::after {
-      box-sizing: border-box;
+    #page-home .chart-wrap {
+      position: relative;
+      flex: 0 0 auto;
+      min-height: 160px;
+      max-height: 220px;
+      height: 180px;
+      padding: 0.35rem;
+    }
+
+    #page-home .chart-wrap canvas {
+      width: 100% !important;
+      height: 100% !important;
+    }
+
+    /* Un peu plus d'air entre les blocs */
+    #page-home .charts-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    /* ===== Mobile ===== */
+    @media (max-width: 700px) {
+      /* espace à gauche et à droite là où tu as marqué en rouge */
+      #page-home .kpi-strip {
+        grid-template-columns: 1fr 1fr;
+        padding-left: 0.9rem;
+        padding-right: 0.9rem;
+        gap: 0.75rem;
+      }
+
+      /* même logique pour garder un alignement propre sur toute la page */
+      #page-home .section {
+        padding-left: 1rem;
+        padding-right: 1rem;
+      }
+
+      #page-home .hero {
+        padding: 2.4rem 1rem 1rem;
+      }
+
+      #page-home .chart-card {
+        padding: 0.9rem 0.9rem 0.8rem;
+        border-radius: 14px;
+      }
+
+      #page-home .chart-wrap {
+        min-height: 125px;
+        max-height: 155px;
+        height: 140px;
+        padding: 0.2rem;
+      }
+
+      #page-home .chart-card h3 {
+        font-size: 0.72rem;
+      }
+
+      #page-home .chart-card p {
+        font-size: 0.64rem;
+        line-height: 1.35;
+      }
     }
 
     #page-home .reveal {
@@ -70,8 +138,9 @@
 
     #page-home .hero {
       position: relative;
-      padding: 7rem 2rem 3.5rem;
+      padding: 1.4rem 2rem 0.8rem;
       overflow: hidden;
+      min-height: auto;
     }
 
     #page-home .hero::before {
@@ -99,9 +168,9 @@
       max-width: 1320px;
       margin: 0 auto;
       display: grid;
-      grid-template-columns: minmax(0, 640px) minmax(320px, 1fr);
-      gap: clamp(2rem, 5vw, 5rem);
-      align-items: center;
+      grid-template-columns: minmax(0, 720px) minmax(340px, 1fr);
+      gap: 1.4rem;
+      align-items: start;
     }
 
     #page-home .hero-copy {
@@ -109,16 +178,31 @@
     }
 
     #page-home .hero-video-slot {
-      min-height: 340px;
       width: 100%;
+      min-height: 260px;
+      height: 260px;
       position: relative;
+      margin-top: 0;
+      border-radius: 22px;
+      border: 1px solid rgba(27,174,159,0.14);
+      background:
+        linear-gradient(180deg, rgba(11,26,48,0.72), rgba(8,20,38,0.68)),
+        radial-gradient(circle at 70% 30%, rgba(9,164,232,0.08), transparent 45%);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.02);
     }
 
     #page-home .hero-video-slot::before {
-      content: '';
+      content: 'Vidéo de présentation de PREVYO';
       position: absolute;
       inset: 0;
-      border-radius: 24px;
+      border-radius: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: rgba(221,232,245,0.42);
+      font-size: 0.9rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
       background:
         linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0)),
         radial-gradient(circle at 50% 50%, rgba(9,164,232,0.05), transparent 65%);
@@ -145,12 +229,13 @@
     }
 
     #page-home .hero-title {
-      font-size: clamp(2.4rem, 5vw, 5rem);
+      font-size: clamp(2.2rem, 4vw, 3.9rem);
       font-weight: 700;
-      line-height: 1.05;
+      line-height: 0.98;
       letter-spacing: -0.04em;
-      margin-bottom: 1.2rem;
+      margin-bottom: 0.8rem;
       color: var(--text);
+      max-width: 680px;
     }
 
     #page-home .hero-title span {
@@ -158,26 +243,30 @@
     }
 
     #page-home .hero-sub {
-      color: var(--muted);
+      color: #fff;
       font-size: 0.92rem;
       line-height: 1.75;
-      max-width: 560px;
+      max-width: 640px;
       margin-bottom: 0;
     }
 
     #page-home .kpi-strip {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
+      max-width: 1320px;
+      margin: 0 auto;
       border-top: 1px solid rgba(27,174,159,0.12);
       border-bottom: 1px solid rgba(27,174,159,0.12);
     }
 
     #page-home .kpi-strip-item {
-      padding: 1.5rem 2rem;
+      padding: 1.15rem 1.5rem 1.25rem;
       border-right: 1px solid rgba(27,174,159,0.10);
       display: flex;
       flex-direction: column;
-      gap: 0.3rem;
+      gap: 0.2rem;
+      min-height: 108px;
+      justify-content: center;
     }
 
     #page-home .kpi-strip-item:last-child {
@@ -185,19 +274,23 @@
     }
 
     #page-home .kpi-strip-item .val {
-      width: 36px;
-      height: 4px;
-      border-radius: 99px;
-      background: linear-gradient(135deg, var(--teal), var(--blue));
-      color: transparent;
-      font-size: 0;
-      margin-bottom: 1.05rem;
+      display: block;
+      width: auto;
+      height: auto;
+      border-radius: 0;
+      background: none;
+      color: #f7fbff;
+      font-size: clamp(1.3rem, 2vw, 2rem);
+      font-weight: 700;
+      line-height: 1.1;
+      margin-bottom: 0.45rem;
     }
 
     #page-home .kpi-strip-item .lbl {
-      font-size: 0.72rem;
+      font-size: 0.8rem;
       color: var(--muted);
       line-height: 1.45;
+      max-width: 220px;
     }
 
     #page-home .section {
@@ -380,16 +473,7 @@
     #page-home .algo-tag.orange { background: rgba(255,165,2,0.1); color: var(--quasi); border-color: rgba(255,165,2,0.22); }
     #page-home .algo-tag.red { background: rgba(255,71,87,0.1); color: var(--anomaly); border-color: rgba(255,71,87,0.22); }
 
-    #page-home .chart-card {
-      background: var(--surface);
-      border: 1px solid rgba(27,174,159,0.12);
-      border-radius: 20px;
-      padding: 1.4rem 1.4rem 1.2rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-      min-height: 100%;
-    }
+
 
     #page-home .chart-card h3 {
       font-size: 0.78rem;
@@ -624,13 +708,20 @@
       text-decoration: none;
     }
 
+    #hero-sub reveal reveal-d2 visible {
+      font-size: 0.86rem;
+      font-color: white;
+    }
+
     @media (max-width: 1100px) {
       #page-home .hero-inner {
         grid-template-columns: 1fr;
+        gap: 1rem;
       }
 
       #page-home .hero-video-slot {
-        display: none;
+        min-height: 220px;
+        height: 220px;
       }
 
       #page-home .axe-block,
@@ -644,26 +735,111 @@
       }
     }
 
-    @media (max-width: 700px) {
-      #page-home .kpi-strip {
-        grid-template-columns: 1fr 1fr;
-      }
-
-      #page-home .charts-2,
-      #page-home .pipeline,
-      #page-home .home-journal-grid {
-        grid-template-columns: 1fr;
-      }
-
-      #page-home .cat-grid,
-      #page-home .level-scale {
-        grid-template-columns: 1fr 1fr;
-      }
-
-      #page-home .hero {
-        padding-top: 6rem;
-      }
+  @media (max-width: 700px) {
+    #page-home .kpi-strip {
+      grid-template-columns: 1fr 1fr;
     }
+
+    #page-home .charts-2,
+    #page-home .pipeline,
+    #page-home .home-journal-grid {
+      grid-template-columns: 1fr;
+    }
+
+    #page-home .cat-grid,
+    #page-home .level-scale {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    #page-home .hero {
+      padding: 2.4rem 1.2rem 1rem;
+    }
+
+    #page-home .hero-title {
+      font-size: clamp(2rem, 9vw, 3rem);
+    }
+
+    #page-home .hero-sub {
+      font-size: 0.86rem;
+    }
+
+    #page-home .kpi-strip-item {
+      padding: 1rem 1rem 1.05rem;
+      min-height: 92px;
+    }
+
+    #page-home .hero-copy {
+      min-width: 0;
+      padding-top: 0.15rem;
+    }
+
+    #page-home .section {
+      max-width: 1240px;
+    }
+
+    #page-home .pipeline {
+      grid-template-columns: 1fr 1fr;
+      gap: 0.8rem;
+    }
+
+    #page-home .pipeline-step {
+      padding: 1rem 1.05rem;
+      border-radius: 14px;
+    }
+
+    #page-home .pipeline-step h3 {
+      font-size: 0.82rem;
+      margin-bottom: 0.35rem;
+    }
+
+    #page-home .pipeline-step p {
+      font-size: 0.7rem;
+      line-height: 1.5;
+    }
+
+    #page-home .pipeline-step .meta {
+      margin-top: 0.55rem;
+      padding-top: 0.45rem;
+      font-size: 0.58rem;
+    }
+
+    #page-home .home-journal-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.75rem;
+    }
+
+    #page-home .report-day {
+      padding: 1rem 1rem 1.05rem;
+      border-radius: 14px;
+    }
+
+    #page-home .report-day h3 {
+      font-size: 0.8rem;
+    }
+
+    #page-home .report-day ul li {
+      font-size: 0.72rem;
+      line-height: 1.45;
+    }
+
+    #page-home .chart-card {
+      padding: 1rem 1rem 0.9rem;
+      border-radius: 16px;
+    }
+
+    #page-home .chart-card h3 {
+      font-size: 0.74rem;
+    }
+
+    #page-home .chart-card p {
+      font-size: 0.66rem;
+      line-height: 1.4;
+    }
+
+    #page-home .chart-wrap {
+      min-height: 165px;
+    }
+  }
   </style>
 </head>
 <body>
@@ -689,7 +865,6 @@
     <canvas id="hero-canvas"></canvas>
     <div class="hero-inner">
       <div class="hero-copy">
-        <div class="hero-eyebrow reveal">EMVISTA PREVYO</div>
         <h1 class="hero-title reveal reveal-d1">Du texte brut<br><span>au graphe</span></h1>
         <p class="hero-sub reveal reveal-d2">
           Cette page présente l'exploration de données, le scoring d'anomalies, la détection de quasi-doublons,
@@ -796,7 +971,7 @@
         <div class="chart-card">
           <h3>Répartition des niveaux d'alerte</h3>
           <p>Part relative des événements normaux, suspects et critiques dans le corpus actif.</p>
-          <div class="chart-wrap" style="min-height:230px"><canvas id="chart-anomaly"></canvas></div>
+          <div class="chart-wrap" style="min-height:120px"><canvas id="chart-anomaly"></canvas></div>
         </div>
         <div class="chart-card">
           <h3>Distribution des scores d'anomalie</h3>
@@ -810,12 +985,7 @@
       <div class="chart-card">
         <h3>Articles les plus exposés</h3>
         <p>Articles concentrant le plus de signaux suspects et critiques (empilé Critique + Suspect).</p>
-        <div class="chart-wrap" style="min-height:240px"><canvas id="chart-article-alerts"></canvas></div>
-      </div>
-      <div class="chart-card">
-        <h3>Complexité des sous-graphes</h3>
-        <p>Répartition des événements selon la taille (nombre de nœuds) de leur sous-graphe local.</p>
-        <div class="chart-wrap" style="min-height:240px"><canvas id="chart-nodes"></canvas></div>
+        <div class="chart-wrap" style="min-height:120px"><canvas id="chart-article-alerts"></canvas></div>
       </div>
     </div>
   </div>
@@ -824,10 +994,10 @@
 
   <div class="section">
     <span class="section-tag">Axe 2</span>
-    <h2 class="section-title reveal">Similarité &amp; clustering — formules et résultats</h2>
+    <h2 class="section-title reveal">Similarité — formules et résultats</h2>    
     <p class="section-desc reveal reveal-d1">
-      Deux questions successives structurent cet axe : ces deux événements se ressemblent-ils ? Et si oui,
-      comment les regrouper ? Le score combiné S<sub>ij</sub> dépasse un seuil τ calibré empiriquement sur le dataset réel.
+      Cet axe se concentre sur la similarité entre événements. Le score combiné S<sub>ij</sub> permet d’identifier
+      les événements proches et les quasi-doublons potentiels à vérifier.
     </p>
 
     <div class="axe-block reverse reveal">
@@ -835,12 +1005,12 @@
         <div class="chart-card">
           <h3>Clusters thématiques HDBSCAN</h3>
           <p>Groupes les plus peuplés parmi les annotations de clustering conservées (hors bruit).</p>
-          <div class="chart-wrap" style="min-height:260px"><canvas id="chart-clusters"></canvas></div>
+          <div class="chart-wrap" style="min-height:120px"><canvas id="chart-clusters"></canvas></div>
         </div>
         <div class="chart-card">
           <h3>Relations sémantiques dominantes</h3>
           <p>Types de liens (arêtes) les plus fréquents dans les sous-graphes extraits par PREVYO.</p>
-          <div class="chart-wrap" style="min-height:200px"><canvas id="chart-edges"></canvas></div>
+          <div class="chart-wrap" style="min-height:110px"><canvas id="chart-edges"></canvas></div>
         </div>
       </div>
 
@@ -907,35 +1077,6 @@
             <div class="action">Signaler pour vérification</div>
           </div>
         </div>
-
-        <div class="axe-eyebrow" style="margin-top:1.2rem">Q2 — Clustering HDBSCAN</div>
-        <h3 class="axe-title" style="font-size:0.9rem">Pipeline en 4 étapes</h3>
-        <ol style="font-size:0.78rem;color:var(--muted);padding-left:1.2rem;line-height:2;margin-bottom:0.9rem">
-          <li>Réduction UMAP en <strong style="color:var(--text)">50 dimensions</strong></li>
-          <li>HDBSCAN avec <strong style="color:var(--text)">min_cluster_size = 5</strong></li>
-          <li>Label thématique par <strong style="color:var(--text)">TF-IDF</strong> (3 mots-clés par cluster)</li>
-          <li>Événements <strong style="color:var(--anomaly)">label −1</strong> → transmis à l'axe 1 comme candidats anomalies</li>
-        </ol>
-        <div class="algo-row">
-          <span class="algo-tag teal">UMAP</span>
-          <span class="algo-tag">HDBSCAN</span>
-          <span class="algo-tag blue">TF-IDF</span>
-          <span class="algo-tag orange">MiniLM cosine</span>
-          <span class="algo-tag red">Bruit → anomalies</span>
-        </div>
-      </div>
-    </div>
-
-    <div class="charts-2 reveal reveal-d2">
-      <div class="chart-card">
-        <h3>Labels de nœuds les plus fréquents</h3>
-        <p>Catégories d'entités (Person, Place, Event…) qui structurent le plus fortement le graphe.</p>
-        <div class="chart-wrap" style="min-height:240px"><canvas id="chart-labels"></canvas></div>
-      </div>
-      <div class="chart-card">
-        <h3>Typologie dominante des événements</h3>
-        <p>Familles d'événements les plus représentées dans le dataset — dernier niveau de la taxonomie.</p>
-        <div class="chart-wrap" style="min-height:240px"><canvas id="chart-types"></canvas></div>
       </div>
     </div>
   </div>
@@ -1046,7 +1187,6 @@
 <div class="page" id="page-location">
   <div class="lab-shell correction-shell">
     <div class="lab-head">
-      <span class="section-tag">Module beta</span>
       <h2 class="section-title">Correction</h2>
       <p class="section-desc correction-desc">
         Cet espace regroupe les outils de correction. Deux sous-onglets sont disponibles ci-dessous, avec une première section dédiée aux anomalies de lieu.
