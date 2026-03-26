@@ -231,15 +231,26 @@
     #page-home .hero-title {
       font-size: clamp(2.2rem, 4vw, 3.9rem);
       font-weight: 700;
-      line-height: 0.98;
+      line-height: 1.12;
       letter-spacing: -0.04em;
       margin-bottom: 0.8rem;
       color: var(--text);
       max-width: 680px;
+      overflow: visible;
     }
 
     #page-home .hero-title span {
+      display: inline;
       color: var(--teal);
+      background: none;
+      -webkit-background-clip: border-box;
+      background-clip: border-box;
+      -webkit-text-fill-color: currentColor;
+      padding-bottom: 0.12em;
+    }
+
+    #page-home .hero-copy {
+      overflow: visible;
     }
 
     #page-home .hero-sub {
