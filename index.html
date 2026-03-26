@@ -233,259 +233,255 @@
     </div>
   </section>
 
-  <section class="section">
-    <span class="section-tag">Cartographie du dépôt</span>
-    <h2 class="section-title">Les briques projet remises au bon niveau dans l’interface</h2>
-    <p class="section-desc">
-      Cette sélection met en avant les notebooks, scripts et modules qui structurent la démarche analytique
-      et la chaîne de traitement du projet.
-    </p>
-    <div class="module-grid" id="home-repo-grid"></div>
-  </section>
-
-  <section class="section">
-    <span class="section-tag">Accès directs</span>
-    <h2 class="section-title">Accéder rapidement aux modules de démonstration</h2>
-    <p class="section-desc">
-      Chaque entrée donne accès à un niveau de lecture complémentaire:
-      exploration du graphe, tableau de bord analytique ou correction ciblée.
-    </p>
-    <div class="module-grid" id="home-launch-grid"></div>
-  </section>
-
   <footer>
     Plateforme de démonstration PREVYO — <a href="https://emvista.com" target="_blank" rel="noopener">EMVISTA</a> × promo 2025/2026
   </footer>
 </div>
 
 <div class="page" id="page-visu">
-  <div class="visu-shell">
-    <div class="visu-header">
+  <div class="visu-shell premium-visu-shell">
+    <div class="visu-header premium-visu-header">
       <span class="section-tag">Atlas analytique</span>
-      <h2 class="section-title">Visualisation, repères métier et réemploi des analyses du dépôt</h2>
+      <h2 class="section-title">Tableau de bord analytique du corpus</h2>
       <p class="section-desc">
-        Cet espace réunit les principaux indicateurs du corpus et les visualisations utiles à l'analyse:
-        niveaux d'alerte, typologies d'événements, structures de sous-graphes, clusters et similarités.
+        Cette vue réunit les indicateurs essentiels du corpus et les visualisations prioritaires pour
+        piloter la qualité des données, analyser les signaux d’alerte, comprendre la structure des sous-graphes,
+        suivre les regroupements et lire les relations sémantiques du graphe de connaissance.
       </p>
+
       <div class="visu-meta-row">
-        <span class="visu-pill">Dataset actif enrichi</span>
-        <span class="visu-pill">Croisement anomalies / clusters / similarité</span>
-        <span class="visu-pill">Réemploi des figures exploratoires du dépôt</span>
+        <span class="visu-pill">Vue directionnelle</span>
+        <span class="visu-pill">Pilotage qualité</span>
+        <span class="visu-pill">Lecture multi-niveaux</span>
       </div>
-      <p class="section-desc" id="visu-header-meta">
-        Chargement des indicateurs du dataset actif…
+
+      <p class="section-desc premium-visu-subline" id="visu-header-meta">
+        Chargement des indicateurs du corpus actif…
       </p>
     </div>
 
-    <div class="stat-row" id="visu-stats">
-      <div class="stat-mini"><div class="dot" style="background:var(--teal)"></div><div><div class="val" id="stat-total">—</div><div class="lbl">Événements</div></div></div>
-      <div class="stat-mini"><div class="dot" style="background:var(--anomaly)"></div><div><div class="val" id="stat-anomalies">—</div><div class="lbl">Alertes</div></div></div>
-      <div class="stat-mini"><div class="dot" style="background:var(--quasi)"></div><div><div class="val" id="stat-quasi">—</div><div class="lbl">Events quasi</div></div></div>
-      <div class="stat-mini"><div class="dot" style="background:var(--blue)"></div><div><div class="val" id="stat-articles">—</div><div class="lbl">Articles</div></div></div>
-      <div class="stat-mini"><div class="dot" style="background:var(--dark-blue)"></div><div><div class="val" id="stat-clusters">—</div><div class="lbl">Clusters</div></div></div>
+    <div class="stat-row premium-stat-row" id="visu-stats">
+      <div class="stat-mini premium-stat-card">
+        <div class="dot" style="background:var(--teal)"></div>
+        <div>
+          <div class="val" id="stat-total">—</div>
+          <div class="lbl">Événements analysés</div>
+        </div>
+      </div>
+
+      <div class="stat-mini premium-stat-card">
+        <div class="dot" style="background:var(--anomaly)"></div>
+        <div>
+          <div class="val" id="stat-anomalies">—</div>
+          <div class="lbl">Événements en alerte</div>
+        </div>
+      </div>
+
+      <div class="stat-mini premium-stat-card">
+        <div class="dot" style="background:var(--quasi)"></div>
+        <div>
+          <div class="val" id="stat-quasi">—</div>
+          <div class="lbl">Événements liés</div>
+        </div>
+      </div>
+
+      <div class="stat-mini premium-stat-card">
+        <div class="dot" style="background:var(--blue)"></div>
+        <div>
+          <div class="val" id="stat-articles">—</div>
+          <div class="lbl">Articles reconstruits</div>
+        </div>
+      </div>
+
+      <div class="stat-mini premium-stat-card">
+        <div class="dot" style="background:var(--dark-blue)"></div>
+        <div>
+          <div class="val" id="stat-clusters">—</div>
+          <div class="lbl">Clusters exploitables</div>
+        </div>
+      </div>
     </div>
 
-    <div class="visu-insight-grid">
-      <article class="insight-card">
-        <span>Signal critique</span>
+    <div class="visu-insight-grid premium-insight-grid">
+      <article class="insight-card premium-insight-card">
+        <span>Priorité de revue</span>
         <strong id="visu-insight-alerts">—</strong>
-        <p>Volume immédiatement prioritaire pour une revue humaine ou une correction de qualité.</p>
+        <p>Volume d’événements critiques à examiner en priorité pour la revue humaine ou la correction ciblée.</p>
       </article>
-      <article class="insight-card">
-        <span>Quasi-doublons</span>
+
+      <article class="insight-card premium-insight-card">
+        <span>Rapprochements détectés</span>
         <strong id="visu-insight-links">—</strong>
-        <p>Liens similaires déjà exploitables dans le graphe fusionné et la lecture qualité.</p>
+        <p>Relations de quasi-doublon déjà identifiées et mobilisables pour la consolidation du graphe.</p>
       </article>
-      <article class="insight-card">
-        <span>Densité du graphe</span>
+
+      <article class="insight-card premium-insight-card">
+        <span>Complexité moyenne</span>
         <strong id="visu-insight-density">—</strong>
-        <p>Moyenne des noeuds par événement pour mesurer la complexité des sous-graphes extraits.</p>
+        <p>Niveau moyen de densité des sous-graphes pour apprécier la richesse structurelle des événements.</p>
       </article>
-      <article class="insight-card">
+
+      <article class="insight-card premium-insight-card">
         <span>Couverture métier</span>
         <strong id="visu-insight-coverage">—</strong>
-        <p>Part des événements déjà enrichis par les champs métier utiles à l’analyse aval.</p>
+        <p>Part du corpus disposant des métadonnées utiles à une lecture métier et à un traitement aval fiable.</p>
       </article>
-      <article class="insight-card">
-        <span>Type dominant</span>
+
+      <article class="insight-card premium-insight-card">
+        <span>Repère dominant</span>
         <strong id="visu-insight-types">—</strong>
-        <p>Le type le plus fréquent ressort comme repère utile pour lire les regroupements et distributions.</p>
+        <p>Type d’événement le plus représenté dans le corpus pour situer rapidement les équilibres du dataset.</p>
       </article>
     </div>
 
-    <div id="visu-empty" style="text-align:center;padding:3.6rem 2rem;color:var(--muted)">
+    <div id="visu-empty" class="premium-empty-state" style="text-align:center;padding:3.6rem 2rem;color:var(--muted)">
       <div style="font-size:3rem;margin-bottom:1rem">📁</div>
-      <p style="font-size:0.9rem;font-weight:300;max-width:480px;margin:0 auto;line-height:1.8">
-        Chargez ou laissez le site ouvrir <strong style="color:var(--teal)">export.events.clean.json</strong>
-        pour alimenter cette page avec les données enrichies du projet.
+      <p style="font-size:0.9rem;font-weight:300;max-width:520px;margin:0 auto;line-height:1.8">
+        Charge un fichier de données ou laisse l’interface ouvrir automatiquement
+        <strong style="color:var(--teal)">export.events.clean.json</strong>
+        pour alimenter ce tableau de bord avec le corpus analytique.
       </p>
-      <button class="btn-primary" style="margin-top:1.5rem" onclick="showPage('demo')">Aller au graphe →</button>
+      <button class="btn-primary" style="margin-top:1.5rem" onclick="showPage('demo')">Accéder au graphe
+        interactif</button>
     </div>
 
-    <div class="visu-grid" id="visu-charts" style="display:none">
-      <div class="chart-card">
-        <h3>Top types d’événements</h3>
-        <p>Lecture rapide des familles d’événements les plus présentes dans le dataset actif.</p>
-        <canvas id="chart-types"></canvas>
-      </div>
-      <div class="chart-card">
-        <h3>Niveaux d’alerte</h3>
-        <p>Répartition entre normal, suspect et critique sur les événements annotés.</p>
-        <canvas id="chart-anomaly"></canvas>
-      </div>
-      <div class="chart-card">
-        <h3>Articles les plus exposés</h3>
-        <p>Articles avec le plus de signaux suspects / critiques dans le dataset chargé.</p>
-        <canvas id="chart-article-alerts"></canvas>
-      </div>
-      <div class="chart-card span-12">
-        <h3>Histogramme des scores d’anomalie</h3>
-        <p>Distribution continue des scores pour mieux voir la coupure entre normal, suspect et critique.</p>
-        <canvas id="chart-scores"></canvas>
-      </div>
-      <div class="chart-card span-6">
-        <h3>Clusters les plus peuplés</h3>
-        <p>Regroupements dominants présents dans les annotations de clustering.</p>
-        <canvas id="chart-clusters"></canvas>
-      </div>
-      <div class="chart-card">
-        <h3>Complexité des sous-graphes</h3>
-        <p>Distribution du nombre de noeuds par événement.</p>
-        <canvas id="chart-nodes"></canvas>
-      </div>
-      <div class="chart-card">
-        <h3>Relations sémantiques</h3>
-        <p>Types d’arêtes les plus fréquents dans les sous-graphes extraits.</p>
-        <canvas id="chart-edges"></canvas>
-      </div>
-      <div class="chart-card span-6">
-        <h3>Top labels de noeuds</h3>
-        <p>Lecture synthétique des catégories d’entités qui structurent le graphe.</p>
-        <canvas id="chart-labels"></canvas>
-      </div>
-    </div>
-
-    <section class="section" style="padding-left:0;padding-right:0;padding-top:2rem;padding-bottom:0">
-      <span class="section-tag">Treemap</span>
-      <h2 class="section-title" style="max-width:760px">Navigation hiérarchique dans les taxonomies et métadonnées</h2>
-      <p class="section-desc">
-        La treemap D3 permet de basculer rapidement entre type, domaine, risque, labels de noeuds et types d’arêtes.
-      </p>
-
-      <div class="treemap-card">
-        <h3 style="font-size:0.9rem;font-weight:600;color:var(--muted);margin-bottom:1rem;letter-spacing:0.04em">
-          Treemap hiérarchique des événements
-        </h3>
-        <div class="treemap-toolbar">
-          <label for="treemap-field">Champ</label>
-          <select id="treemap-field" class="treemap-select">
-            <option value="type" selected>type</option>
-            <option value="domain">domain</option>
-            <option value="subdomain">subdomain</option>
-            <option value="risk">risk</option>
-            <option value="riskCarac">riskCarac</option>
-            <option value="nodes.labels">nodes.labels</option>
-            <option value="edges.type">edges.type</option>
-          </select>
-          <input id="treemap-search" class="treemap-search" type="text" placeholder="Rechercher…">
-          <button id="treemap-reset" class="treemap-btn" type="button">Réinitialiser</button>
+    <div class="visu-grid premium-visu-grid" id="visu-charts" style="display:none">
+      <div class="chart-card premium-chart-card">
+        <div class="chart-card-head">
+          <h3>Typologie dominante des événements</h3>
+          <p>Répartition des principales familles d’événements observées dans le corpus chargé.</p>
         </div>
+        <div class="chart-canvas-wrap">
+          <canvas id="chart-types"></canvas>
+        </div>
+      </div>
+
+      <div class="chart-card premium-chart-card">
+        <div class="chart-card-head">
+          <h3>Répartition des niveaux d’alerte</h3>
+          <p>Lecture synthétique des événements normaux, suspects et critiques dans le corpus actif.</p>
+        </div>
+        <div class="chart-canvas-wrap">
+          <canvas id="chart-anomaly"></canvas>
+        </div>
+      </div>
+
+      <div class="chart-card premium-chart-card">
+        <div class="chart-card-head">
+          <h3>Articles les plus exposés</h3>
+          <p>Articles concentrant le plus de signaux suspects et critiques.</p>
+        </div>
+        <div class="chart-canvas-wrap">
+          <canvas id="chart-article-alerts"></canvas>
+        </div>
+      </div>
+
+      <div class="chart-card premium-chart-card span-12 premium-hero-chart">
+        <div class="chart-card-head">
+          <h3>Distribution des scores d’anomalie</h3>
+          <p>Lecture continue du score pour distinguer les zones de normalité, de vigilance et de criticité.</p>
+        </div>
+        <div class="chart-canvas-wrap">
+          <canvas id="chart-scores"></canvas>
+        </div>
+      </div>
+
+      <div class="chart-card premium-chart-card span-6">
+        <div class="chart-card-head">
+          <h3>Clusters les plus représentés</h3>
+          <p>Regroupements dominants issus des annotations de clustering conservées dans le dataset.</p>
+        </div>
+        <div class="chart-canvas-wrap">
+          <canvas id="chart-clusters"></canvas>
+        </div>
+      </div>
+
+      <div class="chart-card premium-chart-card">
+        <div class="chart-card-head">
+          <h3>Complexité des sous-graphes</h3>
+          <p>Répartition des événements selon la taille de leur sous-graphe local.</p>
+        </div>
+        <div class="chart-canvas-wrap">
+          <canvas id="chart-nodes"></canvas>
+        </div>
+      </div>
+
+      <div class="chart-card premium-chart-card">
+        <div class="chart-card-head">
+          <h3>Relations sémantiques dominantes</h3>
+          <p>Types d’arêtes les plus fréquents dans les structures relationnelles extraites.</p>
+        </div>
+        <div class="chart-canvas-wrap">
+          <canvas id="chart-edges"></canvas>
+        </div>
+      </div>
+
+      <div class="chart-card premium-chart-card span-6">
+        <div class="chart-card-head">
+          <h3>Labels de nœuds les plus fréquents</h3>
+          <p>Catégories d’entités qui structurent le plus fortement le graphe de connaissance.</p>
+        </div>
+        <div class="chart-canvas-wrap">
+          <canvas id="chart-labels"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <section class="section premium-treemap-section"
+      style="padding-left:0;padding-right:0;padding-top:2.2rem;padding-bottom:0">
+      <span class="section-tag">Treemap</span>
+      <h2 class="section-title" style="max-width:860px">Navigation hiérarchique dans les taxonomies et métadonnées</h2>
+      <p class="section-desc">
+        Cette vue hiérarchique permet d’explorer rapidement les événements par type, domaine, sous-domaine,
+        niveau de risque, caractéristiques du risque, labels de nœuds ou types d’arêtes.
+      </p>
+
+      <div class="treemap-card premium-treemap-card">
+        <div class="treemap-headline">
+          <h3>Cartographie hiérarchique du corpus</h3>
+          <p>Zoome sur une branche, recentre l’analyse et isole visuellement les clusters les plus structurants.</p>
+        </div>
+
+        <div class="treemap-toolbar premium-treemap-toolbar">
+          <label for="treemap-field">Champ analysé</label>
+          <select id="treemap-field" class="treemap-select">
+            <option value="type" selected>Type</option>
+            <option value="domain">Domaine</option>
+            <option value="subdomain">Sous-domaine</option>
+            <option value="risk">Risque</option>
+            <option value="riskCarac">Caractéristiques du risque</option>
+            <option value="nodes.labels">Labels des nœuds</option>
+            <option value="edges.type">Types de liens</option>
+          </select>
+
+          <input id="treemap-search" class="treemap-search" type="text"
+            placeholder="Rechercher un cluster, un type ou un label">
+
+          <button id="treemap-reset" class="treemap-btn" type="button">Réinitialiser la vue</button>
+        </div>
+
         <div class="treemap-wrap" id="treemap-wrap">
           <div id="treemap-chart"></div>
           <div id="treemap-breadcrumb"></div>
           <div id="treemap-search-count"></div>
           <div id="treemap-tooltip"></div>
+
           <div id="treemap-stats">
-            <div class="s-title">Statistiques</div>
+            <div class="s-title">Repères de lecture</div>
             <div class="s-row"><span>Événements</span><strong id="treemap-stat-total">—</strong></div>
             <div class="s-row"><span>Profondeur max</span><strong id="treemap-stat-depth">—</strong></div>
             <hr>
             <div class="s-title" id="treemap-top-label">Top 5</div>
             <ul id="treemap-top-list"></ul>
           </div>
+
           <div class="treemap-legend">
-            Molette · zoomer<br>
-            Glisser · déplacer<br>
-            Clic · centrer
+            Molette · zoom<br>
+            Glisser · déplacement<br>
+            Clic · focus sur une branche
           </div>
         </div>
       </div>
-    </section>
-
-    <section class="section" style="padding-left:0;padding-right:0;padding-bottom:0">
-      <span class="section-tag">Figures du dépôt</span>
-      <h2 class="section-title" style="max-width:860px">Les graphiques exploratoires qui méritaient d’être remontés dans l’interface</h2>
-      <p class="section-desc">
-        Cette galerie réutilise directement les visuels générés pendant l’analyse exploratoire pour éviter qu’ils restent enfouis dans le dépôt.
-      </p>
-
-      <div class="figure-gallery">
-        <article class="figure-card">
-          <img src="figures/01_distribution_graphique.png" alt="Distribution graphique" loading="lazy">
-          <div class="figure-body">
-            <h3>Distribution graphique globale</h3>
-            <p>Vue macro sur la structure du dataset et la dispersion des observations sur le graphe de connaissances.</p>
-          </div>
-        </article>
-        <article class="figure-card">
-          <img src="figures/02_top_types_evenements.png" alt="Top types d'événements" loading="lazy">
-          <div class="figure-body">
-            <h3>Top types d’événements</h3>
-            <p>Complément utile aux charts dynamiques pour replacer la hiérarchie des classes métiers observées pendant l’EDA.</p>
-          </div>
-        </article>
-        <article class="figure-card">
-          <img src="figures/03_top_labels_noeuds.png" alt="Top labels de noeuds" loading="lazy">
-          <div class="figure-body">
-            <h3>Top labels de noeuds</h3>
-            <p>Repérage des familles d’entités qui dominent les sous-graphes et structurent les contextes extraits.</p>
-          </div>
-        </article>
-        <article class="figure-card">
-          <img src="figures/04c_top_formes_par_type.png" alt="Formes dominantes par type" loading="lazy">
-          <div class="figure-body">
-            <h3>Formes dominantes par type</h3>
-            <p>Très utile pour relier les conventions visuelles du graphe interactif aux grandes familles d’objets métier présentes dans le dépôt.</p>
-          </div>
-        </article>
-        <article class="figure-card">
-          <img src="figures/05_top_types_aretes.png" alt="Top types d'arêtes" loading="lazy">
-          <div class="figure-body">
-            <h3>Top types d’arêtes</h3>
-            <p>Lecture orientée relations sémantiques, utile pour comprendre pourquoi certains sous-graphes sont plus denses que d’autres.</p>
-          </div>
-        </article>
-        <article class="figure-card">
-          <img src="figures/06_proprietes_linguistiques.png" alt="Propriétés linguistiques" loading="lazy">
-          <div class="figure-body">
-            <h3>Propriétés linguistiques</h3>
-            <p>Signal complémentaire sur la matière textuelle qui sert ensuite au scoring, aux embeddings et aux regroupements.</p>
-          </div>
-        </article>
-        <article class="figure-card">
-          <img src="figures/07_heatmap_evenement_x_arete.png" alt="Heatmap événements x arêtes" loading="lazy">
-          <div class="figure-body">
-            <h3>Heatmap événements × arêtes</h3>
-            <p>Carte technique très parlante pour repérer les relations dominantes et les combinaisons d’arêtes qui créent des sous-graphes atypiques.</p>
-          </div>
-        </article>
-        <article class="figure-card">
-          <img src="figures/08_heatmap_evenement_x_noeud.png" alt="Heatmap événements x noeuds" loading="lazy">
-          <div class="figure-body">
-            <h3>Heatmap événements × noeuds</h3>
-            <p>Vue plus technique pour repérer les zones de concentration et les structures atypiques dans la matrice événement / entité.</p>
-          </div>
-        </article>
-      </div>
-    </section>
-
-    <section class="section" style="padding-left:0;padding-right:0">
-      <span class="section-tag">Modules sources</span>
-      <h2 class="section-title" style="max-width:840px">Dashboards et apps annexes qui nourrissent cette interface</h2>
-      <p class="section-desc">
-        Ces pages existent déjà dans le dépôt. Elles restent utiles comme références, comme modules spécialisés ou comme base pour de futurs onglets.
-      </p>
-      <div class="module-grid" id="visu-source-grid"></div>
     </section>
   </div>
 
@@ -537,33 +533,28 @@
 <div class="page" id="page-demo">
   <div class="demo-layout">
     <div class="demo-sidebar">
-      <div class="sidebar-section">
-        <h4>Jeu de données</h4>
-        <div class="upload-zone" id="upload-zone" onclick="document.getElementById('file-input').click()" ondragover="handleDragOver(event)" ondragleave="document.getElementById('upload-zone').classList.remove('drag-over')" ondrop="handleDrop(event)">
-          <input id="file-input" type="file" accept=".json" onchange="handleFileSelect(event)">
-          <div class="upload-icon">📂</div>
-          <div class="upload-text">
-            Déposer un fichier <strong>export.events.json</strong><br>
-            ou cliquer pour charger vos données
-          </div>
-        </div>
-        <div id="file-loaded" style="margin-top:0.75rem;font-size:0.75rem;color:var(--muted);line-height:1.6">
-          Chargement automatique de <strong style="color:var(--teal)">data/export.events.clean.json</strong> au démarrage.
-        </div>
-      </div>
+      <div class="sidebar-section sidebar-section-dataset-icon">
+        <div class="dataset-title-row">
+          <h4>Jeu de données</h4>
 
-      <div class="sidebar-section">
-        <h4>Mode de vue</h4>
-        <div class="view-toggle">
-          <button class="view-btn active" id="view-selected" onclick="setView('selected')">Articles sélectionnés</button>
-          <button class="view-btn" id="view-merged" onclick="setView('merged')">Graphe global fusionné</button>
+          <button class="dataset-icon-btn" type="button" onclick="document.getElementById('file-input').click()"
+            title="Charger un fichier JSON" aria-label="Charger un fichier JSON">
+            📁
+          </button>
+
+          <input id="file-input" type="file" accept=".json" onchange="handleFileSelect(event)">
+        </div>
+
+        <div id="file-loaded" class="dataset-loaded-micro">
+          ✓ Corpus par défaut chargé
         </div>
       </div>
 
       <div class="sidebar-section">
         <h4 id="filter-title">Articles (<span id="article-count">0</span>)</h4>
         <div id="selected-controls">
-          <input class="search-input" type="text" placeholder="Rechercher par ID…" id="article-search" oninput="filterArticles()">
+          <input class="search-input" type="text" placeholder="Rechercher par ID…" id="article-search"
+            oninput="filterArticles()">
           <div class="article-controls">
             <button class="btn-sm teal" onclick="selectAll()">Tout cocher</button>
             <button class="btn-sm muted" onclick="deselectAll()">Tout décocher</button>
@@ -573,19 +564,22 @@
         <div class="global-controls" id="global-controls">
           <div class="range-row">
             <label for="max-nodes-range">Nombre max de sommets</label>
-            <input type="range" id="max-nodes-range" min="50" max="1500" step="50" value="500" oninput="updateRangeLabels()">
+            <input type="range" id="max-nodes-range" min="50" max="1500" step="50" value="500"
+              oninput="updateRangeLabels()">
             <div class="range-value" id="max-nodes-value">500 sommets</div>
           </div>
           <div class="range-row">
             <label for="max-edges-range">Nombre max d’arêtes</label>
-            <input type="range" id="max-edges-range" min="50" max="3000" step="50" value="1000" oninput="updateRangeLabels()">
+            <input type="range" id="max-edges-range" min="50" max="3000" step="50" value="1000"
+              oninput="updateRangeLabels()">
             <div class="range-value" id="max-edges-value">1000 arêtes</div>
           </div>
         </div>
       </div>
 
       <div class="article-list" id="article-list">
-        <div style="text-align:center;padding:1rem;color:var(--muted);font-size:0.8rem;font-weight:300">Chargement des articles…</div>
+        <div style="text-align:center;padding:1rem;color:var(--muted);font-size:0.8rem;font-weight:300">Chargement des
+          articles…</div>
       </div>
 
       <div class="anomaly-alert" id="anomaly-alert">
@@ -612,7 +606,7 @@
     <div class="demo-main">
       <div class="demo-main-content">
         <div class="demo-topbar">
-          <span class="tb-title" id="view-label">Graphe — Articles sélectionnés</span>
+          <span class="tb-title" id="view-label">Graphe des articles sélectionnés</span>
           <div class="graph-stats">
             <div class="gs-item">Nœuds: <span id="gs-nodes">0</span></div>
             <div class="gs-item">Arêtes: <span id="gs-edges">0</span></div>
@@ -631,10 +625,10 @@
 
         <div id="graph-container">
           <div id="graph-canvas"></div>
-          <div class="graph-placeholder" id="graph-placeholder">
-            <div class="ph-icon">🕸</div>
-            <p>Chargez un fichier JSON, sélectionnez des articles et cliquez sur <strong>Générer</strong></p>
-          </div>
+            <div class="graph-placeholder" id="graph-placeholder">
+              <div class="ph-icon" id="graph-placeholder-icon">🕸</div>
+              <p id="graph-placeholder-text">Charge un fichier JSON pour commencer.</p>
+            </div>
           <div id="article-bubbles"></div>
         </div>
 

@@ -10,7 +10,6 @@ function collectEventsForArticleIds(articleIds) {
 }
 
 function getActiveSidebarEvents() {
-  if (state.currentView === 'merged') return state.events || [];
   return collectEventsForArticleIds([...state.selectedIds]);
 }
 
@@ -95,13 +94,6 @@ function renderArticleList(filter = '') {
     return;
   }
 
-  if (state.currentView === 'merged') {
-    state.articleDropdownOpen = false;
-    setArticleListLayout('hidden');
-    list.innerHTML = '';
-    return;
-  }
-
   setArticleListLayout(state.articleDropdownOpen ? 'expanded' : 'collapsed');
 
   const normalizedFilter = filter.toLowerCase();
@@ -116,8 +108,8 @@ function renderArticleList(filter = '') {
       </button>
       <div class="article-dropdown-menu${openClass}" id="article-dropdown-menu">
         ${filtered.length
-          ? filtered.map(id => buildArticleOption(id)).join('')
-          : '<div class="article-option-empty">Aucun article ne correspond au filtre courant.</div>'}
+      ? filtered.map(id => buildArticleOption(id)).join('')
+      : '<div class="article-option-empty">Aucun article ne correspond au filtre courant.</div>'}
       </div>
     </div>
     <div class="article-list-summary">
@@ -131,14 +123,7 @@ function filterArticles() {
 }
 
 function syncSelectedFromDropdown() {
-  const select = document.getElementById('article-select');
-  if (!select) return;
-
-  const visibleIds = Array.from(select.options).map(option => option.value);
-  visibleIds.forEach(id => state.selectedIds.delete(id));
-  Array.from(select.selectedOptions).forEach(option => state.selectedIds.add(option.value));
-  updateSidebarPanels();
-  renderArticleList(document.getElementById('article-search')?.value || '');
+  return;
 }
 
 function toggleArticle(id, el) {
@@ -215,7 +200,6 @@ function toggleArticleCheckbox(input) {
 function updateSidebarPanels() {
   const activeEvents = getActiveSidebarEvents();
 
-  // Anomalies
   const alert = document.getElementById('anomaly-alert');
   const list = document.getElementById('anomaly-list');
   const anomalyEvents = activeEvents
@@ -243,7 +227,6 @@ function updateSidebarPanels() {
     list.innerHTML = '';
   }
 
-  // Quasi-doublons
   const quasiPanel = document.getElementById('quasi-panel');
   const quasiList = document.getElementById('quasi-list');
   const quasiEvents = activeEvents.filter(event => (event.quasi_duplicates?.length || 0) > 0);
@@ -271,24 +254,30 @@ function updateSidebarPanels() {
     quasiPanel.classList.remove('visible');
     quasiList.innerHTML = '';
   }
+
+  const filterTitle = document.getElementById('filter-title');
+  if (filterTitle) {
+    filterTitle.innerHTML = `Articles (<span id="article-count">${state.articleIds.length}</span>)`;
+  }
+
+  const viewLabel = document.getElementById('view-label');
+  if (viewLabel) {
+    viewLabel.textContent = 'Graphe des articles sélectionnés';
+  }
 }
 
-// ═══════════════════════════════════════════════════════════
-// VIEW SWITCH (selected / merged)
-// ═══════════════════════════════════════════════════════════
-function setView(v) {
-  state.currentView = v;
-  state.articleDropdownOpen = false;
-  document.getElementById('view-selected').classList.toggle('active', v === 'selected');
-  document.getElementById('view-merged').classList.toggle('active', v === 'merged');
-  document.getElementById('view-label').textContent = v === 'merged'
-    ? 'Graphe global fusionné'
-    : 'Graphe — Articles sélectionnés';
-  document.getElementById('selected-controls').style.display = v === 'selected' ? 'block' : 'none';
-  document.getElementById('global-controls').classList.toggle('visible', v === 'merged');
-  document.getElementById('filter-title').innerHTML = v === 'merged'
-    ? `Filtres d'affichage`
-    : `Articles (<span id="article-count">${state.articleIds.length}</span>)`;
+function setView() {
+  state.currentView = 'selected';
+  const selectedControls = document.getElementById('selected-controls');
+  const globalControls = document.getElementById('global-controls');
+  const viewLabel = document.getElementById('view-label');
+  const filterTitle = document.getElementById('filter-title');
+
+  if (selectedControls) selectedControls.style.display = 'block';
+  if (globalControls) globalControls.classList.remove('visible');
+  if (viewLabel) viewLabel.textContent = 'Graphe des articles sélectionnés';
+  if (filterTitle) filterTitle.innerHTML = `Articles (<span id="article-count">${state.articleIds.length}</span>)`;
+
   renderArticleList(document.getElementById('article-search')?.value || '');
   updateSidebarPanels();
 }
@@ -299,4 +288,8 @@ document.addEventListener('click', event => {
   if (!state.articleDropdownOpen) return;
   state.articleDropdownOpen = false;
   renderArticleList(document.getElementById('article-search')?.value || '');
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+  state.currentView = 'selected';
 });

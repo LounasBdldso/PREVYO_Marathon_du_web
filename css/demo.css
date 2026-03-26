@@ -1025,3 +1025,101 @@
     line-height: 1.5;
     backdrop-filter: blur(8px);
 }
+
+/* ─── DATASET MINIMAL ICON ───────────────────────────── */
+
+.sidebar-section-dataset-icon {
+    padding-bottom: 0.55rem;
+}
+
+.dataset-title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+
+.sidebar-section-dataset-icon h4 {
+    margin-bottom: 0;
+}
+
+.dataset-icon-btn {
+    width: 28px;
+    height: 28px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(27, 174, 159, 0.14);
+    border-radius: 8px;
+    background: transparent;
+    color: var(--teal);
+    font-size: 0.95rem;
+    line-height: 1;
+    cursor: pointer;
+    transition: all 0.18s ease;
+    padding: 0;
+    flex-shrink: 0;
+}
+
+.dataset-icon-btn:hover {
+    border-color: rgba(27, 174, 159, 0.32);
+    background: rgba(27, 174, 159, 0.08);
+}
+
+.dataset-loaded-micro {
+    margin-top: 0.38rem;
+    font-size: 0.68rem;
+    line-height: 1.35;
+    color: #89a4c2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#file-input {
+    display: none;
+}
+
+/* on retire complètement l'ancien upload massif et le toggle de vue */
+.upload-zone,
+.view-toggle {
+    display: none !important;
+}
+
+/* la vue globale n'étant plus exposée, on masque aussi ses réglages */
+.global-controls {
+    display: none !important;
+}
+
+.demo-topbar {
+    padding: 0.75rem 1rem;
+}
+
+.demo-topbar .tb-title {
+    font-size: 0.82rem;
+}
+
+.graph-controls {
+    gap: 0.45rem;
+}
+
+.ctrl-btn {
+    padding: 0.34rem 0.58rem;
+    font-size: 0.68rem;
+}
+
+@media (max-width: 1100px) {
+    .demo-layout {
+        grid-template-columns: 260px 1fr;
+    }
+}
+
+@media (max-width: 900px) {
+    .demo-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .demo-sidebar {
+        max-height: 42vh;
+    }
+}

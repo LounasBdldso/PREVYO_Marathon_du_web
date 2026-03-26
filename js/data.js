@@ -42,6 +42,7 @@ function processData(data, sourceLabel = 'Données chargées') {
 
     state.events = data;
     state.selectedIds.clear();
+    state.currentView = 'selected';
     state.articleDropdownOpen = false;
     buildArticleMap();
     renderArticleList();
@@ -49,6 +50,17 @@ function processData(data, sourceLabel = 'Données chargées') {
     updateVisuStats();
     if (typeof updateHomeMetrics === 'function') updateHomeMetrics();
 
+    state.events = data;
+    state.selectedIds.clear();
+    state.currentView = 'selected';
+    state.articleDropdownOpen = false;
+    buildArticleMap();
+    renderArticleList();
+    updateSidebarPanels();
+    updateVisuStats();
+    if (typeof updateHomeMetrics === 'function') updateHomeMetrics();
+
+    setGraphPlaceholderState('Veuillez choisir un ou plusieurs articles.');
     const loaded = document.getElementById('file-loaded');
     if (loaded) {
         loaded.style.display = 'block';
@@ -90,4 +102,14 @@ async function autoLoadDefaultData() {
             loaded.style.color = 'var(--anomaly)';
         }
     }
+}
+
+function setGraphPlaceholderState(message, icon = '🕸') {
+    const placeholder = document.getElementById('graph-placeholder');
+    const placeholderText = document.getElementById('graph-placeholder-text');
+    const placeholderIcon = document.getElementById('graph-placeholder-icon');
+
+    if (placeholder) placeholder.style.display = 'flex';
+    if (placeholderText) placeholderText.innerHTML = message;
+    if (placeholderIcon) placeholderIcon.textContent = icon;
 }
