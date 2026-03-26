@@ -639,7 +639,611 @@
       .bottom-bar { flex-wrap: wrap; }
       .bottom-bar .spacer { display: none; }
     }
-  </style>
+  
+    .icon-edit-btn {
+      width: 32px;
+      height: 32px;
+      border: 1px solid rgba(107,132,163,0.18);
+      background: rgba(6,16,31,0.88);
+      color: var(--text);
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 14px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: border-color 0.18s ease, background 0.18s ease, transform 0.18s ease;
+    }
+
+    .icon-edit-btn:hover {
+      border-color: rgba(27,174,159,0.45);
+      background: rgba(27,174,159,0.10);
+      transform: translateY(-1px);
+    }
+
+/* ─── LABEL POPUP ──────────────────────────────────────── */
+
+    .label-popup {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      display: none;
+      align-items: stretch;
+      background:
+        radial-gradient(ellipse at 20% 0%, rgba(27,174,159,0.13) 0%, transparent 40%),
+        radial-gradient(ellipse at 80% 0%, rgba(9,164,232,0.10) 0%, transparent 38%),
+        rgba(3, 8, 18, 0.88);
+      backdrop-filter: blur(18px) saturate(1.3);
+      animation: popupFadeIn 0.22s ease;
+    }
+
+    @keyframes popupFadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+
+    .label-popup.open {
+      display: flex;
+    }
+
+    .label-popup-panel {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      grid-template-rows: auto auto 1fr auto;
+      background:
+        radial-gradient(ellipse at top left, rgba(27,174,159,0.07) 0%, transparent 32%),
+        linear-gradient(180deg, rgba(9, 20, 42, 0.99) 0%, rgba(6, 14, 30, 0.99) 100%);
+      animation: panelSlideUp 0.26s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    @keyframes panelSlideUp {
+      from { transform: translateY(14px); opacity: 0.6; }
+      to   { transform: translateY(0);    opacity: 1; }
+    }
+
+    /* ── Header ── */
+    .label-popup-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      padding: 22px 28px;
+      border-bottom: 1px solid rgba(27,174,159,0.14);
+      background: rgba(7, 16, 30, 0.55);
+      backdrop-filter: blur(8px);
+    }
+
+    .label-popup-title {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .label-popup-title .popup-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, rgba(27,174,159,0.2), rgba(9,164,232,0.14));
+      border: 1px solid rgba(27,174,159,0.22);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    .label-popup-title-text h2 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: #f7fbff;
+      line-height: 1.15;
+    }
+
+    .label-popup-title-text p {
+      margin: 5px 0 0;
+      color: var(--text-2);
+      font-size: 13px;
+      max-width: 680px;
+      line-height: 1.55;
+    }
+
+    .label-popup-close {
+      flex-shrink: 0;
+      border: 1px solid rgba(107,132,163,0.2);
+      background: rgba(107,132,163,0.06);
+      color: var(--text-2);
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.18s, border-color 0.18s, color 0.18s, transform 0.18s;
+      font-family: var(--sans);
+    }
+
+    .label-popup-close:hover {
+      background: rgba(255,71,87,0.10);
+      border-color: rgba(255,71,87,0.32);
+      color: var(--danger);
+      transform: rotate(90deg) scale(1.05);
+    }
+
+    /* ── Breadcrumb progress ── */
+    .label-popup-progress {
+      padding: 12px 28px;
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 6px;
+      border-bottom: 1px solid rgba(107,132,163,0.10);
+      background: rgba(255,255,255,0.012);
+      min-height: 54px;
+    }
+
+    .crumb {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: 1px solid rgba(9,164,232,0.20);
+      background: linear-gradient(135deg, rgba(9,164,232,0.10), rgba(27,174,159,0.06));
+      color: #a8d8f0;
+      border-radius: 999px;
+      padding: 6px 13px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+      box-shadow: 0 2px 8px rgba(9,164,232,0.08);
+      transition: background 0.15s;
+    }
+
+    .crumb::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent-2);
+      opacity: 0.7;
+      flex-shrink: 0;
+    }
+
+    .crumb:not(:first-child)::after {
+      content: '›';
+      position: absolute;
+      left: -10px;
+    }
+
+    /* ── Body (3-column grid) ── */
+    .label-popup-body {
+      min-height: 0;
+      display: grid;
+      grid-template-columns: minmax(260px, 0.9fr) minmax(380px, 1.4fr) minmax(260px, 0.9fr);
+      gap: 16px;
+      padding: 16px 24px 20px;
+    }
+
+    /* ── Popup cards ── */
+    .popup-card {
+      min-height: 0;
+      border: 1px solid rgba(27,174,159,0.12);
+      border-radius: 20px;
+      background: linear-gradient(160deg, rgba(13, 28, 52, 0.96) 0%, rgba(8, 18, 36, 0.97) 100%);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.03);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: border-color 0.2s;
+    }
+
+    .popup-card:hover {
+      border-color: rgba(27,174,159,0.22);
+    }
+
+    .popup-card-head {
+      padding: 14px 18px 13px;
+      border-bottom: 1px solid rgba(107,132,163,0.10);
+      background: rgba(255,255,255,0.018);
+      flex-shrink: 0;
+    }
+
+    .popup-card-head h3 {
+      margin: 0;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--accent);
+    }
+
+    .popup-card-head p {
+      margin: 5px 0 0;
+      font-size: 11.5px;
+      color: var(--text-2);
+      line-height: 1.5;
+    }
+
+    .popup-card-body {
+      padding: 14px 16px;
+      overflow: auto;
+      min-height: 0;
+      flex: 1;
+    }
+
+    /* ── Choice buttons (arborescence) ── */
+    .choice-btn {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      width: 100%;
+      text-align: left;
+      padding: 13px 14px;
+      border-radius: 14px;
+      border: 1px solid rgba(107,132,163,0.14);
+      background: rgba(17, 34, 64, 0.55);
+      color: var(--text);
+      cursor: pointer;
+      transition: transform 0.18s ease, border-color 0.2s, background 0.2s, box-shadow 0.2s;
+      margin-bottom: 8px;
+      font-family: var(--sans);
+    }
+
+    .choice-btn:hover {
+      transform: translateY(-1px);
+      border-color: rgba(27,174,159,0.38);
+      background: rgba(27,174,159,0.08);
+      box-shadow: 0 6px 18px rgba(27,174,159,0.10);
+    }
+
+    .choice-btn.final {
+      border-color: rgba(9,164,232,0.22);
+      background: rgba(9,164,232,0.06);
+    }
+
+    .choice-btn.final:hover {
+      border-color: rgba(9,164,232,0.48);
+      background: rgba(9,164,232,0.12);
+      box-shadow: 0 6px 18px rgba(9,164,232,0.12);
+    }
+
+    .choice-btn strong {
+      display: block;
+      font-size: 13.5px;
+      color: #f0f8ff;
+      font-weight: 700;
+    }
+
+    .choice-btn small {
+      display: block;
+      font-size: 11px;
+      color: var(--text-2);
+      line-height: 1.5;
+    }
+
+    /* ── Tree chips (levels) ── */
+    .tree-levels {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      margin-bottom: 14px;
+    }
+
+    .tree-chip {
+      padding: 5px 11px;
+      border-radius: 999px;
+      background: rgba(98,94,236,0.14);
+      border: 1px solid rgba(98,94,236,0.20);
+      color: #c8c4ff;
+      font-size: 11.5px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+
+    /* ── Mini treemap ── */
+    .mini-treemap-wrap {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      gap: 8px;
+    }
+
+    .mini-treemap-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+
+    .mini-treemap-head strong {
+      font-size: 12px;
+      color: var(--text);
+      font-weight: 700;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 65%;
+    }
+
+    .mini-treemap-head span {
+      font-size: 10.5px;
+      color: var(--text-2);
+      white-space: nowrap;
+    }
+
+    .mini-treemap-stage {
+      flex: 1;
+      min-height: 200px;
+      border: 1px solid rgba(27,174,159,0.14);
+      border-radius: 16px;
+      background:
+        radial-gradient(ellipse at 30% 30%, rgba(27,174,159,0.09) 0%, transparent 55%),
+        radial-gradient(ellipse at 70% 70%, rgba(9,164,232,0.07) 0%, transparent 50%),
+        rgba(6,14,28,0.65);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .mini-treemap-canvas {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .mini-treemap-canvas svg {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    .mini-svg-child {
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+
+    .mini-svg-child:hover circle {
+      filter: brightness(1.25);
+    }
+
+    .mini-svg-child:hover .child-bg {
+      stroke-width: 2;
+    }
+
+    /* ── Plausible labels list ── */
+    .search-box {
+      width: 100%;
+      border: 1px solid rgba(107,132,163,0.16);
+      background: rgba(6,14,28,0.88);
+      color: var(--text);
+      padding: 11px 14px;
+      border-radius: 12px;
+      outline: none;
+      margin-bottom: 10px;
+      font-family: var(--sans);
+      font-size: 13px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .search-box:focus {
+      border-color: rgba(27,174,159,0.45);
+      box-shadow: 0 0 0 3px rgba(27,174,159,0.10);
+    }
+
+    .plausible-list {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    .plausible-item {
+      border: 1px solid rgba(107,132,163,0.13);
+      background: rgba(17,34,64,0.55);
+      border-radius: 13px;
+      padding: 10px 13px;
+      cursor: pointer;
+      transition: background 0.18s, border-color 0.18s, transform 0.15s;
+    }
+
+    .plausible-item:hover {
+      transform: translateX(2px);
+      border-color: rgba(27,174,159,0.35);
+      background: rgba(27,174,159,0.08);
+    }
+
+    .plausible-item.active {
+      border-color: rgba(27,174,159,0.55);
+      background: rgba(27,174,159,0.13);
+      box-shadow: 0 0 0 1px rgba(27,174,159,0.12), 0 4px 14px rgba(27,174,159,0.10);
+    }
+
+    .plausible-item strong {
+      display: block;
+      margin-bottom: 3px;
+      font-size: 12.5px;
+      color: #ecf6ff;
+      font-weight: 700;
+      line-height: 1.35;
+    }
+
+    .plausible-item span {
+      display: block;
+      color: var(--text-2);
+      font-size: 11px;
+      line-height: 1.45;
+    }
+
+    /* ── Current choice box ── */
+    .current-choice {
+      margin-top: 12px;
+      padding: 13px 15px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, rgba(9,164,232,0.07), rgba(27,174,159,0.04));
+      border: 1px solid rgba(9,164,232,0.20);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
+    }
+
+    .current-choice strong {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      margin-bottom: 8px;
+      color: var(--accent-2);
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+    }
+
+    .current-choice strong::before {
+      content: '';
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--accent-2);
+    }
+
+    .choice-value {
+      color: #9de8ff;
+      font-weight: 700;
+      font-size: 13.5px;
+      word-break: break-word;
+      line-height: 1.5;
+      font-family: var(--mono);
+    }
+
+    /* ── Manual input box ── */
+    .manual-box {
+      margin-top: 12px;
+    }
+
+    .manual-box label {
+      display: block;
+      color: var(--text-2);
+      font-size: 11px;
+      margin-bottom: 6px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+    }
+
+    .manual-box input {
+      width: 100%;
+      border: 1px solid rgba(107,132,163,0.16);
+      background: rgba(6,14,28,0.88);
+      color: var(--text);
+      padding: 11px 14px;
+      border-radius: 12px;
+      outline: none;
+      font-family: var(--mono);
+      font-size: 12.5px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .manual-box input:focus {
+      border-color: rgba(27,174,159,0.45);
+      box-shadow: 0 0 0 3px rgba(27,174,159,0.10);
+    }
+
+    /* ── Footer ── */
+    .label-popup-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 16px 28px;
+      border-top: 1px solid rgba(107,132,163,0.12);
+      background: rgba(6,14,28,0.55);
+      backdrop-filter: blur(8px);
+    }
+
+    .footer-note {
+      color: var(--text-2);
+      font-size: 12px;
+      line-height: 1.55;
+      max-width: 480px;
+    }
+
+    .footer-note kbd {
+      display: inline-block;
+      background: rgba(107,132,163,0.14);
+      border: 1px solid rgba(107,132,163,0.22);
+      border-radius: 6px;
+      padding: 1px 6px;
+      font-size: 11px;
+      font-family: var(--mono);
+      color: var(--text);
+    }
+
+    .footer-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    /* ── Popup-scoped buttons ── */
+    .btn {
+      border-radius: 12px;
+      padding: 10px 16px;
+      font: 700 13px/1.2 var(--sans);
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: transform 0.18s, box-shadow 0.18s, opacity 0.18s, background 0.18s;
+      white-space: nowrap;
+    }
+
+    .btn:hover { transform: translateY(-1px); }
+    .btn:active { transform: translateY(0); }
+
+    .btn-ghost {
+      background: rgba(255,255,255,0.04);
+      color: var(--text-2);
+      border-color: rgba(107,132,163,0.18);
+    }
+
+    .btn-ghost:hover {
+      background: rgba(255,255,255,0.07);
+      color: var(--text);
+      border-color: rgba(107,132,163,0.30);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color: #fff;
+      box-shadow: 0 8px 22px rgba(9,164,232,0.22);
+    }
+
+    .btn-primary:hover {
+      box-shadow: 0 12px 28px rgba(9,164,232,0.30);
+    }
+
+    .btn-purple {
+      background: linear-gradient(135deg, rgba(189,51,209,0.88), rgba(98,94,236,0.92));
+      color: #fff;
+      box-shadow: 0 8px 22px rgba(189,51,209,0.20);
+    }
+
+    .btn-purple:hover {
+      box-shadow: 0 12px 28px rgba(189,51,209,0.28);
+    }
+
+    @media (max-width: 1100px) {
+      .label-popup-body {
+        grid-template-columns: 1fr;
+        overflow-y: auto;
+      }
+      .label-popup-header { padding: 16px 18px; }
+      .label-popup-footer { padding: 14px 18px; flex-wrap: wrap; }
+      .footer-note { display: none; }
+    }
+  
+</style>
 </head>
 <body>
   <div class="app">
@@ -713,7 +1317,85 @@
     <input type="file" id="fileInput" accept=".json" hidden />
   </div>
 
-  <script>
+  <div id="labelPopup" class="label-popup" aria-hidden="true">
+    <div class="label-popup-panel">
+      <div class="label-popup-header">
+        <div class="label-popup-title">
+          <div class="popup-icon">🏷️</div>
+          <div class="label-popup-title-text">
+            <h2>Reclasser un label</h2>
+            <p>Navigue dans l’arborescence ou cherche directement un label final. Un clic sur un choix terminal l’applique immédiatement.</p>
+          </div>
+        </div>
+        <button class="label-popup-close" type="button" onclick="closeLabelPopup()">✕</button>
+      </div>
+
+      <div id="popupProgress" class="label-popup-progress"></div>
+
+      <div class="label-popup-body">
+        <section class="popup-card">
+          <div class="popup-card-head">
+            <h3>Arborescence du label</h3>
+            <p>Chaque clic descend d’un niveau. Si tu arrives sur un label final, il est appliqué directement.</p>
+          </div>
+          <div class="popup-card-body">
+            <div id="treeLevels" class="tree-levels"></div>
+            <div id="choiceList" class="choice-list"></div>
+          </div>
+        </section>
+
+        <section class="popup-card">
+          <div class="popup-card-head">
+            <h3>Mini treemap</h3>
+            <p>Vue interactive — cliquer sur un enfant pour naviguer.</p>
+          </div>
+          <div class="popup-card-body">
+            <div class="mini-treemap-wrap">
+              <div class="mini-treemap-head">
+                <strong id="miniTreemapTitle">Vue courante</strong>
+                <span id="miniTreemapHint">Aperçu du niveau</span>
+              </div>
+              <div class="mini-treemap-stage">
+                <div id="miniTreemapCanvas" class="mini-treemap-canvas"></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="popup-card">
+          <div class="popup-card-head">
+            <h3>Labels finaux plausibles</h3>
+            <p>Tu peux choisir directement un label complet.</p>
+          </div>
+          <div class="popup-card-body">
+            <input id="labelSearch" class="search-box" type="text" placeholder="Filtrer les labels finaux..." oninput="renderPlausibleLabels()" />
+            <div id="plausibleList" class="plausible-list"></div>
+            <div class="manual-box">
+              <label for="manualLabelInput">Label manuel complet</label>
+              <input id="manualLabelInput" type="text" placeholder="Ex: Thing/Abstract/Event/Win" oninput="setManualLabel(this.value)" />
+            </div>
+            <div class="current-choice">
+              <strong>Choix actuel</strong>
+              <div id="choiceValue" class="choice-value">Aucun label sélectionné</div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <div class="label-popup-footer">
+        <div class="footer-note">
+          <kbd>Retour</kbd> remonte d’un niveau dans l’arbre. <kbd>Esc</kbd> ferme la popup. Valider applique le label manuel si tu en as saisi un.
+        </div>
+        <div class="footer-actions">
+          <button class="btn btn-ghost" type="button" onclick="stepBack()">Retour</button>
+          <button class="btn btn-ghost" type="button" onclick="resetPopupFlow()">Réinitialiser</button>
+          <button type="button" class="btn btn-purple" onclick="applySelectedLabel()">Valider</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
 
     var rawJson = null;
     var rawText = '';
@@ -896,7 +1578,7 @@
           + '<button class="btn btn-ghost" style="margin-left:auto;padding:6px 14px;font-size:0.82rem" onclick="undoDelete()">Annuler</button></div>';
       }
       if (isFixed && !isDel) {
-        h += '<div class="applied-banner ok">\u2713 Correction enregistr\u00e9e \u2192 ' + corr.latitude + ', ' + corr.longitude
+        h += '<div class="applied-banner ok">\u2713 Correction enregistr\u00e9e' + ((corr.latitude != null && corr.longitude != null) ? ' \u2192 ' + corr.latitude + ', ' + corr.longitude : '')
           + '<button class="btn btn-ghost" style="margin-left:auto;padding:6px 14px;font-size:0.82rem" onclick="removeCorrection()">Retirer</button></div>';
       }
 
@@ -906,7 +1588,13 @@
       // Current data section
       h += '<div class="detail-section"><h3>Donn\u00e9es actuelles</h3><div class="detail-grid">'
         + '<div class="detail-field"><label>Form</label><div class="val">' + esc(a.form) + '</div></div>'
-        + '<div class="detail-field"><label>Labels</label><div class="val">' + (a.labels||[]).join(', ') + '</div></div>'
+        + '<div class="detail-field">'
+        + '<label style="display:flex;align-items:center;justify-content:space-between;gap:10px">'
+        + '<span>Labels</span>'
+        + '<button type="button" class="icon-edit-btn" onclick="openLabelPopupForActive()" title="Modifier le label">✏️</button>'
+        + '</label>'
+        + '<div class="val" id="currentLabelsValue">' + esc((a.labels || []).join(', ')) + '</div>'
+        + '</div>'
         + '<div class="detail-field"><label>Latitude</label><div class="val ' + (a.latitude===0?'danger-highlight':'') + '">' + (a.latitude!=null?a.latitude:'N/A') + '</div></div>'
         + '<div class="detail-field"><label>Longitude</label><div class="val ' + (a.longitude===0?'danger-highlight':'') + '">' + (a.longitude!=null?a.longitude:'N/A') + '</div></div>';
       if (a.uri) h += '<div class="detail-field"><label>URI Wikidata</label><div class="val"><a href="' + esc(a.uri) + '" target="_blank" style="color:var(--accent)">' + esc(a.uri) + '</a></div></div>';
@@ -1119,12 +1807,576 @@
           if (c.form && c.form !== node.form) { node.form = c.form; if ('value' in p) p.value = c.form; }
           if (c.uri) p.uri = c.uri;
           if (c.description) p.description = c.description;
+          if (c.labels && Array.isArray(c.labels)) node.labels = c.labels.slice();
           node.properties = p;
         }
         if (ev.nodes.length === 0) data.splice(i, 1);
       }
       return data;
     }
+
+
+
+    var popupLabelTarget = null;
+
+    const popupState = {
+      path: [],
+      selectedLabel: '',
+      manualLabel: '',
+      treeRoot: null,
+      leafLabels: []
+    };
+
+    function buildLabelTreeFromPaths(paths) {
+      const root = { name: 'ROOT', fullPath: '', children: {}, isLeaf: false };
+
+      paths.forEach(function(path) {
+        if (!path || typeof path !== 'string') return;
+        const clean = path.split('/').filter(Boolean);
+        if (!clean.length) return;
+
+        let current = root;
+        let acc = [];
+
+        clean.forEach(function(part, idx) {
+          acc.push(part);
+          const fullPath = acc.join('/');
+
+          if (!current.children[part]) {
+            current.children[part] = {
+              name: part,
+              fullPath: fullPath,
+              children: {},
+              isLeaf: false
+            };
+          }
+
+          current = current.children[part];
+          if (idx === clean.length - 1) current.isLeaf = true;
+        });
+      });
+
+      return root;
+    }
+
+    function collectAllDatasetLabels() {
+      const labels = new Set();
+
+      if (rawJson && Array.isArray(rawJson)) {
+        rawJson.forEach(function(ev) {
+          (ev.nodes || []).forEach(function(node) {
+            (node.labels || []).forEach(function(label) {
+              if (typeof label === 'string' && label.trim()) labels.add(label.trim());
+            });
+          });
+
+          ['type', 'domain', 'subdomain', 'risk', 'riskCarac'].forEach(function(field) {
+            if (typeof ev[field] === 'string' && ev[field].trim()) labels.add(ev[field].trim());
+          });
+        });
+      }
+
+      if (popupLabelTarget && Array.isArray(popupLabelTarget.labels)) {
+        popupLabelTarget.labels.forEach(function(label) {
+          if (typeof label === 'string' && label.trim()) labels.add(label.trim());
+        });
+      }
+
+      return Array.from(labels).sort(function(a, b) { return a.localeCompare(b); });
+    }
+
+    function ensurePopupTree() {
+      const allLabels = collectAllDatasetLabels();
+      popupState.leafLabels = allLabels;
+      popupState.treeRoot = buildLabelTreeFromPaths(allLabels);
+    }
+
+    function getCurrentPopupNode() {
+      let node = popupState.treeRoot;
+      if (!node) return null;
+
+      for (const key of popupState.path) {
+        if (!node.children[key]) break;
+        node = node.children[key];
+      }
+      return node;
+    }
+
+    function getPopupPathNodes() {
+      const nodes = [];
+      let node = popupState.treeRoot;
+      if (!node) return nodes;
+
+      nodes.push({ name: 'ROOT', fullPath: '' });
+      for (const key of popupState.path) {
+        if (!node.children[key]) break;
+        node = node.children[key];
+        nodes.push(node);
+      }
+      return nodes;
+    }
+
+    function getNodeChildrenArray(node) {
+      if (!node || !node.children) return [];
+      return Object.values(node.children).sort(function(a, b) { return a.name.localeCompare(b.name); });
+    }
+
+    function countLeaves(node) {
+      if (!node) return 0;
+      const children = getNodeChildrenArray(node);
+      if (!children.length) return node.fullPath ? 1 : 0;
+      return children.reduce(function(sum, child) { return sum + countLeaves(child); }, 0);
+    }
+
+    function collectLeafLabelsFromNode(node, out) {
+      if (!node) return;
+      const children = getNodeChildrenArray(node);
+      if (!children.length) {
+        if (node.fullPath) out.push(node.fullPath);
+        return;
+      }
+      children.forEach(function(child) { collectLeafLabelsFromNode(child, out); });
+    }
+
+    function getDescendantLeafLabels(node) {
+      const out = [];
+      collectLeafLabelsFromNode(node, out);
+      return out.sort(function(a, b) { return a.localeCompare(b); });
+    }
+
+    function updateLabelCorrection(nodeKey, finalLabel) {
+      const current = corrections.get(nodeKey) || {};
+      current.labels = [finalLabel];
+      corrections.set(nodeKey, current);
+    }
+
+    function openLabelPopupForActive() {
+      if (activeIdx == null || activeIdx < 0 || !anomalies[activeIdx]) return;
+
+      popupLabelTarget = anomalies[activeIdx];
+      ensurePopupTree();
+      resetPopupFlow();
+
+      document.getElementById('labelPopup').classList.add('open');
+      document.getElementById('labelPopup').setAttribute('aria-hidden', 'false');
+
+      const currentLabels = popupLabelTarget.labels || [];
+      if (currentLabels.length) {
+        document.getElementById('choiceValue').textContent = currentLabels.join(', ');
+      }
+
+      /* Re-render treemap after layout settles so clientWidth/Height are correct */
+      requestAnimationFrame(function() {
+        requestAnimationFrame(renderMiniTreemap);
+      });
+    }
+
+    function openLabelPopup() {
+      document.getElementById('labelPopup').classList.add('open');
+      document.getElementById('labelPopup').setAttribute('aria-hidden', 'false');
+      renderPopup();
+    }
+
+    function closeLabelPopup() {
+      document.getElementById('labelPopup').classList.remove('open');
+      document.getElementById('labelPopup').setAttribute('aria-hidden', 'true');
+    }
+
+    function chooseNodePart(partName) {
+      const current = getCurrentPopupNode();
+      if (!current || !current.children[partName]) return;
+
+      const next = current.children[partName];
+      popupState.path.push(partName);
+      popupState.selectedLabel = '';
+      popupState.manualLabel = '';
+      document.getElementById('manualLabelInput').value = '';
+
+      const nextChildren = getNodeChildrenArray(next);
+      if (!nextChildren.length && next.fullPath) {
+        applySelectedLabelDirect(next.fullPath);
+        return;
+      }
+
+      renderPopup();
+    }
+
+    function applySelectedLabelDirect(fullLabel) {
+      popupState.selectedLabel = fullLabel;
+      popupState.manualLabel = '';
+      document.getElementById('manualLabelInput').value = '';
+      renderChoice();
+
+      if (!popupLabelTarget) return;
+      popupLabelTarget.labels = [fullLabel];
+      updateLabelCorrection(popupLabelTarget.nodeKey, fullLabel);
+
+      const labelBox = document.getElementById('currentLabelsValue');
+      if (labelBox) labelBox.textContent = fullLabel;
+
+      closeLabelPopup();
+      renderList(document.getElementById('filterInput').value);
+      renderDetail(popupLabelTarget);
+      updateStats();
+    }
+
+    function stepBack() {
+      if (!popupState.path.length) return;
+      popupState.path.pop();
+      popupState.selectedLabel = '';
+      popupState.manualLabel = '';
+      document.getElementById('manualLabelInput').value = '';
+      renderPopup();
+    }
+
+    function resetPopupFlow() {
+      popupState.path = [];
+      popupState.selectedLabel = '';
+      popupState.manualLabel = '';
+      const manual = document.getElementById('manualLabelInput');
+      const search = document.getElementById('labelSearch');
+      if (manual) manual.value = '';
+      if (search) search.value = '';
+      renderPopup();
+    }
+
+    function setManualLabel(value) {
+      popupState.manualLabel = String(value || '').trim();
+      if (popupState.manualLabel) popupState.selectedLabel = '';
+      renderChoice();
+      renderPlausibleLabels();
+    }
+
+    function setSelectedLabel(label) {
+      popupState.selectedLabel = label;
+      popupState.manualLabel = '';
+      document.getElementById('manualLabelInput').value = '';
+      renderChoice();
+      renderPlausibleLabels();
+    }
+
+    function renderProgress() {
+      const container = document.getElementById('popupProgress');
+      const nodes = getPopupPathNodes();
+      container.innerHTML = nodes
+        .filter(function(node) { return node.name !== 'ROOT'; })
+        .map(function(node) { return '<span class="crumb">' + node.name + '</span>'; })
+        .join('');
+    }
+
+    function renderTreeLevels() {
+      const container = document.getElementById('treeLevels');
+      const nodes = getPopupPathNodes();
+
+      if (nodes.length <= 1) {
+        container.innerHTML = '<span class="tree-chip">Racine</span>';
+        return;
+      }
+
+      container.innerHTML = nodes
+        .filter(function(node) { return node.name !== 'ROOT'; })
+        .map(function(node) { return '<span class="tree-chip">' + node.name + '</span>'; })
+        .join('');
+    }
+
+    function renderChoiceList() {
+      const current = getCurrentPopupNode();
+      const children = getNodeChildrenArray(current);
+      const container = document.getElementById('choiceList');
+
+      if (!children.length) {
+        container.innerHTML = '<div style="color:var(--text-2);font-size:13px">Niveau final atteint. Choisis un label complet à droite ou saisis-le manuellement.</div>';
+        return;
+      }
+
+      container.innerHTML = children.map(function(child) {
+        const childChildren = getNodeChildrenArray(child);
+        const isFinal = !childChildren.length;
+        const leafCount = countLeaves(child);
+
+        return ''
+          + '<button class="choice-btn ' + (isFinal ? 'final' : '') + '" type="button" onclick="chooseNodePart(\'' + child.name.replace(/'/g, "\\'") + '\')">'
+          + '<strong>' + child.name + '</strong>'
+          + '<small>'
+          + (isFinal ? 'Label final · ' + child.fullPath : leafCount + ' label' + (leafCount > 1 ? 's' : '') + ' dans cette branche')
+          + '</small>'
+          + '</button>';
+      }).join('');
+    }
+
+    function escSvg(text) {
+      return String(text || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    function svgWrapLabel(text, maxChars) {
+      if (!text) return [''];
+      if (text.length <= maxChars) return [text];
+      const mid = Math.floor(text.length / 2);
+      const spaceIdx = text.indexOf(' ', mid);
+      const breakIdx = spaceIdx !== -1 ? spaceIdx : mid;
+      const line1 = text.slice(0, breakIdx).trim();
+      const line2 = text.slice(breakIdx).trim();
+      const truncated2 = line2.length > maxChars ? line2.slice(0, maxChars - 1) + '…' : line2;
+      return [line1, truncated2];
+    }
+
+    function renderMiniTreemap() {
+      const current = getCurrentPopupNode();
+      const pathNodes = getPopupPathNodes();
+      const canvas = document.getElementById('miniTreemapCanvas');
+      const title = document.getElementById('miniTreemapTitle');
+      const hint = document.getElementById('miniTreemapHint');
+
+      if (!current || !canvas) return;
+
+      title.textContent = current.fullPath || 'Racine';
+
+      const children = getNodeChildrenArray(current);
+      const isLeaf = !children.length;
+
+      hint.textContent = isLeaf
+        ? '✓ Label final'
+        : children.length + ' choix disponible' + (children.length > 1 ? 's' : '') + ' · cliquer pour naviguer';
+
+      const stage = canvas.parentElement;
+      const W = Math.max(stage.clientWidth || 340, 200);
+      const H = Math.max(stage.clientHeight || 220, 180);
+
+      /* ── Layout constants ── */
+      const cx = W / 2;
+      const cy = H / 2;
+      const maxChildren = Math.min(children.length, 10);
+      const shown = children.slice(0, maxChildren);
+      const hidden = children.length - maxChildren;
+
+      const activeR = Math.min(H * 0.2, W * 0.18, 46);
+      const maxLeaves = shown.reduce(function(m, c) { return Math.max(m, countLeaves(c)); }, 1);
+
+      /* orbit radius adapts to number of children */
+      const baseOrbit = Math.min(W, H) * (shown.length <= 4 ? 0.33 : shown.length <= 7 ? 0.36 : 0.39);
+      const orbitR = Math.max(activeR * 2.2, baseOrbit);
+      const childMinR = Math.min(16, orbitR * 0.22);
+      const childMaxR = Math.min(activeR * 0.85, orbitR * 0.36);
+
+      /* ── SVG defs ── */
+      let svg = '<svg xmlns="http://www.w3.org/2000/svg" width="' + W + '" height="' + H + '" viewBox="0 0 ' + W + ' ' + H + '">';
+      svg += '<defs>';
+      svg += '<radialGradient id="mg-active" cx="38%" cy="32%" r="68%">';
+      svg += '<stop offset="0%" stop-color="#1bae9f" stop-opacity="0.55"/>';
+      svg += '<stop offset="100%" stop-color="#09a4e8" stop-opacity="0.22"/>';
+      svg += '</radialGradient>';
+      svg += '<radialGradient id="mg-branch" cx="40%" cy="35%" r="65%">';
+      svg += '<stop offset="0%" stop-color="#1bae9f" stop-opacity="0.32"/>';
+      svg += '<stop offset="100%" stop-color="#09a4e8" stop-opacity="0.10"/>';
+      svg += '</radialGradient>';
+      svg += '<radialGradient id="mg-leaf" cx="40%" cy="35%" r="65%">';
+      svg += '<stop offset="0%" stop-color="#09a4e8" stop-opacity="0.38"/>';
+      svg += '<stop offset="100%" stop-color="#625eec" stop-opacity="0.14"/>';
+      svg += '</radialGradient>';
+      svg += '<filter id="mg-glow"><feGaussianBlur in="SourceAlpha" stdDeviation="3"/><feOffset dx="0" dy="0"/><feComposite in2="SourceGraphic"/></filter>';
+      svg += '</defs>';
+
+      /* ── Ancestor breadcrumb strip (top) ── */
+      const ancestors = pathNodes.filter(function(n) { return n.name !== 'ROOT' && n !== current; });
+      if (ancestors.length) {
+        let ax = 10, ay = 14;
+        ancestors.forEach(function(anc, i) {
+          const label = anc.name.length > 12 ? anc.name.slice(0, 11) + '…' : anc.name;
+          const w = label.length * 6.4 + 16;
+          svg += '<rect x="' + ax + '" y="' + (ay - 9) + '" width="' + w + '" height="17" rx="8" fill="rgba(98,94,236,0.14)" stroke="rgba(98,94,236,0.22)" stroke-width="1"/>';
+          svg += '<text x="' + (ax + w / 2) + '" y="' + ay + '" text-anchor="middle" dominant-baseline="middle" fill="rgba(200,196,255,0.75)" font-size="9" font-weight="700" font-family="Lexend,sans-serif">' + escSvg(label) + '</text>';
+          ax += w + 6;
+          if (i < ancestors.length - 1) {
+            svg += '<text x="' + ax + '" y="' + ay + '" dominant-baseline="middle" fill="rgba(107,132,163,0.5)" font-size="9" font-family="Lexend,sans-serif">›</text>';
+            ax += 12;
+          }
+        });
+      }
+
+      /* ── Connector lines ── */
+      shown.forEach(function(child, i) {
+        const angle = (2 * Math.PI * i / shown.length) - Math.PI / 2;
+        const x = cx + orbitR * Math.cos(angle);
+        const y = cy + orbitR * Math.sin(angle);
+        const leaves = countLeaves(child);
+        const r = childMinR + (childMaxR - childMinR) * Math.sqrt(leaves / maxLeaves);
+        /* shorten line so it goes edge-to-edge */
+        const dx = x - cx, dy = y - cy;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        const x1 = cx + dx * (activeR / dist);
+        const y1 = cy + dy * (activeR / dist);
+        const x2 = cx + dx * ((dist - r) / dist);
+        const y2 = cy + dy * ((dist - r) / dist);
+        svg += '<line x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 + '" stroke="rgba(27,174,159,0.18)" stroke-width="1.2" stroke-dasharray="3 3"/>';
+      });
+
+      /* ── Active node ── */
+      if (isLeaf) {
+        svg += '<circle cx="' + cx + '" cy="' + cy + '" r="' + (activeR + 4) + '" fill="rgba(9,164,232,0.08)" stroke="rgba(9,164,232,0.25)" stroke-width="1.5" stroke-dasharray="5 3"/>';
+        svg += '<circle cx="' + cx + '" cy="' + cy + '" r="' + activeR + '" fill="url(#mg-leaf)" stroke="rgba(9,164,232,0.6)" stroke-width="1.8"/>';
+        svg += '<text x="' + cx + '" y="' + (cy - 6) + '" text-anchor="middle" dominant-baseline="middle" fill="#9de8ff" font-size="15" font-family="Lexend,sans-serif">✓</text>';
+        const nameLines = svgWrapLabel(current.name === 'ROOT' ? 'Racine' : current.name, 9);
+        nameLines.forEach(function(line, li) {
+          const yy = cy + 8 + li * 11;
+          svg += '<text x="' + cx + '" y="' + yy + '" text-anchor="middle" dominant-baseline="middle" fill="rgba(157,232,255,0.9)" font-size="9" font-weight="700" font-family="Lexend,sans-serif">' + escSvg(line) + '</text>';
+        });
+      } else {
+        svg += '<circle cx="' + cx + '" cy="' + cy + '" r="' + (activeR + 5) + '" fill="rgba(27,174,159,0.06)" stroke="rgba(27,174,159,0.18)" stroke-width="1" stroke-dasharray="4 3"/>';
+        svg += '<circle cx="' + cx + '" cy="' + cy + '" r="' + activeR + '" fill="url(#mg-active)" stroke="rgba(27,174,159,0.65)" stroke-width="1.8"/>';
+        const nameLines = svgWrapLabel(current.name === 'ROOT' ? 'Racine' : current.name, 8);
+        nameLines.forEach(function(line, li) {
+          const yy = cy + (li - (nameLines.length - 1) / 2) * 13;
+          svg += '<text x="' + cx + '" y="' + yy + '" text-anchor="middle" dominant-baseline="middle" fill="#e0f7f5" font-size="11" font-weight="700" font-family="Lexend,sans-serif">' + escSvg(line) + '</text>';
+        });
+      }
+
+      /* ── Child nodes (clickable) ── */
+      shown.forEach(function(child, i) {
+        const angle = (2 * Math.PI * i / shown.length) - Math.PI / 2;
+        const leaves = countLeaves(child);
+        const r = childMinR + (childMaxR - childMinR) * Math.sqrt(leaves / maxLeaves);
+        const x = cx + orbitR * Math.cos(angle);
+        const y = cy + orbitR * Math.sin(angle);
+        const isFinal = !getNodeChildrenArray(child).length;
+        const fill = isFinal ? 'url(#mg-leaf)' : 'url(#mg-branch)';
+        const stroke = isFinal ? 'rgba(9,164,232,0.5)' : 'rgba(27,174,159,0.4)';
+        const nameEsc = escSvg(child.name.replace(/'/g, "\\'"));
+
+        svg += '<g class="mini-svg-child" onclick="chooseNodePart(\'' + child.name.replace(/\\/g, '\\\\').replace(/'/g, "\\'") + '\')" role="button" aria-label="' + escSvg(child.name) + '">';
+        /* hover ring */
+        svg += '<circle class="hover-ring" cx="' + x + '" cy="' + y + '" r="' + (r + 5) + '" fill="rgba(255,255,255,0)" stroke="rgba(27,174,159,0)" stroke-width="1.5"/>';
+        svg += '<circle class="child-bg" cx="' + x + '" cy="' + y + '" r="' + r + '" fill="' + fill + '" stroke="' + stroke + '" stroke-width="1.2"/>';
+
+        /* label */
+        const maxC = Math.max(4, Math.floor(r * 1.5 / 6));
+        const label = child.name.length > maxC ? child.name.slice(0, maxC - 1) + '…' : child.name;
+        svg += '<text x="' + x + '" y="' + y + '" text-anchor="middle" dominant-baseline="middle" fill="rgba(255,255,255,0.9)" font-size="' + Math.min(9.5, r * 0.38) + '" font-weight="700" font-family="Lexend,sans-serif" pointer-events="none">' + escSvg(label) + '</text>';
+
+        /* count badge below */
+        const badgeText = isFinal ? '✓' : leaves + (leaves > 1 ? '' : '');
+        const badgeColor = isFinal ? 'rgba(9,164,232,0.85)' : 'rgba(107,132,163,0.72)';
+        svg += '<text x="' + x + '" y="' + (y + r + 11) + '" text-anchor="middle" dominant-baseline="middle" fill="' + badgeColor + '" font-size="8.5" font-family="Lexend,sans-serif" pointer-events="none">' + escSvg(badgeText) + '</text>';
+
+        svg += '</g>';
+      });
+
+      /* ── "+N more" notice ── */
+      if (hidden > 0) {
+        svg += '<text x="' + (W - 10) + '" y="' + (H - 10) + '" text-anchor="end" fill="rgba(107,132,163,0.65)" font-size="9.5" font-family="Lexend,sans-serif">+' + hidden + ' non affich\u00e9' + (hidden > 1 ? 's' : '') + '</text>';
+      }
+
+      /* ── Empty state ── */
+      if (isLeaf && !ancestors.length) {
+        svg += '<text x="' + cx + '" y="' + (cy + activeR + 22) + '" text-anchor="middle" fill="rgba(9,164,232,0.7)" font-size="10" font-family="Lexend,sans-serif">Label final \u2014 prêt à appliquer</text>';
+      }
+
+      svg += '</svg>';
+      canvas.innerHTML = svg;
+
+      /* CSS hover effect via stylesheet injection (once) */
+      if (!document.getElementById('mini-svg-styles')) {
+        const st = document.createElement('style');
+        st.id = 'mini-svg-styles';
+        st.textContent = [
+          '.mini-svg-child:hover .child-bg { stroke-width: 2.2; filter: brightness(1.3); }',
+          '.mini-svg-child:hover .hover-ring { stroke: rgba(27,174,159,0.35); }',
+          '.mini-svg-child { transition: opacity .15s; }'
+        ].join('\n');
+        document.head.appendChild(st);
+      }
+    }
+
+    function renderPlausibleLabels() {
+      const current = getCurrentPopupNode();
+      const list = document.getElementById('plausibleList');
+      const search = String(document.getElementById('labelSearch').value || '').toLowerCase().trim();
+
+      if (!current || !list) return;
+
+      let labels = getDescendantLeafLabels(current);
+      if (!labels.length && current.fullPath) labels = [current.fullPath];
+
+      if (search) {
+        labels = labels.filter(function(label) { return label.toLowerCase().includes(search); });
+      }
+
+      if (!labels.length) {
+        list.innerHTML = '<div style="color:var(--text-2);font-size:13px">Aucun label final trouvé.</div>';
+        return;
+      }
+
+      list.innerHTML = labels.slice(0, 120).map(function(label) {
+        const active = popupState.selectedLabel === label ? 'active' : '';
+        const parts = label.split('/');
+        return ''
+          + '<div class="plausible-item ' + active + '" onclick="setSelectedLabel(\'' + label.replace(/'/g, "\\'") + '\')">'
+          + '<strong>' + label + '</strong>'
+          + '<span>' + parts.length + ' niveau' + (parts.length > 1 ? 'x' : '') + ' · clic pour sélectionner</span>'
+          + '</div>';
+      }).join('');
+    }
+
+    function renderChoice() {
+      const choice = document.getElementById('choiceValue');
+      if (!choice) return;
+
+      if (popupState.manualLabel) {
+        choice.textContent = popupState.manualLabel;
+        return;
+      }
+
+      if (popupState.selectedLabel) {
+        choice.textContent = popupState.selectedLabel;
+        return;
+      }
+
+      if (popupLabelTarget && popupLabelTarget.labels && popupLabelTarget.labels.length) {
+        choice.textContent = popupLabelTarget.labels.join(', ');
+        return;
+      }
+
+      choice.textContent = 'Aucun label sélectionné';
+    }
+
+    function renderPopup() {
+      renderProgress();
+      renderTreeLevels();
+      renderChoiceList();
+      renderMiniTreemap();
+      renderPlausibleLabels();
+      renderChoice();
+    }
+
+    function applySelectedLabel() {
+      if (!popupLabelTarget) return;
+
+      let finalLabel = '';
+      if (popupState.manualLabel && popupState.manualLabel.trim()) {
+        finalLabel = popupState.manualLabel.trim();
+      } else if (popupState.selectedLabel) {
+        finalLabel = popupState.selectedLabel;
+      }
+
+      if (!finalLabel) {
+        alert('Choisis un label final ou saisis un label manuel complet.');
+        return;
+      }
+
+      popupLabelTarget.labels = [finalLabel];
+      updateLabelCorrection(popupLabelTarget.nodeKey, finalLabel);
+
+      const labelBox = document.getElementById('currentLabelsValue');
+      if (labelBox) labelBox.textContent = finalLabel;
+
+      closeLabelPopup();
+      renderList(document.getElementById('filterInput').value);
+      renderDetail(popupLabelTarget);
+      updateStats();
+    }
+
+    document.addEventListener('keydown', function(event) {
+      if (event.key === 'Escape') closeLabelPopup();
+    });
 
     function exportJson() {
       var corrected = applyCorrectionsToData();
