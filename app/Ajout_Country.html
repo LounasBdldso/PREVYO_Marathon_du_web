@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Prevyo — Enrichissement Country</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300..700;1,9..40,300..700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0c1017;--surface: #131920;--surface-2: #1a222c;--surface-3: #222d3a;
+      --text: #e1e4ea;--text-2: #8b95a5;
+      --accent: #3b9eff;--accent-dim: rgba(59,158,255,0.12);
+      --ok: #2dd4a8;--ok-dim: rgba(45,212,168,0.12);
+      --warn: #f0a030;--warn-dim: rgba(240,160,48,0.12);
+      --danger: #f06060;--danger-dim: rgba(240,96,96,0.10);
+      --purple: #a882ff;--purple-dim: rgba(168,130,255,0.12);
+      --border: #252e3a;--border-2: #2f3a48;--radius: 10px;
+      --mono: 'JetBrains Mono', monospace;--sans: 'DM Sans', system-ui, sans-serif;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0}html{height:100%}
+    body{height:100%;font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.5;overflow:hidden}
+    .app{display:grid;grid-template-rows:auto 1fr;height:100vh}
+    .topbar{display:flex;align-items:center;gap:16px;padding:14px 24px;background:var(--surface);border-bottom:1px solid var(--border)}
+    .topbar h1{font-size:1.05rem;font-weight:600}.topbar h1 span{color:var(--accent)}
+    .topbar-stats{display:flex;gap:18px;margin-left:auto;font-size:.82rem;color:var(--text-2)}
+    .topbar-stat{display:flex;align-items:center;gap:6px}.topbar-stat .dot{width:8px;height:8px;border-radius:50%}
+    .workspace{display:grid;grid-template-columns:400px 1fr;min-height:0}
+    .panel-left{display:flex;flex-direction:column;border-right:1px solid var(--border);background:var(--surface);min-height:0}
+    .panel-header{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-shrink:0}
+    .panel-header h2{font-size:.92rem;font-weight:600}
+    .panel-header .count{margin-left:auto;padding:2px 10px;border-radius:999px;font-size:.78rem;font-weight:600}
+    .count-p{background:var(--purple-dim);color:var(--purple)}
+    .panel-toolbar{padding:10px 18px;border-bottom:1px solid var(--border);flex-shrink:0}
+    .panel-toolbar input{width:100%;padding:8px 12px;border-radius:var(--radius);border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:var(--sans);font-size:.88rem}
+    .panel-toolbar input::placeholder{color:var(--text-2)}
+    .anomaly-list{flex:1;overflow-y:auto;padding:6px}
+    .acard{padding:12px 14px;border-radius:var(--radius);cursor:pointer;border:1px solid transparent;margin-bottom:2px}
+    .acard:hover{background:var(--surface-2)}.acard.active{background:var(--accent-dim);border-color:var(--accent)}
+    .acard.fixed{opacity:.5}.acard.fixed .af::after{content:' \2713';color:var(--ok);font-size:.78rem;font-weight:600}
+    .at{font-size:.72rem;font-weight:600;padding:2px 8px;border-radius:999px;text-transform:uppercase;letter-spacing:.04em;display:inline-block;margin-bottom:4px}
+    .at-p{background:var(--purple-dim);color:var(--purple)}
+    .af{font-weight:600;font-size:.95rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .am{font-size:.78rem;color:var(--text-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+    .panel-right{display:flex;flex-direction:column;min-height:0;overflow-y:auto;background:var(--bg)}
+    .detail-empty{display:flex;align-items:center;justify-content:center;height:100%;color:var(--text-2);font-size:.95rem}
+    .detail-view{padding:28px 32px;max-width:860px}
+    .detail-view h2{font-size:1.3rem;font-weight:700;margin-bottom:4px}
+    .dsec{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px;margin-bottom:16px}
+    .dsec h3{font-size:.82rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--text-2);margin-bottom:12px}
+    .dgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .dfield label{display:block;font-size:.78rem;color:var(--text-2);margin-bottom:4px}
+    .dval{font-family:var(--mono);font-size:.88rem;padding:8px 10px;border-radius:8px;background:var(--bg);border:1px solid var(--border);word-break:break-all}
+    .ctx{font-size:.88rem;line-height:1.6;padding:12px 14px;border-radius:8px;background:var(--bg);border:1px solid var(--border);color:var(--text-2)}
+    .srow{display:flex;gap:8px;margin-bottom:14px}
+    .srow input,.srow select{padding:10px 14px;border-radius:var(--radius);border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:var(--sans);font-size:.9rem}
+    .srow input{flex:1}.srow select{min-width:160px}
+    .btn{padding:10px 20px;border-radius:var(--radius);border:1px solid transparent;font-family:var(--sans);font-size:.88rem;font-weight:600;cursor:pointer;white-space:nowrap}
+    .btn-a{background:var(--accent);color:#fff}.btn-ok{background:var(--ok);color:#0c1017}.btn-g{background:transparent;border-color:var(--border);color:var(--text-2)}.btn-g:hover{color:var(--text)}
+    .btn:disabled{opacity:.4;cursor:not-allowed}
+    .slist{display:grid;gap:6px;max-height:340px;overflow-y:auto}
+    .sitem{display:grid;grid-template-columns:1fr auto;align-items:center;gap:12px;padding:12px 14px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface-2);cursor:pointer}
+    .sitem:hover{border-color:var(--accent);background:var(--accent-dim)}
+    .sn{font-weight:600;font-size:.92rem}.sd{font-size:.78rem;color:var(--text-2);margin-top:2px}
+    .sc{font-family:var(--mono);font-size:.82rem;color:var(--ok);text-align:right}
+    .mgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}.mgrid.full{grid-template-columns:1fr}
+    .mfield label{display:block;font-size:.78rem;color:var(--text-2);margin-bottom:4px}
+    .mfield input{width:100%;padding:10px 12px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:var(--sans);font-size:.9rem}
+    .bottom-bar{position:fixed;bottom:0;left:0;right:0;padding:12px 24px;background:var(--surface);border-top:1px solid var(--border);display:flex;align-items:center;gap:12px;z-index:50}
+    .bottom-bar .info{font-size:.84rem;color:var(--text-2)}.bottom-bar .spacer{flex:1}
+    .load-overlay{position:fixed;inset:0;background:rgba(12,16,23,.92);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;z-index:100}
+    .load-overlay.hidden{display:none}.load-overlay h2{font-size:1.1rem}.load-overlay .sub{color:var(--text-2);font-size:.9rem;text-align:center}
+    .spinner{width:18px;height:18px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;display:inline-block}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    ::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border-2);border-radius:3px}
+    .applied-banner{padding:12px 14px;border-radius:8px;font-weight:600;font-size:.9rem;display:flex;align-items:center;gap:8px;margin-bottom:16px}
+    .applied-banner.ok{background:var(--ok-dim);border:1px solid rgba(45,212,168,.25);color:var(--ok)}
+</style>
+</head>
+<body>
+
+  <div class="app">
+    <div class="topbar">
+      <h1>Prevyo — <span>Enrichissement Country</span></h1>
+      <div class="topbar-stats">
+        <div class="topbar-stat"><span class="dot" style="background:var(--warn)"></span><span id="statTotal">0 places</span></div>
+        <div class="topbar-stat"><span class="dot" style="background:var(--purple)"></span><span id="statEnriched">0 enrichis</span></div>
+      </div>
+    </div>
+    <div class="workspace">
+      <div class="panel-left">
+        <div class="panel-header">
+          <h2 id="listTitle">Places sans Country</h2>
+          <span class="count count-p" id="listCount">0</span>
+        </div>
+        <div class="panel-toolbar"><input id="filterInput" type="text" placeholder="Filtrer par nom..." /></div>
+        <div class="anomaly-list" id="anomalyList"><div class="detail-empty">Charge un fichier.</div></div>
+      </div>
+      <div class="panel-right" id="panelRight">
+        <div class="detail-empty" id="emptyState">&larr; S&eacute;lectionne un lieu.</div>
+        <div class="detail-view" id="detailView" style="display:none"></div>
+      </div>
+    </div>
+  </div>
+  <div class="bottom-bar">
+    <div class="info" id="bottomInfo">Aucun fichier.</div>
+    <div class="spacer"></div>
+    <button class="btn btn-g" id="reloadBtn">Recharger un fichier</button>
+    <button class="btn btn-a" id="exportBtn" disabled>Exporter le JSON enrichi</button>
+  </div>
+  <div class="load-overlay" id="loadOverlay">
+    <h2>Enrichisseur de Pays Prevyo</h2>
+    <div class="sub">Charge ton <strong>export.events.json</strong></div>
+    <button class="btn btn-a" id="loadFileBtn" style="width:320px">Charger un fichier</button>
+    <button class="btn btn-g" id="loadAutoBtn" style="width:320px">data/export.events.json</button>
+    <input type="file" id="fileInput" accept=".json" hidden />
+  </div>
+
+  <script>
+    // ═══════════ STATE ═══════════
+    var rawJson=null, activeIdx=-1;
+    var enrichItems=[], enrichData=new Map(); // nodeKey -> {countryNode, placeNodeId}
+    var _autoResults=[];
+    var $=function(id){return document.getElementById(id)};
+
+    // ═══════════ PARSE ═══════════
+    function nm(v){if(Array.isArray(v))return v.map(nm);if(v&&typeof v==='object'){var k=Object.keys(v);if(k.length===1&&k[0]==='$oid')return v.$oid;if(k.length===1&&k[0]==='$date')return v.$date;var o={};for(var i of k)o[i]=nm(v[i]);return o}return v}
+    function parse(t){t=t.trim();if(!t)throw new Error('Vide');if(t.startsWith('['))return nm(JSON.parse(t));return t.split(/\n+/).map(function(l){return l.trim()}).filter(Boolean).map(function(l){return nm(JSON.parse(l))})}
+    function esc(t){return String(t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+
+    // ═══════════ DETECT ═══════════
+    function detectEnrichItems(data){
+      var r=[],seen=new Set();
+      for(var ev of data){
+        var aid=ev.resultAnalyseId||'SANS_ID',ctx=ev.context||'';
+        for(var n of(ev.nodes||[])){
+          var labels=n.labels||[];
+          var isPlace=labels.some(function(l){return l.includes('Location/Place')});
+          var isCountry=labels.some(function(l){return l.includes('Location/Country')});
+          if(!isPlace||isCountry)continue;
+          var nid=String(n._id||''),nk=nid+'||'+(n.form||'');
+          if(seen.has(nk))continue;seen.add(nk);
+          var hasCountryInEvent=false;
+          for(var n2 of(ev.nodes||[])){
+            if((n2.labels||[]).some(function(l){return l.includes('Location/Country')})){
+              for(var e of(ev.edges||[])){
+                if((String(e.source)===nid&&String(e.target)===String(n2._id))||(String(e.target)===nid&&String(e.source)===String(n2._id))){
+                  hasCountryInEvent=true;break;
+                }
+              }
+            }
+            if(hasCountryInEvent)break;
+          }
+          var props=n.properties||{};
+          r.push({nodeKey:nk,nodeId:nid,form:n.form||'',labels:labels,properties:{...props},uri:props.uri||null,description:props.description||null,latitude:props.latitude||null,longitude:props.longitude||null,articleId:aid,context:ctx,sourceNodeId:ev.sourceNodeId||null,hasCountryInEvent:hasCountryInEvent});
+        }
+      }
+      return r;
+    }
+
+    // ═══════════ RENDER LIST ═══════════
+    function renderList(){
+      var list=$('anomalyList'),f=($('filterInput').value||'').toLowerCase();
+      var fl=enrichItems.filter(function(a){return a.form.toLowerCase().includes(f)||(a.description||'').toLowerCase().includes(f)});
+      $('listCount').textContent=fl.length;
+      if(!fl.length){list.innerHTML='<div style="padding:20px;text-align:center;color:var(--text-2)">Aucun r\u00e9sultat.</div>';return}
+      var h='';
+      for(var i=0;i<fl.length;i++){
+        var a=fl[i],ri=enrichItems.indexOf(a);
+        var isEnriched=enrichData.has(a.nodeKey);
+        var typeLabel=a.hasCountryInEvent?'D\u00e9j\u00e0 li\u00e9':'Sans Country';
+        h+='<div class="acard '+(ri===activeIdx?'active':'')+' '+(isEnriched?'fixed':'')+'" onclick="selectItem('+ri+')">'
+          +'<div class="at at-p">'+typeLabel+'</div>'
+          +'<div class="af">'+esc(a.form)+'</div>'
+          +'<div class="am">'+esc(a.description||a.uri||a.articleId)+'</div></div>';
+      }
+      list.innerHTML=h;
+    }
+
+    function updateStats(){
+      $('statTotal').textContent=enrichItems.length+' places';
+      $('statEnriched').textContent=enrichData.size+' enrichis';
+      $('exportBtn').disabled=(enrichData.size===0);
+    }
+
+    function selectItem(idx){activeIdx=idx;renderList();renderEnrichDetail(enrichItems[idx])}
+
+    // ═══════════ ENRICH DETAIL ═══════════
+    function renderEnrichDetail(a){
+      $('emptyState').style.display='none';var v=$('detailView');v.style.display='block';
+      var isEnriched=enrichData.has(a.nodeKey),ed=enrichData.get(a.nodeKey);
+      var h='';
+      if(isEnriched)h+='<div class="applied-banner ok">\u2713 Country ajout\u00e9 : '+esc(ed.countryNode.form)+'<button class="btn btn-g" style="margin-left:auto;padding:6px 14px;font-size:.82rem" onclick="enrichData.delete(enrichItems[activeIdx].nodeKey);renderEnrichDetail(enrichItems[activeIdx]);renderList();updateStats()">Retirer</button></div>';
+      h+='<h2>'+esc(a.form)+'</h2><div style="color:var(--text-2);margin-bottom:18px">Place \u2014 Article: '+esc(a.articleId)+'</div>';
+      h+='<div class="dsec"><h3>N\u0153ud actuel</h3><div class="dgrid">'
+        +'<div class="dfield"><label>_id</label><div class="dval">'+esc(a.nodeId)+'</div></div>'
+        +'<div class="dfield"><label>Labels</label><div class="dval">'+esc(a.labels.join(', '))+'</div></div>'
+        +'<div class="dfield"><label>Latitude</label><div class="dval">'+(a.latitude||'N/A')+'</div></div>'
+        +'<div class="dfield"><label>Longitude</label><div class="dval">'+(a.longitude||'N/A')+'</div></div>'
+        +'</div></div>';
+      h+='<div class="dsec"><h3>Contexte</h3><div class="ctx">'+esc(a.context)+'</div></div>';
+      h+='<div class="dsec"><h3>Trouver le Country</h3>'
+        +'<div style="font-size:.88rem;color:var(--text-2);margin-bottom:12px">Recherche le pays correspondant \u00e0 ce lieu. Si trouv\u00e9, un n\u0153ud Country + edge seront ajout\u00e9s.</div>'
+        +'<div class="srow"><input id="autoQ" type="text" value="'+esc(a.form)+'" placeholder="Lieu..." /><select id="autoSrc"><option value="nominatim">Nominatim</option><option value="wikidata">Wikidata</option></select><button class="btn btn-a" onclick="runSearch()">Rechercher</button></div>'
+        +'<div id="autoRes"><div style="color:var(--text-2);font-size:.88rem">Lance une recherche pour trouver le pays.</div></div></div>';
+      h+='<div class="dsec"><h3>Saisie manuelle du Country</h3>'
+        +'<div class="mgrid"><div class="mfield"><label>Nom du pays</label><input id="mCName" type="text" placeholder="ex: France" /></div>'
+        +'<div class="mfield"><label>URI Wikidata</label><input id="mCUri" type="text" placeholder="https://www.wikidata.org/entity/Q..." /></div></div>'
+        +'<div class="mgrid"><div class="mfield"><label>Latitude</label><input id="mCLat" type="number" step="any" /></div>'
+        +'<div class="mfield"><label>Longitude</label><input id="mCLon" type="number" step="any" /></div></div>'
+        +'<div class="mgrid full"><div class="mfield"><label>Description</label><input id="mCDesc" type="text" placeholder="ex: pays d\'Europe" /></div></div>'
+        +'<button class="btn btn-ok" onclick="applyManualEnrich()">Ajouter ce Country</button></div>';
+      v.innerHTML=h;
+    }
+
+    // ═══════════ SEARCH ═══════════
+    async function searchNominatim(q){
+      var r=await fetch('https://nominatim.openstreetmap.org/search?q='+encodeURIComponent(q)+'&format=json&limit=6&addressdetails=1&accept-language=fr');
+      if(!r.ok)throw new Error('HTTP '+r.status);var d=await r.json();
+      return d.map(function(i){return{name:i.display_name,latitude:parseFloat(i.lat),longitude:parseFloat(i.lon),type:i.type||'',source:'nominatim',country:i.address&&i.address.country||null,countryCode:i.address&&i.address.country_code||null}});
+    }
+
+    async function searchWikidata(q){
+      var r=await fetch('https://www.wikidata.org/w/api.php?action=wbsearchentities&search='+encodeURIComponent(q)+'&language=fr&limit=6&format=json&origin=*');
+      if(!r.ok)throw new Error('HTTP '+r.status);var d=await r.json();var res=[];
+      for(var item of(d.search||[])){
+        try{
+          var er=await fetch('https://www.wikidata.org/w/api.php?action=wbgetentities&ids='+item.id+'&props=claims|descriptions&format=json&origin=*');
+          var ed=await er.json(),ent=ed.entities&&ed.entities[item.id];if(!ent)continue;
+          var lat=null,lon=null,cc=ent.claims&&ent.claims['P625'];
+          if(cc&&cc[0]&&cc[0].mainsnak&&cc[0].mainsnak.datavalue&&cc[0].mainsnak.datavalue.value){lat=cc[0].mainsnak.datavalue.value.latitude;lon=cc[0].mainsnak.datavalue.value.longitude}
+          var countryId=null,p17=ent.claims&&ent.claims['P17'];
+          if(p17&&p17[0]&&p17[0].mainsnak&&p17[0].mainsnak.datavalue)countryId='Q'+p17[0].mainsnak.datavalue.value['numeric-id'];
+          var desc=(ent.descriptions&&ent.descriptions.fr&&ent.descriptions.fr.value)||item.description||'';
+          res.push({name:item.label+(desc?' \u2014 '+desc:''),latitude:lat,longitude:lon,uri:'https://www.wikidata.org/entity/'+item.id,description:desc,type:'wikidata',source:'wikidata',entityId:item.id,countryEntityId:countryId});
+        }catch(e){}
+      }
+      return res;
+    }
+
+    async function fetchWikidataCountry(entityId){
+      try{
+        var r=await fetch('https://www.wikidata.org/w/api.php?action=wbgetentities&ids='+entityId+'&props=claims|labels|descriptions|aliases&languages=fr&format=json&origin=*');
+        var d=await r.json(),ent=d.entities&&d.entities[entityId];if(!ent)return null;
+        var label=(ent.labels&&ent.labels.fr&&ent.labels.fr.value)||entityId;
+        var desc=(ent.descriptions&&ent.descriptions.fr&&ent.descriptions.fr.value)||'';
+        var aliases=(ent.aliases&&ent.aliases.fr)?ent.aliases.fr.map(function(a){return a.value}):[];
+        var lat=null,lon=null,cc=ent.claims&&ent.claims['P625'];
+        if(cc&&cc[0]&&cc[0].mainsnak&&cc[0].mainsnak.datavalue&&cc[0].mainsnak.datavalue.value){lat=cc[0].mainsnak.datavalue.value.latitude;lon=cc[0].mainsnak.datavalue.value.longitude}
+        var img=null,p18=ent.claims&&ent.claims['P18'];
+        if(p18&&p18[0]&&p18[0].mainsnak&&p18[0].mainsnak.datavalue){var fn=p18[0].mainsnak.datavalue.value;img='http://commons.wikimedia.org/wiki/Special:FilePath/'+encodeURIComponent(fn)}
+        return {_id:'https://www.wikidata.org/entity/'+entityId,form:label,labels:['Thing/Abstract/Location/Country'],properties:{value:label,latitude:lat||0,longitude:lon||0,description:desc,imageUrl:img,aliases:aliases,type:'Thing/Abstract/Location/Country',info:null,uri:'https://www.wikidata.org/entity/'+entityId}};
+      }catch(e){return null}
+    }
+
+    async function runSearch(){
+      var q=$('autoQ').value.trim(),src=$('autoSrc').value,c=$('autoRes');
+      if(!q){c.innerHTML='<div style="color:var(--warn)">Saisis un terme.</div>';return}
+      c.innerHTML='<div style="display:flex;align-items:center;gap:8px"><span class="spinner"></span> Recherche...</div>';
+      try{
+        var results=src==='wikidata'?await searchWikidata(q):await searchNominatim(q);
+        _autoResults=results;
+        if(!results.length){c.innerHTML='<div style="color:var(--warn)">Aucun r\u00e9sultat.</div>';return}
+        var h='<div class="slist">';
+        for(var i=0;i<results.length;i++){
+          var r=results[i];
+          var coords=(r.latitude!=null&&r.longitude!=null)?r.latitude.toFixed(4)+', '+r.longitude.toFixed(4):'<span style="color:var(--warn)">?</span>';
+          var extra=(r.country?' \u00b7 Pays: '+esc(r.country):'');
+          h+='<div class="sitem" data-ri="'+i+'" onclick="applyAutoResult(Number(this.dataset.ri))"><div><div class="sn">'+esc(r.name)+'</div><div class="sd">'+esc(r.type)+extra+'</div></div><div class="sc">'+coords+'</div></div>';
+        }
+        h+='</div>';c.innerHTML=h;
+      }catch(err){c.innerHTML='<div style="color:var(--danger)">Erreur: '+esc(err.message)+'</div>'}
+    }
+
+    async function applyAutoResult(idx){
+      var r=_autoResults[idx];
+      var a=enrichItems[activeIdx];
+      $('autoRes').innerHTML='<div style="display:flex;align-items:center;gap:8px"><span class="spinner"></span> R\u00e9cup\u00e9ration du pays...</div>';
+
+      var countryNode=null;
+      if(r.source==='nominatim'&&r.country){
+        var cResults=await searchWikidata(r.country);
+        for(var cr of cResults){
+          if(cr.countryEntityId||cr.entityId){
+            countryNode=await fetchWikidataCountry(cr.entityId);
+            if(countryNode)break;
+          }
+        }
+        if(!countryNode){
+          $('autoRes').innerHTML='<div style="color:var(--warn)">Pays "'+esc(r.country)+'" non trouv\u00e9 sur Wikidata. Essaie Wikidata directement ou saisis manuellement.</div>';
+          return;
+        }
+      }
+      if(r.source==='wikidata'&&r.countryEntityId){
+        countryNode=await fetchWikidataCountry(r.countryEntityId);
+      }
+      if(!countryNode){
+        $('autoRes').innerHTML='<div style="color:var(--warn)">Pays non trouv\u00e9 pour ce r\u00e9sultat. Essaie un autre ou saisis manuellement.</div>';
+        return;
+      }
+      enrichData.set(a.nodeKey,{countryNode:countryNode,placeNodeId:a.nodeId});
+      renderEnrichDetail(a);renderList();updateStats();
+    }
+
+    function applyManualEnrich(){
+      var a=enrichItems[activeIdx];
+      var name=$('mCName').value.trim(),uri=$('mCUri').value.trim();
+      var lat=parseFloat($('mCLat').value),lon=parseFloat($('mCLon').value),desc=$('mCDesc').value.trim();
+      if(!name||!uri)return alert('Nom et URI requis.');
+      if(isNaN(lat))lat=0;if(isNaN(lon))lon=0;
+      var cn={_id:uri,form:name,labels:['Thing/Abstract/Location/Country'],properties:{value:name,latitude:lat,longitude:lon,description:desc||null,imageUrl:null,aliases:[],type:'Thing/Abstract/Location/Country',info:null,uri:uri}};
+      enrichData.set(a.nodeKey,{countryNode:cn,placeNodeId:a.nodeId});
+      renderEnrichDetail(a);renderList();updateStats();
+    }
+
+    // ═══════════ EXPORT ═══════════
+    function doExport(){
+      var data=JSON.parse(JSON.stringify(rawJson));
+      var edgeCtr=800000;
+      for(var ev of data){
+        var nodesToCheck=ev.nodes||[];
+        for(var n of nodesToCheck){
+          var nk=String(n._id||'')+'||'+(n.form||'');
+          if(!enrichData.has(nk))continue;
+          var ed=enrichData.get(nk);
+          var cn=ed.countryNode;
+          var hasCountry=(ev.nodes||[]).some(function(x){return String(x._id)===cn._id});
+          if(!hasCountry)ev.nodes.push(JSON.parse(JSON.stringify(cn)));
+          var hasEdge=(ev.edges||[]).some(function(e){return String(e.source)===ed.placeNodeId&&String(e.target)===cn._id});
+          if(!hasEdge){
+            if(!ev.edges)ev.edges=[];
+            ev.edges.push({_id:String(edgeCtr++),type:'Country',source:ed.placeNodeId,target:cn._id,properties:{}});
+          }
+        }
+      }
+      var blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+      var url=URL.createObjectURL(blob);var a=document.createElement('a');a.href=url;a.download='export.events.enriched.json';a.click();URL.revokeObjectURL(url);
+      alert('Export OK !\n\n\u2022 '+enrichData.size+' Country ajout\u00e9s\n\nFichier: export.events.enriched.json');
+    }
+
+    // ═══════════ LOAD ═══════════
+    function loadFromText(text){
+      rawJson=parse(text);
+      enrichItems=detectEnrichItems(rawJson);enrichData.clear();
+      activeIdx=-1;
+      $('loadOverlay').classList.add('hidden');
+      $('bottomInfo').textContent=rawJson.length+' events \u2014 '+enrichItems.length+' places sans country';
+      renderList();updateStats();
+      $('emptyState').style.display='';$('detailView').style.display='none';
+    }
+    
+    $('loadFileBtn').addEventListener('click',function(){$('fileInput').click()});
+    $('fileInput').addEventListener('change',async function(e){var f=e.target.files[0];if(!f)return;try{loadFromText(await f.text())}catch(err){alert(err.message)}});
+    $('loadAutoBtn').addEventListener('click',async function(){try{var r=await fetch('data/export.events.json',{cache:'no-store'});if(!r.ok)throw new Error('HTTP '+r.status);loadFromText(await r.text())}catch(err){alert(err.message)}});
+    $('reloadBtn').addEventListener('click',function(){$('loadOverlay').classList.remove('hidden')});
+    $('exportBtn').addEventListener('click',doExport);
+    $('filterInput').addEventListener('input',function(){renderList()});
+</script>
+</body>
+</html>

@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prevyo - Fusion similarité</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+  <link rel="stylesheet" href="../variables.css">
+  <link rel="stylesheet" href="../layout.css">
+  <link rel="stylesheet" href="../demo.css">
+  <link rel="stylesheet" href="../treemap.css">
+</head>
+<body>
+  <div class="page active" id="page-fusion">
+    <div class="demo-layout">
+
+      <div class="demo-sidebar">
+        <div class="sidebar-section">
+          <h4>Paires quasi-doublons</h4>
+          <div class="range-row">
+            <label>Seuil cosinus : <span id="f-thr-v" style="color:var(--teal);font-weight:600">0.90</span></label>
+            <input type="range" id="f-thr" min="50" max="100" value="90" oninput="buildFusionPairs()">
+          </div>
+          <select id="f-pairs" class="article-select" onchange="onFusionPairSel()" style="width:100%;margin-top:.6rem"></select>
+        </div>
+
+        <div class="sidebar-section">
+          <h4>Events</h4>
+          <label class="f-label">Article A</label>
+          <select id="f-ev-a" class="article-select" style="width:100%;margin-bottom:.6rem"></select>
+          <label class="f-label">Article B</label>
+          <select id="f-ev-b" class="article-select" style="width:100%;margin-bottom:.75rem"></select>
+          <button class="btn-sm teal" onclick="loadFusion()" style="width:100%">Charger</button>
+          <button class="btn-sm muted" onclick="resetFusion()" style="width:100%;margin-top:.4rem">Réinitialiser</button>
+        </div>
+
+        <div class="sidebar-section">
+          <h4>Nœuds sélectionnés</h4>
+          <div class="f-label" style="margin-bottom:.3rem">A (canonique, gardé)</div>
+          <span class="f-badge" id="f-sel-a-lbl">aucun</span>
+          <div class="f-label" style="margin:.6rem 0 .3rem">B (absorbé, supprimé)</div>
+          <span class="f-badge" id="f-sel-b-lbl">aucun</span>
+        </div>
+
+        <div class="sidebar-section">
+          <h4>Actions</h4>
+          <div style="display:flex;flex-direction:column;gap:.4rem">
+            <button class="btn-sm teal" onclick="doFusionMerge()">⇄ Fusionner A ← B</button>
+            <button class="btn-sm red" onclick="doFusionDelete('a')">✕ Supprimer nœud de A</button>
+            <button class="btn-sm red" onclick="doFusionDelete('b')">✕ Supprimer nœud de B</button>
+            <button class="btn-sm muted" onclick="undoFusion()">↩ Annuler</button>
+          </div>
+          <p style="font-size:.68rem;color:var(--muted);margin-top:.6rem;line-height:1.5">
+            Clique un nœud dans A (canonique) puis un nœud dans B (absorbé). Les deux events sont fusionnés dans A, B se vide.<br><br>
+            <span style="color:#6b84a3">■</span> Original A &nbsp;
+            <span style="color:#1bae9f">■</span> Partagé A+B &nbsp;
+            <span style="color:#ffa502">■</span> Migré de B
+          </p>
+        </div>
+
+        <div class="sidebar-section" style="flex:1;min-height:0;overflow-y:auto">
+          <h4>Historique</h4>
+          <div id="f-history"><span style="color:var(--muted);font-size:.8rem">Aucune modification.</span></div>
+        </div>
+
+        <div class="sidebar-section">
+          <button class="btn-sm teal" onclick="downloadFusionJSON()" style="width:100%">⬇ Exporter dataset complet</button>
+        </div>
+      </div>
+
+      <div class="demo-main">
+        <div class="demo-main-content">
+          <div class="demo-topbar">
+            <span class="tb-title">Fusion manuelle de graphes</span>
+            <div id="f-shared-msg"></div>
+          </div>
+
+          <div id="f-empty" style="display:none;text-align:center;padding:3rem 2rem;color:var(--muted)">
+            <div style="font-size:3rem;margin-bottom:1rem">📂</div>
+            <p style="font-size:.9rem;font-weight:300;max-width:480px;margin:0 auto;line-height:1.8">
+              Chargez d'abord un fichier <strong style="color:var(--teal)">export.events.json</strong> depuis l'onglet <strong>Démo outil</strong>.
+            </p>
+            <button class="btn-primary" style="margin-top:1.5rem" onclick="goToDemoPage()">Charger les données →</button>
+          </div>
+
+          <div id="f-content" style="display:none;flex-direction:column;flex:1;min-height:0">
+            <div class="graph-placeholder" id="f-placeholder">
+              <div class="ph-icon">⬡</div>
+              <p>Sélectionne une paire et clique <strong>Charger</strong> pour afficher les graphes</p>
+            </div>
+
+            <div id="f-main" style="display:none;flex-direction:column;flex:1;min-height:0">
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;padding:1rem">
+                <div>
+                  <div class="f-graph-title" id="f-title-a">Event A</div>
+                  <div id="f-context-a" style="font-size:.72rem;color:var(--muted);line-height:1.5;padding:.4rem .25rem .5rem;font-style:italic;border-left:2px solid rgba(27,174,159,.3);padding-left:.6rem;margin-bottom:.4rem"></div>
+                  <div id="f-net-a" style="height:340px;border-radius:12px;border:1px solid var(--border);background:var(--bg)"></div>
+                  <div class="f-graph-stats" id="f-stats-a"></div>
+                </div>
+                <div>
+                  <div class="f-graph-title" id="f-title-b">Event B</div>
+                  <div id="f-context-b" style="font-size:.72rem;color:var(--muted);line-height:1.5;padding:.4rem .25rem .5rem;font-style:italic;border-left:2px solid rgba(27,174,159,.3);padding-left:.6rem;margin-bottom:.4rem"></div>
+                  <div id="f-net-b" style="height:340px;border-radius:12px;border:1px solid var(--border);background:var(--bg)"></div>
+                  <div class="f-graph-stats" id="f-stats-b"></div>
+                </div>
+              </div>
+
+              <div style="padding:0 1rem 1rem;display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+                <div>
+                  <label class="f-label" style="display:block;margin-bottom:.3rem">JSON Event A</label>
+                  <textarea class="f-json-edit" id="f-json-a" style="height:160px"></textarea>
+                  <button class="btn-sm teal" onclick="applyFusionEdit('a')" style="margin-top:.3rem">Appliquer A</button>
+                </div>
+                <div>
+                  <label class="f-label" style="display:block;margin-bottom:.3rem">JSON Event B</label>
+                  <textarea class="f-json-edit" id="f-json-b" style="height:160px"></textarea>
+                  <button class="btn-sm teal" onclick="applyFusionEdit('b')" style="margin-top:.3rem">Appliquer B</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="../state.js"></script>
+  <script src="../home.js"></script>
+  <script src="../nav.js"></script>
+  <script src="../data.js"></script>
+  <script src="../articles.js"></script>
+  <script src="../graph.js"></script>
+  <script src="../inspect.js"></script>
+  <script src="../visu.js"></script>
+  <script src="../fusion.js"></script>
+  <script>
+    function goToDemoPage() {
+      try {
+        if (window.parent && window.parent !== window && typeof window.parent.showPage === 'function') {
+          window.parent.showPage('demo');
+          return;
+        }
+      } catch (e) {}
+      window.location.href = '../index.html';
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      if (typeof Chart !== 'undefined') {
+        Chart.defaults.color = '#6b84a3';
+        Chart.defaults.borderColor = 'rgba(255,255,255,0.04)';
+        Chart.defaults.backgroundColor = 'rgba(27,174,159,0.1)';
+      }
+
+      if (typeof updateRangeLabels === 'function') {
+        updateRangeLabels();
+      }
+
+      if (typeof autoLoadDefaultData === 'function') {
+        autoLoadDefaultData();
+      }
+    });
+  </script>
+</body>
+</html>

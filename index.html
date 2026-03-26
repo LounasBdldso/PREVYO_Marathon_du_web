@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Prevyo — Outils de détection</title>
+  <title>Prevyo — Accueil & Analyses</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 
   <script src="https://d3js.org/d3.v7.min.js"></script>
   <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
@@ -16,17 +16,660 @@
   <link rel="stylesheet" href="css/layout.css">
   <link rel="stylesheet" href="css/demo.css">
   <link rel="stylesheet" href="css/treemap.css">
+
+  <style>
+    :root {
+      --bg: #06101f;
+      --surface: #0b1a30;
+      --surface2: #112240;
+      --surface3: #162d4e;
+      --teal: #1bae9f;
+      --blue: #09a4e8;
+      --purple: #bd33d1;
+      --dark-blue: #625eec;
+      --anomaly: #ff4757;
+      --quasi: #ffa502;
+      --normal: #2ed573;
+      --suspect: #ffa502;
+      --text: #dde8f5;
+      --muted: #6b84a3;
+      --border: rgba(27,174,159,0.15);
+      --mono: 'JetBrains Mono', monospace;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    #page-home {
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    #page-home *, #page-home *::before, #page-home *::after {
+      box-sizing: border-box;
+    }
+
+    #page-home .reveal {
+      opacity: 0;
+      transform: translateY(22px);
+      transition: opacity 0.55s ease, transform 0.55s ease;
+    }
+
+    #page-home .reveal.visible {
+      opacity: 1;
+      transform: none;
+    }
+
+    #page-home .reveal-d1 { transition-delay: 0.08s; }
+    #page-home .reveal-d2 { transition-delay: 0.16s; }
+    #page-home .reveal-d3 { transition-delay: 0.24s; }
+    #page-home .reveal-d4 { transition-delay: 0.32s; }
+
+    #page-home .hero {
+      position: relative;
+      padding: 7rem 2rem 3.5rem;
+      overflow: hidden;
+    }
+
+    #page-home .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 70% 55% at 15% 40%, rgba(27,174,159,0.11) 0%, transparent 60%),
+        radial-gradient(ellipse 55% 50% at 80% 20%, rgba(9,164,232,0.09) 0%, transparent 55%),
+        radial-gradient(ellipse 40% 40% at 60% 80%, rgba(189,51,209,0.06) 0%, transparent 50%);
+      pointer-events: none;
+    }
+
+    #page-home #hero-canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      opacity: 0.55;
+    }
+
+    #page-home .hero-inner {
+      position: relative;
+      max-width: 1320px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: minmax(0, 640px) minmax(320px, 1fr);
+      gap: clamp(2rem, 5vw, 5rem);
+      align-items: center;
+    }
+
+    #page-home .hero-copy {
+      min-width: 0;
+    }
+
+    #page-home .hero-video-slot {
+      min-height: 340px;
+      width: 100%;
+      position: relative;
+    }
+
+    #page-home .hero-video-slot::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 24px;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0)),
+        radial-gradient(circle at 50% 50%, rgba(9,164,232,0.05), transparent 65%);
+    }
+
+    #page-home .hero-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.55rem;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--teal);
+      margin-bottom: 1rem;
+    }
+
+    #page-home .hero-eyebrow::before {
+      content: '';
+      width: 28px;
+      height: 2px;
+      background: var(--teal);
+      border-radius: 99px;
+    }
+
+    #page-home .hero-title {
+      font-size: clamp(2.4rem, 5vw, 5rem);
+      font-weight: 700;
+      line-height: 1.05;
+      letter-spacing: -0.04em;
+      margin-bottom: 1.2rem;
+      color: var(--text);
+    }
+
+    #page-home .hero-title span {
+      color: var(--teal);
+    }
+
+    #page-home .hero-sub {
+      color: var(--muted);
+      font-size: 0.92rem;
+      line-height: 1.75;
+      max-width: 560px;
+      margin-bottom: 0;
+    }
+
+    #page-home .kpi-strip {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      border-top: 1px solid rgba(27,174,159,0.12);
+      border-bottom: 1px solid rgba(27,174,159,0.12);
+    }
+
+    #page-home .kpi-strip-item {
+      padding: 1.5rem 2rem;
+      border-right: 1px solid rgba(27,174,159,0.10);
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+    }
+
+    #page-home .kpi-strip-item:last-child {
+      border-right: none;
+    }
+
+    #page-home .kpi-strip-item .val {
+      width: 36px;
+      height: 4px;
+      border-radius: 99px;
+      background: linear-gradient(135deg, var(--teal), var(--blue));
+      color: transparent;
+      font-size: 0;
+      margin-bottom: 1.05rem;
+    }
+
+    #page-home .kpi-strip-item .lbl {
+      font-size: 0.72rem;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    #page-home .section {
+      max-width: 1320px;
+      margin: 0 auto;
+      padding: 4rem 2rem;
+    }
+
+    #page-home .section-tag {
+      display: inline-block;
+      font-size: 0.64rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--teal);
+      border: 1px solid rgba(27,174,159,0.35);
+      border-radius: 999px;
+      padding: 0.3rem 0.8rem;
+      margin-bottom: 0.85rem;
+    }
+
+    #page-home .section-title {
+      font-size: clamp(1.5rem, 3vw, 2.2rem);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.75rem;
+      color: var(--text);
+    }
+
+    #page-home .section-desc {
+      color: var(--muted);
+      font-size: 0.88rem;
+      line-height: 1.75;
+      max-width: 700px;
+      margin-bottom: 2.5rem;
+    }
+
+    #page-home hr.sep {
+      border: none;
+      border-top: 1px solid rgba(27,174,159,0.1);
+      margin: 0;
+    }
+
+    #page-home .axe-block {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      margin-bottom: 3rem;
+      align-items: start;
+    }
+
+    #page-home .axe-block.reverse {
+      direction: rtl;
+    }
+
+    #page-home .axe-block.reverse > * {
+      direction: ltr;
+    }
+
+    #page-home .axe-copy {
+      background: var(--surface);
+      border: 1px solid rgba(27,174,159,0.12);
+      border-radius: 20px;
+      padding: 2rem;
+    }
+
+    #page-home .axe-eyebrow {
+      font-size: 0.64rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--teal);
+      margin-bottom: 0.55rem;
+    }
+
+    #page-home .axe-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.85rem;
+      color: var(--text);
+    }
+
+    #page-home .axe-desc {
+      font-size: 0.83rem;
+      color: var(--muted);
+      line-height: 1.72;
+      margin-bottom: 1.2rem;
+    }
+
+    #page-home .formula-box {
+      background: rgba(6,16,31,0.85);
+      border: 1px solid rgba(27,174,159,0.2);
+      border-radius: 14px;
+      padding: 1.2rem 1.4rem;
+      margin-bottom: 1.2rem;
+      font-family: var(--mono);
+    }
+
+    #page-home .formula-label {
+      font-size: 0.64rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.55rem;
+    }
+
+    #page-home .formula-main {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 0.4rem;
+    }
+
+    #page-home .formula-main .var-alpha { color: var(--teal); }
+    #page-home .formula-main .var-beta { color: var(--blue); }
+    #page-home .formula-main .var-fn { color: var(--purple); }
+
+    #page-home .formula-sub {
+      font-size: 0.72rem;
+      color: var(--muted);
+    }
+
+    #page-home .weight-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.76rem;
+      margin-bottom: 1rem;
+    }
+
+    #page-home .weight-table th {
+      font-weight: 700;
+      font-size: 0.64rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-align: left;
+      padding: 0.5rem 0.7rem;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+
+    #page-home .weight-table td {
+      padding: 0.55rem 0.7rem;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      color: var(--text);
+    }
+
+    #page-home .weight-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    #page-home .weight-badge {
+      display: inline-block;
+      background: rgba(27,174,159,0.12);
+      color: var(--teal);
+      border-radius: 6px;
+      padding: 0.18rem 0.48rem;
+      font: 700 0.7rem var(--mono);
+    }
+
+    #page-home .algo-row {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-top: 0.75rem;
+    }
+
+    #page-home .algo-tag {
+      padding: 0.35rem 0.75rem;
+      border-radius: 8px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      background: rgba(98,94,236,0.12);
+      color: var(--dark-blue);
+      border: 1px solid rgba(98,94,236,0.22);
+    }
+
+    #page-home .algo-tag.teal { background: rgba(27,174,159,0.1); color: var(--teal); border-color: rgba(27,174,159,0.22); }
+    #page-home .algo-tag.blue { background: rgba(9,164,232,0.1); color: var(--blue); border-color: rgba(9,164,232,0.22); }
+    #page-home .algo-tag.orange { background: rgba(255,165,2,0.1); color: var(--quasi); border-color: rgba(255,165,2,0.22); }
+    #page-home .algo-tag.red { background: rgba(255,71,87,0.1); color: var(--anomaly); border-color: rgba(255,71,87,0.22); }
+
+    #page-home .chart-card {
+      background: var(--surface);
+      border: 1px solid rgba(27,174,159,0.12);
+      border-radius: 20px;
+      padding: 1.4rem 1.4rem 1.2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      min-height: 100%;
+    }
+
+    #page-home .chart-card h3 {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    #page-home .chart-card p {
+      font-size: 0.7rem;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    #page-home .chart-wrap {
+      position: relative;
+      flex: 1;
+      min-height: 220px;
+    }
+
+    #page-home .chart-wrap canvas {
+      width: 100% !important;
+      height: 100% !important;
+    }
+
+    #page-home .charts-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.2rem;
+    }
+
+    #page-home .pipeline {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+    }
+
+    #page-home .pipeline-step {
+      background: var(--surface);
+      border: 1px solid rgba(27,174,159,0.10);
+      border-radius: 16px;
+      padding: 1.4rem;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+
+    #page-home .pipeline-step:hover {
+      border-color: rgba(27,174,159,0.3);
+      transform: translateY(-2px);
+    }
+
+    #page-home .pipeline-step::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(27,174,159,0.03), transparent 60%);
+    }
+
+    #page-home .p-index {
+      font: 700 0.62rem var(--mono);
+      color: var(--teal);
+      margin-bottom: 0.6rem;
+      opacity: 0.7;
+      position: relative;
+      z-index: 1;
+    }
+
+    #page-home .pipeline-step h3 {
+      font-size: 0.88rem;
+      margin-bottom: 0.45rem;
+      position: relative;
+      z-index: 1;
+      color: var(--text);
+    }
+
+    #page-home .pipeline-step p {
+      font-size: 0.74rem;
+      color: var(--muted);
+      line-height: 1.6;
+      position: relative;
+      z-index: 1;
+    }
+
+    #page-home .pipeline-step .meta {
+      margin-top: 0.75rem;
+      font: 400 0.64rem var(--mono);
+      color: rgba(107,132,163,0.7);
+      border-top: 1px solid rgba(255,255,255,0.05);
+      padding-top: 0.55rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    #page-home .level-scale {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.75rem;
+      margin-bottom: 1.2rem;
+    }
+
+    #page-home .level-cell {
+      border-radius: 12px;
+      padding: 0.85rem;
+      text-align: center;
+    }
+
+    #page-home .level-cell .score {
+      font: 700 0.72rem var(--mono);
+      margin-bottom: 0.3rem;
+    }
+
+    #page-home .level-cell .interp {
+      font-size: 0.7rem;
+      font-weight: 700;
+      margin-bottom: 0.2rem;
+    }
+
+    #page-home .level-cell .action {
+      font-size: 0.62rem;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+
+    #page-home .level-cell.green { background: rgba(46,213,115,0.08); border: 1px solid rgba(46,213,115,0.2); }
+    #page-home .level-cell.yellow { background: rgba(255,165,2,0.08); border: 1px solid rgba(255,165,2,0.22); }
+    #page-home .level-cell.orange { background: rgba(255,100,2,0.08); border: 1px solid rgba(255,100,2,0.2); }
+    #page-home .level-cell.red { background: rgba(255,71,87,0.08); border: 1px solid rgba(255,71,87,0.2); }
+
+    #page-home .cat-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+
+    #page-home .cat-cell {
+      background: rgba(6,16,31,0.6);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 12px;
+      padding: 1rem;
+    }
+
+    #page-home .cat-cell .cat-icon {
+      font-size: 1.1rem;
+      margin-bottom: 0.4rem;
+    }
+
+    #page-home .cat-cell .cat-name {
+      font-size: 0.78rem;
+      font-weight: 700;
+      margin-bottom: 0.3rem;
+      color: var(--text);
+    }
+
+    #page-home .cat-cell .cat-desc {
+      font-size: 0.7rem;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    #page-home .report-day {
+      background: var(--surface2);
+      border: 1px solid rgba(27,174,159,0.1);
+      border-radius: 16px;
+      padding: 1.4rem 1.6rem;
+      margin-bottom: 1rem;
+    }
+
+    #page-home .report-day-header {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      margin-bottom: 0.85rem;
+    }
+
+    #page-home .day-badge {
+      background: linear-gradient(135deg, var(--teal), var(--blue));
+      color: #fff;
+      font: 700 0.62rem 'Lexend', sans-serif;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 0.28rem 0.65rem;
+      border-radius: 999px;
+    }
+
+    #page-home .report-day h3 {
+      font-size: 0.88rem;
+      color: var(--text);
+    }
+
+    #page-home .report-day ul {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      margin: 0;
+      padding: 0;
+    }
+
+    #page-home .report-day ul li {
+      font-size: 0.78rem;
+      color: var(--muted);
+      padding-left: 1rem;
+      position: relative;
+      line-height: 1.55;
+    }
+
+    #page-home .report-day ul li::before {
+      content: '•';
+      position: absolute;
+      left: 0;
+      color: var(--teal);
+      font-size: 0.7rem;
+    }
+
+    #page-home .home-journal-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 1rem;
+    }
+
+    #page-home footer {
+      max-width: 1320px;
+      margin: 0 auto;
+      padding: 0 2rem 2.5rem;
+      color: var(--muted);
+      font-size: 0.78rem;
+    }
+
+    #page-home footer a {
+      color: var(--teal);
+      text-decoration: none;
+    }
+
+    @media (max-width: 1100px) {
+      #page-home .hero-inner {
+        grid-template-columns: 1fr;
+      }
+
+      #page-home .hero-video-slot {
+        display: none;
+      }
+
+      #page-home .axe-block,
+      #page-home .axe-block.reverse {
+        grid-template-columns: 1fr;
+        direction: ltr;
+      }
+
+      #page-home .pipeline {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    @media (max-width: 700px) {
+      #page-home .kpi-strip {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      #page-home .charts-2,
+      #page-home .pipeline,
+      #page-home .home-journal-grid {
+        grid-template-columns: 1fr;
+      }
+
+      #page-home .cat-grid,
+      #page-home .level-scale {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      #page-home .hero {
+        padding-top: 6rem;
+      }
+    }
+  </style>
 </head>
 <body>
 
 <nav>
   <div class="nav-logo" onclick="showPage('home')">
-    <svg viewBox="0 0 110 54" xmlns="http://www.w3.org/2000/svg">
-      <path d="M12,7 Q28,1 44,7 Q60,13 76,7 Q88,3 96,7" stroke="#8412dd" fill="none" stroke-width="3.2" stroke-linecap="round"/>
-      <path d="M8,15 Q24,9 40,15 Q56,21 72,15 Q84,11 92,15" stroke="#8412dd" fill="none" stroke-width="2.8" stroke-linecap="round"/>
-      <path d="M4,23 Q20,17 36,23 Q52,29 68,23 Q80,19 88,23" stroke="#bd33d1" fill="none" stroke-width="2.2" stroke-linecap="round" opacity="0.7"/>
-      <text x="4" y="48" font-family="Lexend,sans-serif" font-size="20" font-weight="600" fill="#8412dd">prevyo</text>
-    </svg>
+    <img src="logo/prevyo/Prevyo(k0)1200px.png" alt="Prevyo" class="nav-logo-img">
     <div class="nav-logo-copy">
       <strong>Plateforme d'analyse</strong>
       <span>Graphes de connaissance événementiels</span>
@@ -35,500 +678,504 @@
 
   <div class="nav-links">
     <button class="nav-link active" onclick="showPage('home')" id="nav-home">Accueil</button>
-    <button class="nav-link" onclick="showPage('visu')" id="nav-visu">Visualisation</button>
     <button class="nav-link" onclick="showPage('demo')" id="nav-demo">Démo outil</button>
-    <button class="nav-link" onclick="showPage('location')" id="nav-location">Correction lieux</button>
+    <button class="nav-link" onclick="showPage('location')" id="nav-location">Correction</button>
   </div>
 </nav>
 
 <div class="page active" id="page-home">
-  <div class="hero">
+  <section class="hero">
     <canvas id="hero-canvas"></canvas>
-
-    <div class="hero-grid">
+    <div class="hero-inner">
       <div class="hero-copy">
-        <div class="hero-eyebrow fade-in"><span></span>EMVISTA × PREVYO · pipeline connaissance</div>
-        <h1 class="hero-title fade-in delay-1">Du texte brut<br><span>au graphe corrigé</span></h1>
-        <p class="hero-sub fade-in delay-2">
-          Le dépôt réunit l’exploration de données, le scoring d’anomalies, la détection de quasi-doublons,
-          plusieurs approches de clustering et maintenant un module dédié à la correction des lieux.
-          Cette interface centralise les principaux éléments de lecture, d'analyse et de correction
-          appliqués aux graphes de connaissance extraits par PREVYO.
+        <div class="hero-eyebrow reveal">EMVISTA PREVYO</div>
+        <h1 class="hero-title reveal reveal-d1">Du texte brut<br><span>au graphe</span></h1>
+        <p class="hero-sub reveal reveal-d2">
+          Cette page présente l'exploration de données, le scoring d'anomalies, la détection de quasi-doublons,
+          le clustering multi-approche et la correction de lieux. Il présente les méthodes utilisées,
+          les formules de calcul et les résultats visuels sur le corpus PREVYO.
         </p>
-
-        <div class="hero-chip-row fade-in delay-2">
-          <span class="hero-chip" style="color:var(--teal)">Isolation Forest + score local</span>
-          <span class="hero-chip" style="color:var(--blue)">UMAP / HDBSCAN / TF-IDF</span>
-          <span class="hero-chip" style="color:var(--quasi)">Quasi-doublons & fusion</span>
-          <span class="hero-chip" style="color:var(--purple)">Modules interactifs du dépôt</span>
-        </div>
-
-        <div class="hero-btns fade-in delay-3">
-          <button class="btn-primary" onclick="showPage('demo')">Explorer le graphe</button>
-          <button class="btn-outline" onclick="showPage('visu')">Consulter le tableau de bord</button>
-          <button class="btn-outline" onclick="showPage('location')">Tester le correcteur de lieux</button>
-        </div>
-
-        <div class="hero-footnotes fade-in delay-3">
-          <div id="home-summary-line">2 273 articles reconstruits, 659 clusters actifs et plus d’un millier de relations de quasi-doublons.</div>
-          <div id="home-signal-line">Le dépôt couvre l’EDA, la détection d’anomalies, la similarité, le clustering multi-approche et la correction des données.</div>
-        </div>
       </div>
 
-      <div class="hero-panel fade-in delay-2">
-        <div class="hero-panel-card">
-          <h3>Indicateurs du dataset chargé</h3>
-          <div class="hero-metrics">
-            <div class="hero-metric">
-              <span class="label">Événements</span>
-              <div class="value" id="hero-total-events">—</div>
-            </div>
-            <div class="hero-metric">
-              <span class="label">Articles</span>
-              <div class="value" id="hero-total-articles">—</div>
-            </div>
-            <div class="hero-metric">
-              <span class="label">Alertes</span>
-              <div class="value" id="hero-total-alerts">—</div>
-            </div>
-            <div class="hero-metric">
-              <span class="label">Clusters</span>
-              <div class="value" id="hero-total-clusters">—</div>
-            </div>
-          </div>
-
-          <div class="hero-signal-list">
-            <div class="hero-signal-row">
-              <div class="hero-signal-index">01</div>
-              <div class="hero-signal-content">
-                <strong>Lecture et normalisation</strong>
-                <p>Les notebooks EDA partent des exports Mongo, restructurent les champs techniques et reconstruisent le contexte local autour de chaque événement.</p>
-              </div>
-            </div>
-            <div class="hero-signal-row">
-              <div class="hero-signal-index">02</div>
-              <div class="hero-signal-content">
-                <strong>Scoring et regroupements</strong>
-                <p>Le dépôt combine anomalies structurelles, similarité sémantique, clustering d’events et clustering d’articles selon plusieurs méthodes.</p>
-              </div>
-            </div>
-            <div class="hero-signal-row">
-              <div class="hero-signal-index">03</div>
-              <div class="hero-signal-content">
-                <strong>Inspection et correction</strong>
-                <p>Le graphe interactif sert à inspecter, le 4e onglet prépare la correction de lieux, et les dashboards annexes aident à comprendre les familles d’erreurs.</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <div class="hero-video-slot reveal reveal-d2" aria-label="Zone réservée à la vidéo"></div>
     </div>
-  </div>
+  </section>
 
   <div class="kpi-strip">
-    <div class="kpi-item fade-in">
-      <div class="kpi-value" id="home-kpi-events">—</div>
-      <div class="kpi-label">Événements annotés dans le dataset actif</div>
+    <div class="kpi-strip-item reveal">
+      <div class="val" id="strip-events">—</div>
+      <div class="lbl">Événements annotés dans le dataset actif</div>
     </div>
-    <div class="kpi-item fade-in delay-1">
-      <div class="kpi-value" id="home-kpi-articles">—</div>
-      <div class="kpi-label">Articles reconstruits via <code>resultAnalyseId</code></div>
+    <div class="kpi-strip-item reveal reveal-d1">
+      <div class="val" id="strip-articles">—</div>
+      <div class="lbl">Articles reconstruits via <code>resultAnalyseId</code></div>
     </div>
-    <div class="kpi-item fade-in delay-2">
-      <div class="kpi-value" id="home-kpi-critical">—</div>
-      <div class="kpi-label">Événements critiques détectés</div>
+    <div class="kpi-strip-item reveal reveal-d2">
+      <div class="val" id="strip-critical">—</div>
+      <div class="lbl">Événements critiques détectés</div>
     </div>
-    <div class="kpi-item fade-in delay-3">
-      <div class="kpi-value" id="home-kpi-links">—</div>
-      <div class="kpi-label">Liens de quasi-doublons disponibles</div>
+    <div class="kpi-strip-item reveal reveal-d3">
+      <div class="val" id="strip-links">—</div>
+      <div class="lbl">Liens de quasi-doublons disponibles</div>
     </div>
   </div>
 
-  <section class="section">
-    <span class="section-tag">Contexte</span>
-    <h2 class="section-title">Une plateforme de lecture, d'analyse et d'aide à la décision</h2>
-    <p class="section-desc">
-      Cette interface réunit les principaux livrables du projet dans une lecture cohérente:
-      compréhension du corpus, qualification des anomalies, repérage des similarités, analyse des regroupements
-      et préparation des correctifs sur les graphes de connaissance produits par PREVYO.
+  <hr class="sep">
+
+  <div class="section">
+    <span class="section-tag">Axe 1</span>
+    <h2 class="section-title reveal">Détection d'anomalies — méthode et résultats</h2>
+    <p class="section-desc reveal reveal-d1">
+      Un événement anormal se distingue significativement des autres selon une ou plusieurs dimensions mesurables.
+      Le pipeline combine features hybrides (embeddings, structure, taxonomie) et deux algorithmes non supervisés en parallèle.
     </p>
 
-    <div class="story-grid">
-      <article class="story-card wide">
-        <h3>De PREVYO à la supervision qualité</h3>
-        <p>
-          EMVISTA / PREVYO extrait des événements, entités, lieux, dates et relations depuis des sources textuelles.
-          Le site consolide ce travail en une démonstration structurée, pensée pour présenter le contexte,
-          les analyses produites sur le corpus et les leviers d'action disponibles pour améliorer la qualité du graphe.
+    <div class="axe-block reveal">
+      <div class="axe-copy">
+        <div class="axe-eyebrow">Représentation vectorielle</div>
+        <h3 class="axe-title">Trois types de features combinés</h3>
+        <p class="axe-desc">
+          Chaque événement e<sub>i</sub> est encodé en un vecteur multi-dimensionnel combinant le sens du texte,
+          la structure du sous-graphe et la position dans la taxonomie.
         </p>
-        <div class="story-stat-row">
-          <div class="story-stat">
-            <span>Densité moyenne</span>
-            <strong id="home-metric-density">—</strong>
+
+        <div class="cat-grid">
+          <div class="cat-cell">
+            <div class="cat-icon">🔤</div>
+            <div class="cat-name">Embedding textuel</div>
+            <div class="cat-desc">Encodage du champ <code>context</code> via sentence-transformers (modèle multilingue MiniLM-L6).</div>
           </div>
-          <div class="story-stat">
-            <span>Couverture domaine</span>
-            <strong id="home-metric-coverage">—</strong>
+          <div class="cat-cell">
+            <div class="cat-icon">🕸</div>
+            <div class="cat-name">Features structurelles</div>
+            <div class="cat-desc">Nombre de nœuds, nombre d'arêtes, types de relations présents, profondeur taxonomique.</div>
+          </div>
+          <div class="cat-cell">
+            <div class="cat-icon">🌳</div>
+            <div class="cat-name">Encodage du type</div>
+            <div class="cat-desc">Hiérarchie <code>Thing/Abstract/Event/…</code> encodée en vecteur one-hot sur les niveaux.</div>
           </div>
         </div>
-      </article>
 
-      <article class="story-card">
-        <h3>Axe 1 · Détection d’anomalies</h3>
-        <p>
-          Le scoring s’appuie sur des features hybrides : embeddings, structure des sous-graphes et profondeur taxonomique.
-          Le résultat combine un score global et un signal local pour distinguer normal, suspect et critique.
-        </p>
-      </article>
+        <div class="axe-eyebrow" style="margin-top:1.2rem">Algorithmes utilisés</div>
+        <h3 class="axe-title">Isolation Forest + DBSCAN en parallèle</h3>
 
-      <article class="story-card">
-        <h3>Axe 2 · Similarité & clustering</h3>
-        <p>
-          Le dépôt contient un clustering au niveau événement, un clustering reconstruit au niveau article
-          et une version avancée qui compare HDBSCAN, NMF et Louvain pour documenter les regroupements.
-        </p>
-      </article>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-bottom:1rem">
+          <div class="formula-box">
+            <div class="formula-label">Isolation Forest</div>
+            <div class="formula-main">Score ∈ [0, 1]</div>
+            <div class="formula-sub">Anomalies <strong>globales</strong> — événements isolés dans l'espace complet des features.</div>
+          </div>
+          <div class="formula-box">
+            <div class="formula-label">DBSCAN</div>
+            <div class="formula-main">Label <span style="color:var(--anomaly)">−1</span> ou cluster</div>
+            <div class="formula-sub">Anomalies <strong>locales</strong> — événements n'appartenant à aucun cluster de leur propre type.</div>
+          </div>
+        </div>
+
+        <div class="axe-eyebrow">Trois catégories d'anomalies</div>
+        <table class="weight-table" style="margin-top:0.5rem">
+          <thead><tr><th>Catégorie</th><th>Signal</th></tr></thead>
+          <tbody>
+            <tr><td>⚡ Type rare</td><td>Type de l'événement incohérent avec son contexte</td></tr>
+            <tr><td>🕸 Structurelle</td><td>Trop peu / trop de nœuds ou arêtes vs. moyenne</td></tr>
+            <tr><td>🔤 Sémantique</td><td>Context sémantiquement éloigné des autres du même type</td></tr>
+          </tbody>
+        </table>
+
+        <div class="algo-row">
+          <span class="algo-tag teal">MiniLM-L6-v2</span>
+          <span class="algo-tag">Isolation Forest</span>
+          <span class="algo-tag red">DBSCAN bruit</span>
+          <span class="algo-tag blue">Explicabilité auto</span>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:1.2rem">
+        <div class="chart-card">
+          <h3>Répartition des niveaux d'alerte</h3>
+          <p>Part relative des événements normaux, suspects et critiques dans le corpus actif.</p>
+          <div class="chart-wrap" style="min-height:230px"><canvas id="chart-anomaly"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <h3>Distribution des scores d'anomalie</h3>
+          <p>Concentration des cas faibles, intermédiaires et élevés. Le gradient indique le seuil de dangerosité.</p>
+          <div class="chart-wrap" style="min-height:195px"><canvas id="chart-scores"></canvas></div>
+        </div>
+      </div>
     </div>
-  </section>
 
-  <section class="section">
-    <span class="section-tag">Pipeline</span>
-    <h2 class="section-title">Six étapes lisibles, depuis les notebooks jusqu’aux outils d’action</h2>
-    <p class="section-desc">
-      Cette vue synthétise les briques d'analyse et de correction mobilisées pour passer de l'export brut
-      à une lecture exploitable du graphe de connaissance.
+    <div class="charts-2 reveal reveal-d2">
+      <div class="chart-card">
+        <h3>Articles les plus exposés</h3>
+        <p>Articles concentrant le plus de signaux suspects et critiques (empilé Critique + Suspect).</p>
+        <div class="chart-wrap" style="min-height:240px"><canvas id="chart-article-alerts"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <h3>Complexité des sous-graphes</h3>
+        <p>Répartition des événements selon la taille (nombre de nœuds) de leur sous-graphe local.</p>
+        <div class="chart-wrap" style="min-height:240px"><canvas id="chart-nodes"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="sep">
+
+  <div class="section">
+    <span class="section-tag">Axe 2</span>
+    <h2 class="section-title reveal">Similarité &amp; clustering — formules et résultats</h2>
+    <p class="section-desc reveal reveal-d1">
+      Deux questions successives structurent cet axe : ces deux événements se ressemblent-ils ? Et si oui,
+      comment les regrouper ? Le score combiné S<sub>ij</sub> dépasse un seuil τ calibré empiriquement sur le dataset réel.
     </p>
 
-    <div class="pipeline-grid">
-      <article class="pipeline-step">
-        <div class="index">01</div>
-        <h3>EDA & parsing</h3>
-        <p>Lecture des exports, normalisation Mongo, premiers profils statistiques et contrôle de la structure des graphes.</p>
+    <div class="axe-block reverse reveal">
+      <div style="display:flex;flex-direction:column;gap:1.2rem">
+        <div class="chart-card">
+          <h3>Clusters thématiques HDBSCAN</h3>
+          <p>Groupes les plus peuplés parmi les annotations de clustering conservées (hors bruit).</p>
+          <div class="chart-wrap" style="min-height:260px"><canvas id="chart-clusters"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <h3>Relations sémantiques dominantes</h3>
+          <p>Types de liens (arêtes) les plus fréquents dans les sous-graphes extraits par PREVYO.</p>
+          <div class="chart-wrap" style="min-height:200px"><canvas id="chart-edges"></canvas></div>
+        </div>
+      </div>
+
+      <div class="axe-copy">
+        <div class="axe-eyebrow">Q1 — Score de similarité</div>
+        <h3 class="axe-title">Formule combinée α·contexte + β·structure</h3>
+        <p class="axe-desc">
+          Deux événements sont similaires si leur score S<sub>ij</sub> dépasse un seuil τ calibré
+          empiriquement. Un score supérieur à 0,90 désigne un quasi-doublon potentiel.
+        </p>
+
+        <div class="formula-box">
+          <div class="formula-label">Score de similarité composite</div>
+          <div class="formula-main">
+            S<sub>ij</sub> = <span class="var-alpha">α</span> · <span class="var-fn">sim_contexte</span>(e<sub>i</sub>, e<sub>j</sub>) + <span class="var-beta">β</span> · <span class="var-fn">sim_structure</span>(e<sub>i</sub>, e<sub>j</sub>)
+          </div>
+          <div class="formula-sub" style="margin-top:0.55rem">
+            <span class="var-alpha">α = 0,6</span> (similarité textuelle cosinus sur embeddings MiniLM) · <span class="var-beta">β = 0,4</span> (similarité structurelle)
+          </div>
+        </div>
+
+        <div class="axe-eyebrow" style="margin-top:1rem">Décomposition de sim_structure</div>
+        <table class="weight-table">
+          <thead><tr><th>Champ comparé</th><th>Méthode</th><th>Poids</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>Taxonomie <code>type</code></td>
+              <td>Proportion de niveaux hiérarchiques communs</td>
+              <td><span class="weight-badge">0,50</span></td>
+            </tr>
+            <tr>
+              <td>Labels de nœuds</td>
+              <td>Proportion de labels communs</td>
+              <td><span class="weight-badge">0,30</span></td>
+            </tr>
+            <tr>
+              <td>Types d'arêtes</td>
+              <td>Proportion de relations communes</td>
+              <td><span class="weight-badge">0,20</span></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="axe-eyebrow" style="margin-top:1.2rem">Niveaux de similarité</div>
+        <div class="level-scale" style="margin-top:0.55rem">
+          <div class="level-cell green">
+            <div class="score">&lt; 0,50</div>
+            <div class="interp" style="color:var(--normal)">Distincts</div>
+            <div class="action">Aucun regroupement</div>
+          </div>
+          <div class="level-cell yellow">
+            <div class="score">0,50 – 0,70</div>
+            <div class="interp" style="color:#e8d57a">Proches</div>
+            <div class="action">Cluster secondaire</div>
+          </div>
+          <div class="level-cell orange">
+            <div class="score">0,70 – 0,90</div>
+            <div class="interp" style="color:var(--quasi)">Fortement liés</div>
+            <div class="action">Même cluster</div>
+          </div>
+          <div class="level-cell red">
+            <div class="score">&gt; 0,90</div>
+            <div class="interp" style="color:var(--anomaly)">Quasi-doublon</div>
+            <div class="action">Signaler pour vérification</div>
+          </div>
+        </div>
+
+        <div class="axe-eyebrow" style="margin-top:1.2rem">Q2 — Clustering HDBSCAN</div>
+        <h3 class="axe-title" style="font-size:0.9rem">Pipeline en 4 étapes</h3>
+        <ol style="font-size:0.78rem;color:var(--muted);padding-left:1.2rem;line-height:2;margin-bottom:0.9rem">
+          <li>Réduction UMAP en <strong style="color:var(--text)">50 dimensions</strong></li>
+          <li>HDBSCAN avec <strong style="color:var(--text)">min_cluster_size = 5</strong></li>
+          <li>Label thématique par <strong style="color:var(--text)">TF-IDF</strong> (3 mots-clés par cluster)</li>
+          <li>Événements <strong style="color:var(--anomaly)">label −1</strong> → transmis à l'axe 1 comme candidats anomalies</li>
+        </ol>
+        <div class="algo-row">
+          <span class="algo-tag teal">UMAP</span>
+          <span class="algo-tag">HDBSCAN</span>
+          <span class="algo-tag blue">TF-IDF</span>
+          <span class="algo-tag orange">MiniLM cosine</span>
+          <span class="algo-tag red">Bruit → anomalies</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="charts-2 reveal reveal-d2">
+      <div class="chart-card">
+        <h3>Labels de nœuds les plus fréquents</h3>
+        <p>Catégories d'entités (Person, Place, Event…) qui structurent le plus fortement le graphe.</p>
+        <div class="chart-wrap" style="min-height:240px"><canvas id="chart-labels"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <h3>Typologie dominante des événements</h3>
+        <p>Familles d'événements les plus représentées dans le dataset — dernier niveau de la taxonomie.</p>
+        <div class="chart-wrap" style="min-height:240px"><canvas id="chart-types"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="sep">
+
+  <div class="section">
+    <span class="section-tag">Pipeline</span>
+    <h2 class="section-title reveal">Six briques, des notebooks aux outils d'action</h2>
+    <p class="section-desc reveal reveal-d1">
+      Synthèse du dépôt — depuis l'EDA jusqu'à la correction des lieux, chaque étape est documentée
+      et reliée à ses fichiers sources.
+    </p>
+
+    <div class="pipeline">
+      <article class="pipeline-step reveal">
+        <div class="p-index">01 · EDA</div>
+        <h3>Exploration & normalisation</h3>
+        <p>Lecture des exports Mongo, normalisation des champs $oid / $date, reconstruction des sous-graphes et observation de la distribution brute.</p>
+        <div class="meta">EDA/intro_au_json.ipynb · EDA/reconstruction_de_contexte.ipynb</div>
       </article>
-      <article class="pipeline-step">
-        <div class="index">02</div>
-        <h3>Reconstruction contexte</h3>
-        <p>Assemblage des sous-graphes locaux, relecture par événement et graphe de contexte pour comprendre l’environnement de chaque cas.</p>
+      <article class="pipeline-step reveal reveal-d1">
+        <div class="p-index">02 · Axe 1</div>
+        <h3>Scoring d'anomalies</h3>
+        <p>Pipeline hybride — embeddings MiniLM, features structurelles, taxonomie. Score final via Isolation Forest + score local de voisinage sémantique.</p>
+        <div class="meta">anomalies_similarite/anomalies.py · marquage_anomalies.ipynb</div>
       </article>
-      <article class="pipeline-step">
-        <div class="index">03</div>
-        <h3>Score anomalie</h3>
-        <p>Isolation Forest + score local de voisinage sémantique, puis explications textuelles et niveaux d’alerte.</p>
+      <article class="pipeline-step reveal reveal-d2">
+        <div class="p-index">03 · Similarité</div>
+        <h3>Quasi-doublons & fusion</h3>
+        <p>Embeddings MiniLM, score cosinus, fenêtre temporelle. 44 paires très similaires isolées après filtrage strict. Rapports de fusion ou quasi-doublon.</p>
+        <div class="meta">deduplicate_events.py · intra_cluster_doublons.py</div>
       </article>
-      <article class="pipeline-step">
-        <div class="index">04</div>
-        <h3>Quasi-doublons</h3>
-        <p>Embeddings MiniLM, similarité cosinus, fusion stricte et rapports de déduplication pour nettoyer les événements proches.</p>
+      <article class="pipeline-step reveal reveal-d3">
+        <div class="p-index">04 · Axe 2</div>
+        <h3>Clustering des articles</h3>
+        <p>Articles reconstruits via resultAnalyseId (2 273 groupes, ~5 events/groupe), enrichis structure + taxonomie, projetés UMAP puis groupés HDBSCAN.</p>
+        <div class="meta">clusters/cluster_articles.py · app/dashboard_articles.html</div>
       </article>
-      <article class="pipeline-step">
-        <div class="index">05</div>
-        <h3>Clustering</h3>
-        <p>UMAP / HDBSCAN, labels TF-IDF, reconstruction article et variantes avancées NMF / Louvain / grid search.</p>
+      <article class="pipeline-step reveal">
+        <div class="p-index">05 · Recherche</div>
+        <h3>Comparaison de méthodes</h3>
+        <p>HDBSCAN optimisé vs NMF topic modeling vs Louvain sur graphe d'entités partagées — mesure de qualité de regroupement comparée.</p>
+        <div class="meta">clusters/clustering_advanced.py · clustering_advanced.html</div>
       </article>
-      <article class="pipeline-step">
-        <div class="index">06</div>
-        <h3>Inspection & correction</h3>
-        <p>Graphe interactif, dashboards d’analyse, rapport technique et module beta de correction des anomalies de lieux.</p>
+      <article class="pipeline-step reveal reveal-d1">
+        <div class="p-index">06 · Beta</div>
+        <h3>Correction des lieux</h3>
+        <p>Module de correction des coordonnées aberrantes. Exemples : "Drôme" → dromadaire, "France 2" → pays France. Export JSON corrigé.</p>
+        <div class="meta">app/location_fixer.html</div>
       </article>
     </div>
-  </section>
+  </div>
+
+  <hr class="sep">
+
+  <div class="section">
+    <span class="section-tag">Avancement</span>
+    <h2 class="section-title reveal">Journal des trois jours</h2>
+    <p class="section-desc reveal reveal-d1">
+      Résumé des décisions techniques et des livrables produits à chaque itération du Marathon du Web.
+    </p>
+
+    <div class="home-journal-grid reveal reveal-d1">
+      <div class="report-day">
+        <div class="report-day-header">
+          <span class="day-badge">Jour 1</span>
+          <h3>Exploration initiale</h3>
+        </div>
+        <ul>
+          <li>Lecture et compréhension de la structure JSON des graphes</li>
+          <li>Identification des nœuds isolés et nœuds très répétitifs (mots de liaison)</li>
+          <li>Premières visualisations Treemap et graphe de sous-graphes</li>
+          <li>Cadrage des deux axes : anomalies et similarité</li>
+        </ul>
+      </div>
+      <div class="report-day">
+        <div class="report-day-header">
+          <span class="day-badge">Jour 2</span>
+          <h3>Scoring & similarité</h3>
+        </div>
+        <ul>
+          <li>Regroupement par resultAnalyseId → 2 273 groupes, ~5 events/groupe</li>
+          <li>Score S<sub>ij</sub> = α·contexte + β·structure, filtrage strict → 44 paires très similaires</li>
+          <li>Clustering visuel sur les labels, intégration dans l'app interactive</li>
+          <li>Constat : score élevé ≠ automatiquement même événement réel</li>
+        </ul>
+      </div>
+      <div class="report-day">
+        <div class="report-day-header">
+          <span class="day-badge">Jour 3</span>
+          <h3>Anomalies & corrections</h3>
+        </div>
+        <ul>
+          <li>Mauvais mappings Wikidata : Drôme→dromadaire, Pompéi mal interprété</li>
+          <li>France 2 / France 24 associés à tort à l'identifiant pays France</li>
+          <li>Vectorisation des events → similarité sémantique pour doublons NLP</li>
+          <li>Intégration complète dans l'application interactive finale</li>
+        </ul>
+      </div>
+    </div>
+  </div>
 
   <footer>
     Plateforme de démonstration PREVYO — <a href="https://emvista.com" target="_blank" rel="noopener">EMVISTA</a> × promo 2025/2026
   </footer>
 </div>
-
-<div class="page" id="page-visu">
-  <div class="visu-shell premium-visu-shell">
-    <div class="visu-header premium-visu-header">
-      <span class="section-tag">Atlas analytique</span>
-      <h2 class="section-title">Tableau de bord analytique du corpus</h2>
-      <p class="section-desc">
-        Cette vue réunit les indicateurs essentiels du corpus et les visualisations prioritaires pour
-        piloter la qualité des données, analyser les signaux d’alerte, comprendre la structure des sous-graphes,
-        suivre les regroupements et lire les relations sémantiques du graphe de connaissance.
-      </p>
-
-      <div class="visu-meta-row">
-        <span class="visu-pill">Vue directionnelle</span>
-        <span class="visu-pill">Pilotage qualité</span>
-        <span class="visu-pill">Lecture multi-niveaux</span>
-      </div>
-
-      <p class="section-desc premium-visu-subline" id="visu-header-meta">
-        Chargement des indicateurs du corpus actif…
-      </p>
-    </div>
-
-    <div class="stat-row premium-stat-row" id="visu-stats">
-      <div class="stat-mini premium-stat-card">
-        <div class="dot" style="background:var(--teal)"></div>
-        <div>
-          <div class="val" id="stat-total">—</div>
-          <div class="lbl">Événements analysés</div>
-        </div>
-      </div>
-
-      <div class="stat-mini premium-stat-card">
-        <div class="dot" style="background:var(--anomaly)"></div>
-        <div>
-          <div class="val" id="stat-anomalies">—</div>
-          <div class="lbl">Événements en alerte</div>
-        </div>
-      </div>
-
-      <div class="stat-mini premium-stat-card">
-        <div class="dot" style="background:var(--quasi)"></div>
-        <div>
-          <div class="val" id="stat-quasi">—</div>
-          <div class="lbl">Événements liés</div>
-        </div>
-      </div>
-
-      <div class="stat-mini premium-stat-card">
-        <div class="dot" style="background:var(--blue)"></div>
-        <div>
-          <div class="val" id="stat-articles">—</div>
-          <div class="lbl">Articles reconstruits</div>
-        </div>
-      </div>
-
-      <div class="stat-mini premium-stat-card">
-        <div class="dot" style="background:var(--dark-blue)"></div>
-        <div>
-          <div class="val" id="stat-clusters">—</div>
-          <div class="lbl">Clusters exploitables</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="visu-insight-grid premium-insight-grid">
-      <article class="insight-card premium-insight-card">
-        <span>Priorité de revue</span>
-        <strong id="visu-insight-alerts">—</strong>
-        <p>Volume d’événements critiques à examiner en priorité pour la revue humaine ou la correction ciblée.</p>
-      </article>
-
-      <article class="insight-card premium-insight-card">
-        <span>Rapprochements détectés</span>
-        <strong id="visu-insight-links">—</strong>
-        <p>Relations de quasi-doublon déjà identifiées et mobilisables pour la consolidation du graphe.</p>
-      </article>
-
-      <article class="insight-card premium-insight-card">
-        <span>Complexité moyenne</span>
-        <strong id="visu-insight-density">—</strong>
-        <p>Niveau moyen de densité des sous-graphes pour apprécier la richesse structurelle des événements.</p>
-      </article>
-
-      <article class="insight-card premium-insight-card">
-        <span>Couverture métier</span>
-        <strong id="visu-insight-coverage">—</strong>
-        <p>Part du corpus disposant des métadonnées utiles à une lecture métier et à un traitement aval fiable.</p>
-      </article>
-
-      <article class="insight-card premium-insight-card">
-        <span>Repère dominant</span>
-        <strong id="visu-insight-types">—</strong>
-        <p>Type d’événement le plus représenté dans le corpus pour situer rapidement les équilibres du dataset.</p>
-      </article>
-    </div>
-
-    <div id="visu-empty" class="premium-empty-state" style="text-align:center;padding:3.6rem 2rem;color:var(--muted)">
-      <div style="font-size:3rem;margin-bottom:1rem">📁</div>
-      <p style="font-size:0.9rem;font-weight:300;max-width:520px;margin:0 auto;line-height:1.8">
-        Charge un fichier de données ou laisse l’interface ouvrir automatiquement
-        <strong style="color:var(--teal)">export.events.clean.json</strong>
-        pour alimenter ce tableau de bord avec le corpus analytique.
-      </p>
-      <button class="btn-primary" style="margin-top:1.5rem" onclick="showPage('demo')">Accéder au graphe
-        interactif</button>
-    </div>
-
-    <div class="visu-grid premium-visu-grid" id="visu-charts" style="display:none">
-      <div class="chart-card premium-chart-card">
-        <div class="chart-card-head">
-          <h3>Typologie dominante des événements</h3>
-          <p>Répartition des principales familles d’événements observées dans le corpus chargé.</p>
-        </div>
-        <div class="chart-canvas-wrap">
-          <canvas id="chart-types"></canvas>
-        </div>
-      </div>
-
-      <div class="chart-card premium-chart-card">
-        <div class="chart-card-head">
-          <h3>Répartition des niveaux d’alerte</h3>
-          <p>Lecture synthétique des événements normaux, suspects et critiques dans le corpus actif.</p>
-        </div>
-        <div class="chart-canvas-wrap">
-          <canvas id="chart-anomaly"></canvas>
-        </div>
-      </div>
-
-      <div class="chart-card premium-chart-card">
-        <div class="chart-card-head">
-          <h3>Articles les plus exposés</h3>
-          <p>Articles concentrant le plus de signaux suspects et critiques.</p>
-        </div>
-        <div class="chart-canvas-wrap">
-          <canvas id="chart-article-alerts"></canvas>
-        </div>
-      </div>
-
-      <div class="chart-card premium-chart-card span-12 premium-hero-chart">
-        <div class="chart-card-head">
-          <h3>Distribution des scores d’anomalie</h3>
-          <p>Lecture continue du score pour distinguer les zones de normalité, de vigilance et de criticité.</p>
-        </div>
-        <div class="chart-canvas-wrap">
-          <canvas id="chart-scores"></canvas>
-        </div>
-      </div>
-
-      <div class="chart-card premium-chart-card span-6">
-        <div class="chart-card-head">
-          <h3>Clusters les plus représentés</h3>
-          <p>Regroupements dominants issus des annotations de clustering conservées dans le dataset.</p>
-        </div>
-        <div class="chart-canvas-wrap">
-          <canvas id="chart-clusters"></canvas>
-        </div>
-      </div>
-
-      <div class="chart-card premium-chart-card">
-        <div class="chart-card-head">
-          <h3>Complexité des sous-graphes</h3>
-          <p>Répartition des événements selon la taille de leur sous-graphe local.</p>
-        </div>
-        <div class="chart-canvas-wrap">
-          <canvas id="chart-nodes"></canvas>
-        </div>
-      </div>
-
-      <div class="chart-card premium-chart-card">
-        <div class="chart-card-head">
-          <h3>Relations sémantiques dominantes</h3>
-          <p>Types d’arêtes les plus fréquents dans les structures relationnelles extraites.</p>
-        </div>
-        <div class="chart-canvas-wrap">
-          <canvas id="chart-edges"></canvas>
-        </div>
-      </div>
-
-      <div class="chart-card premium-chart-card span-6">
-        <div class="chart-card-head">
-          <h3>Labels de nœuds les plus fréquents</h3>
-          <p>Catégories d’entités qui structurent le plus fortement le graphe de connaissance.</p>
-        </div>
-        <div class="chart-canvas-wrap">
-          <canvas id="chart-labels"></canvas>
-        </div>
-      </div>
-    </div>
-
-    <section class="section premium-treemap-section"
-      style="padding-left:0;padding-right:0;padding-top:2.2rem;padding-bottom:0">
-      <span class="section-tag">Treemap</span>
-      <h2 class="section-title" style="max-width:860px">Navigation hiérarchique dans les taxonomies et métadonnées</h2>
-      <p class="section-desc">
-        Cette vue hiérarchique permet d’explorer rapidement les événements par type, domaine, sous-domaine,
-        niveau de risque, caractéristiques du risque, labels de nœuds ou types d’arêtes.
-      </p>
-
-      <div class="treemap-card premium-treemap-card">
-        <div class="treemap-headline">
-          <h3>Cartographie hiérarchique du corpus</h3>
-          <p>Zoome sur une branche, recentre l’analyse et isole visuellement les clusters les plus structurants.</p>
-        </div>
-
-        <div class="treemap-toolbar premium-treemap-toolbar">
-          <label for="treemap-field">Champ analysé</label>
-          <select id="treemap-field" class="treemap-select">
-            <option value="type" selected>Type</option>
-            <option value="domain">Domaine</option>
-            <option value="subdomain">Sous-domaine</option>
-            <option value="risk">Risque</option>
-            <option value="riskCarac">Caractéristiques du risque</option>
-            <option value="nodes.labels">Labels des nœuds</option>
-            <option value="edges.type">Types de liens</option>
-          </select>
-
-          <input id="treemap-search" class="treemap-search" type="text"
-            placeholder="Rechercher un cluster, un type ou un label">
-
-          <button id="treemap-reset" class="treemap-btn" type="button">Réinitialiser la vue</button>
-        </div>
-
-        <div class="treemap-wrap" id="treemap-wrap">
-          <div id="treemap-chart"></div>
-          <div id="treemap-breadcrumb"></div>
-          <div id="treemap-search-count"></div>
-          <div id="treemap-tooltip"></div>
-
-          <div id="treemap-stats">
-            <div class="s-title">Repères de lecture</div>
-            <div class="s-row"><span>Événements</span><strong id="treemap-stat-total">—</strong></div>
-            <div class="s-row"><span>Profondeur max</span><strong id="treemap-stat-depth">—</strong></div>
-            <hr>
-            <div class="s-title" id="treemap-top-label">Top 5</div>
-            <ul id="treemap-top-list"></ul>
-          </div>
-
-          <div class="treemap-legend">
-            Molette · zoom<br>
-            Glisser · déplacement<br>
-            Clic · focus sur une branche
-          </div>
-        </div>
-      </div>
-    </section>
-  </div>
-
-  <footer>
-    Plateforme de démonstration PREVYO — <a href="https://emvista.com" target="_blank" rel="noopener">EMVISTA</a>
-  </footer>
-</div>
-
 <div class="page" id="page-location">
-  <div class="lab-shell">
+  <div class="lab-shell correction-shell">
     <div class="lab-head">
       <span class="section-tag">Module beta</span>
-      <h2 class="section-title">Correction des anomalies de lieux</h2>
-      <p class="section-desc">
-        Cette version intègre le correcteur de lieux dans l’esthétique PREVYO, avec une hiérarchie visuelle plus lisible,
-        des cartes homogènes avec le reste du site, une meilleure mise en avant des actions de correction
-        et une continuité graphique avec les autres modules d’analyse.
+      <h2 class="section-title">Correction</h2>
+      <p class="section-desc correction-desc">
+        Cet espace regroupe les outils de correction. Deux sous-onglets sont disponibles ci-dessous, avec une première section dédiée aux anomalies de lieu.
       </p>
-      <div class="lab-actions">
-        <a class="module-action link" href="app/location_fixer.html" target="_blank" rel="noopener">Ouvrir le module complet</a>
-        <button class="module-action" type="button" onclick="showPage('demo')">Revenir au graphe principal</button>
+    </div>
+
+    <div class="correction-subtabs" role="tablist" aria-label="Sous-onglets correction">
+      <input type="radio" name="correction-tab" id="correction-tab-places" checked>
+      <input type="radio" name="correction-tab" id="correction-tab-empty">
+      <input type="radio" name="correction-tab" id="correction-tab-fusion">
+      <input type="radio" name="correction-tab" id="correction-tab-fusion-sim">
+
+
+      <div class="correction-subtabs-nav">
+        <label for="correction-tab-places" class="correction-subtab-btn">Anomalies de lieu</label>
+        <label for="correction-tab-empty" class="correction-subtab-btn">Enrichissement Pays</label>
+        <label for="correction-tab-fusion" class="correction-subtab-btn">Fusion par fréquence</label>
+        <label for="correction-tab-fusion-sim" class="correction-subtab-btn">Fusion par similarité</label>
       </div>
-    </div>
 
-    <div class="lab-highlights">
-      <article class="lab-highlight">
-        <span>Détection</span>
-        <strong>Coordonnées incohérentes</strong>
-        <p>Les anomalies sont hiérarchisées visuellement pour accélérer la revue humaine et prioriser les cas à fort impact.</p>
-      </article>
-      <article class="lab-highlight">
-        <span>Correction</span>
-        <strong>Recherche assistée</strong>
-        <p>Les panneaux de correction utilisent désormais la même logique de cartes, de contrastes et d’actions que le reste de l’interface.</p>
-      </article>
-      <article class="lab-highlight">
-        <span>Sortie</span>
-        <strong>JSON réinjectable</strong>
-        <p>L’export final reste compatible avec la chaîne qualité tout en offrant une expérience de correction nettement plus intégrée.</p>
-      </article>
-    </div>
+      <div class="correction-tab-panels">
+        <section class="correction-tab-panel correction-tab-panel-places" role="tabpanel" aria-labelledby="correction-tab-places">
 
-    <div class="lab-frame-wrap">
-      <iframe class="lab-frame" src="app/location_fixer.html" title="Correcteur de lieux Prevyo" loading="lazy"></iframe>
+          <div class="lab-highlights">
+            <article class="lab-highlight">
+              <span>Détection</span>
+              <strong>Coordonnées incohérentes</strong>
+              <p>Les anomalies sont hiérarchisées visuellement pour accélérer la revue humaine et prioriser les cas à fort impact.</p>
+            </article>
+            <article class="lab-highlight">
+              <span>Correction</span>
+              <strong>Recherche assistée</strong>
+              <p>Les panneaux de correction utilisent désormais la même logique de cartes, de contrastes et d’actions que le reste de l’interface.</p>
+            </article>
+            <article class="lab-highlight">
+              <span>Sortie</span>
+              <strong>JSON réinjectable</strong>
+              <p>L’export final reste compatible avec la chaîne qualité tout en offrant une expérience de correction nettement plus intégrée.</p>
+            </article>
+          </div>
+
+          <div class="lab-frame-wrap">
+            <iframe class="lab-frame" src="app/location_fixer.html" title="Correcteur de lieux Prevyo" loading="lazy"></iframe>
+          </div>
+        </section>
+
+        <section class="correction-tab-panel correction-tab-panel-empty" role="tabpanel" aria-labelledby="correction-tab-empty">
+          <div class="lab-highlights">
+            <article class="lab-highlight">
+              <span>Enrichissement</span>
+              <strong>Pays manquants</strong>
+              <p>Ce module cible les lieux sans nœud Country lié et centralise leur revue dans une interface dédiée.</p>
+            </article>
+            <article class="lab-highlight">
+              <span>Assistance</span>
+              <strong>Recherche et sélection</strong>
+              <p>La recherche de pays et la validation se font dans un parcours homogène avec le reste de la plateforme.</p>
+            </article>
+            <article class="lab-highlight">
+              <span>Export</span>
+              <strong>JSON enrichi</strong>
+              <p>Le fichier de sortie reste exploitable pour réinjecter les corrections dans la chaîne de traitement.</p>
+            </article>
+          </div>
+        
+          <div class="lab-frame-wrap">
+            <iframe class="lab-frame" src="app/Ajout_Country.html" title="Enrichissement Country Prevyo"
+              loading="lazy"></iframe>
+          </div>
+        </section>
+                
+        <section class="correction-tab-panel correction-tab-panel-fusion" role="tabpanel"
+          aria-labelledby="correction-tab-fusion">
+          <div class="lab-highlights">
+            <article class="lab-highlight">
+              <span>Déduplication</span>
+              <strong>Fusion centralisée</strong>
+              <p>Ce module permet d’identifier les groupes de nœuds dupliqués et de préparer une fusion globale en conservant un
+                nœud canonique.</p>
+            </article>
+            <article class="lab-highlight">
+              <span>Contrôle</span>
+              <strong>Validation manuelle</strong>
+              <p>L’interface détaille les occurrences, les identifiants concernés et les edges générés avant export du JSON
+                fusionné.</p>
+            </article>
+            <article class="lab-highlight">
+              <span>Export</span>
+              <strong>JSON prêt à réinjecter</strong>
+              <p>Le fichier exporté reste exploitable dans le pipeline PREVYO avec les groupes sélectionnés et les relations
+                ajoutées automatiquement.</p>
+            </article>
+          </div>
+        
+          <div class="lab-frame-wrap">
+            <iframe class="lab-frame" src="app/fusion_noeud.html" title="Fusion de nœuds Prevyo" loading="lazy"></iframe>
+          </div>
+        </section>
+
+        <section class="correction-tab-panel correction-tab-panel-fusion-sim" role="tabpanel"
+          aria-labelledby="correction-tab-fusion-sim">
+          <div class="lab-highlights">
+            <article class="lab-highlight">
+              <span>Similarité</span>
+              <strong>Paires quasi-doublons</strong>
+              <p>Ce module permet d’explorer les événements très proches sémantiquement et structurellement afin d’identifier
+                des candidats à la fusion.</p>
+            </article>
+            <article class="lab-highlight">
+              <span>Contrôle</span>
+              <strong>Fusion manuelle guidée</strong>
+              <p>L’interface permet de comparer deux événements, sélectionner les nœuds à conserver ou absorber, puis suivre les
+                modifications dans l’historique.</p>
+            </article>
+            <article class="lab-highlight">
+              <span>Export</span>
+              <strong>Dataset complet fusionné</strong>
+              <p>Le fichier exporté reste compatible avec le pipeline PREVYO après validation des rapprochements détectés.</p>
+            </article>
+          </div>
+        
+          <div class="lab-frame-wrap">
+            <iframe class="lab-frame" src="app/fusion_similarite.html" title="Fusion similarité Prevyo" loading="lazy"></iframe>
+          </div>
+        </section>
+      </div>
     </div>
   </div>
 </div>
+
 
 <div class="page" id="page-demo">
   <div class="demo-layout">
@@ -646,25 +1293,345 @@
   </div>
 </div>
 
+
+
 <script src="js/state.js"></script>
-<script src="js/home.js"></script>
+<script src="js/visu.js"></script>
 <script src="js/nav.js"></script>
 <script src="js/data.js"></script>
 <script src="js/articles.js"></script>
 <script src="js/graph.js"></script>
 <script src="js/inspect.js"></script>
-<script src="js/visu.js"></script>
 <script src="js/treemap.js"></script>
+<script src="js/fusion.js"></script>
+
 <script>
-  document.addEventListener('DOMContentLoaded', () => {
-    if (typeof Chart !== 'undefined') {
-      Chart.defaults.color = '#6b84a3';
-      Chart.defaults.borderColor = 'rgba(255,255,255,0.04)';
-      Chart.defaults.backgroundColor = 'rgba(27,174,159,0.1)';
+// ─── HERO CANVAS ───────────────────────────────────────────────
+(function() {
+  const canvas = document.getElementById('hero-canvas');
+  if (!canvas) return;
+
+  const ctx = canvas.getContext('2d');
+  const nodes = [];
+  let w = 0, h = 0;
+
+  function resize() {
+    w = canvas.width = canvas.offsetWidth;
+    h = canvas.height = canvas.offsetHeight;
+  }
+
+  resize();
+  window.addEventListener('resize', resize);
+
+  for (let i = 0; i < 55; i++) {
+    nodes.push({
+      x: Math.random() * (w || 1200),
+      y: Math.random() * (h || 500),
+      vx: (Math.random() - 0.5) * 0.4,
+      vy: (Math.random() - 0.5) * 0.4,
+      r: Math.random() * 3 + 1.5,
+      color: ['#1bae9f', '#09a4e8', '#bd33d1', '#625eec'][Math.floor(Math.random() * 4)],
+      anomaly: Math.random() < 0.12
+    });
+  }
+
+  function draw() {
+    if (w !== canvas.offsetWidth || h !== canvas.offsetHeight) resize();
+    ctx.clearRect(0, 0, w, h);
+
+    for (let i = 0; i < nodes.length; i++) {
+      for (let j = i + 1; j < nodes.length; j++) {
+        const dx = nodes[j].x - nodes[i].x;
+        const dy = nodes[j].y - nodes[i].y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+
+        if (dist < 130) {
+          ctx.beginPath();
+          ctx.moveTo(nodes[i].x, nodes[i].y);
+          ctx.lineTo(nodes[j].x, nodes[j].y);
+          ctx.strokeStyle = `rgba(27,174,159,${0.12 * (1 - dist / 130)})`;
+          ctx.lineWidth = 0.8;
+          ctx.stroke();
+        }
+      }
     }
-    updateRangeLabels();
-    autoLoadDefaultData();
+
+    nodes.forEach((n) => {
+      n.x += n.vx;
+      n.y += n.vy;
+
+      if (n.x < 0 || n.x > w) n.vx *= -1;
+      if (n.y < 0 || n.y > h) n.vy *= -1;
+
+      if (n.anomaly) {
+        ctx.shadowColor = '#ff4757';
+        ctx.shadowBlur = 8;
+        ctx.beginPath();
+        ctx.arc(n.x, n.y, n.r + 2, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(255,71,87,0.25)';
+        ctx.fill();
+        ctx.shadowBlur = 0;
+      }
+
+      ctx.beginPath();
+      ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
+      ctx.fillStyle = n.anomaly ? '#ff4757' : n.color;
+      ctx.fill();
+    });
+
+    requestAnimationFrame(draw);
+  }
+
+  draw();
+})();
+
+// ─── SCROLL REVEAL ─────────────────────────────────────────────
+(function() {
+  const reveals = document.querySelectorAll('#page-home .reveal');
+  if (!reveals.length || !('IntersectionObserver' in window)) {
+    reveals.forEach((el) => el.classList.add('visible'));
+    return;
+  }
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) entry.target.classList.add('visible');
+    });
+  }, { threshold: 0.1 });
+
+  reveals.forEach((el) => observer.observe(el));
+})();
+
+// ─── DEMO DATA (preview accueil) ───────────────────────────────
+const DEMO_HOME = {
+  events: 11482,
+  articles: 2273,
+  alerts: 1143,
+  clusters: 659,
+  critical: 487,
+  suspect: 656,
+  links: 1044,
+  anomalyDist: { Normal: 10339, Suspect: 656, Critique: 487 },
+  types: [['Win', 1820], ['Say', 1543], ['Move', 987], ['Create', 754], ['End', 621], ['Begin', 510], ['Modify', 447], ['Transfer', 389], ['Meet', 301], ['Exist', 267]],
+  clusters: [['Élections municipales', 312], ['Crise sanitaire COVID', 287], ['Affaires judiciaires', 243], ['Économie entreprises', 198], ['Sport résultats', 176], ['International diplomatie', 154], ['Culture spectacle', 132], ['Technologie numérique', 118], ['Environnement climat', 97], ['Sécurité défense', 84]],
+  edges: [['Stimulus', 3241], ['Theme', 2876], ['Time', 2104], ['Agent', 1932], ['Place', 1687], ['Patient', 1423], ['Cause', 987], ['Result', 743], ['Manner', 612], ['Source', 489]],
+  labels: [['Event', 8432], ['Person', 6217], ['Place', 4891], ['Time', 3754], ['Object', 2341], ['Organization', 1987], ['Concept', 1234], ['Abstract', 987], ['Number', 743], ['State', 621]],
+  articleAlerts: [['a8f3d', 12, 8], ['b92ca', 9, 11], ['c14ef', 8, 5], ['d7701', 7, 9], ['e223b', 6, 7], ['f84ac', 5, 6], ['g19de', 5, 4], ['h3fc2', 4, 8], ['i77ab', 4, 5], ['j001f', 3, 6], ['k45ee', 3, 4], ['l88dc', 2, 5]],
+  nodes: { '0': 487, '1-2': 3241, '3-5': 4987, '6-10': 2243, '11+': 524 }
+};
+
+(function populateHomeKPIs() {
+  const format = (value) => value.toLocaleString('fr-FR');
+  const map = {
+    'strip-events': format(DEMO_HOME.events),
+    'strip-articles': format(DEMO_HOME.articles),
+    'strip-critical': format(DEMO_HOME.critical),
+    'strip-links': format(DEMO_HOME.links)
+  };
+
+  Object.entries(map).forEach(([id, value]) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = value;
   });
+})();
+
+// ─── CHARTS ────────────────────────────────────────────────────
+(function initHomeCharts() {
+  if (typeof Chart === 'undefined') return;
+
+  const tc = '#6b84a3';
+  const gc = 'rgba(255,255,255,0.05)';
+  const af = { family: 'Lexend', size: 9 };
+  const lf = { family: 'Lexend', size: 10 };
+
+  Chart.defaults.color = tc;
+  Chart.defaults.borderColor = gc;
+
+  const base = { responsive: true, maintainAspectRatio: false, animation: false };
+
+  new Chart(document.getElementById('chart-anomaly'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Normal', 'Suspect', 'Critique'],
+      datasets: [{
+        data: [DEMO_HOME.anomalyDist.Normal, DEMO_HOME.anomalyDist.Suspect, DEMO_HOME.anomalyDist.Critique],
+        backgroundColor: ['#2ed573', '#ffa502', '#ff4757'],
+        borderWidth: 2,
+        borderColor: '#0b1a30',
+        hoverOffset: 6
+      }]
+    },
+    options: {
+      ...base,
+      cutout: '66%',
+      plugins: {
+        legend: {
+          position: 'top',
+          labels: { color: tc, font: lf, boxWidth: 10, usePointStyle: true }
+        }
+      }
+    }
+  });
+
+  const buckets = Array.from({ length: 12 }, (_, i) => {
+    const center = i / 11;
+    const baseValue = Math.round(Math.exp(-Math.pow((center - 0.22) * 4, 2)) * 3800);
+    const tail = Math.round(Math.exp(-Math.pow((center - 0.78) * 3.5, 2)) * 420);
+    return baseValue + tail + Math.round(Math.random() * 80);
+  });
+
+  new Chart(document.getElementById('chart-scores'), {
+    type: 'bar',
+    data: {
+      labels: Array.from({ length: 12 }, (_, i) => `${(i / 12).toFixed(1)}-${((i + 1) / 12).toFixed(1)}`),
+      datasets: [{
+        label: 'Événements',
+        data: buckets,
+        backgroundColor: buckets.map((_, i) => i >= 8 ? 'rgba(255,71,87,0.68)' : i >= 5 ? 'rgba(255,165,2,0.62)' : 'rgba(27,174,159,0.56)'),
+        borderRadius: 6,
+        borderSkipped: false
+      }]
+    },
+    options: {
+      ...base,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { color: tc, font: af, maxRotation: 0 }, grid: { color: 'rgba(255,255,255,0.03)' } },
+        y: { beginAtZero: true, ticks: { color: tc, font: af }, grid: { color: gc } }
+      }
+    }
+  });
+
+  new Chart(document.getElementById('chart-article-alerts'), {
+    type: 'bar',
+    data: {
+      labels: DEMO_HOME.articleAlerts.map((a) => a[0]),
+      datasets: [
+        { label: 'Critique', data: DEMO_HOME.articleAlerts.map((a) => a[1]), backgroundColor: 'rgba(255,71,87,0.74)', borderRadius: 5, borderSkipped: false },
+        { label: 'Suspect', data: DEMO_HOME.articleAlerts.map((a) => a[2]), backgroundColor: 'rgba(255,165,2,0.66)', borderRadius: 5, borderSkipped: false }
+      ]
+    },
+    options: {
+      ...base,
+      plugins: { legend: { position: 'top', labels: { color: tc, font: lf, boxWidth: 10, usePointStyle: true } } },
+      scales: {
+        x: { stacked: true, ticks: { color: tc, font: af, maxRotation: 0 }, grid: { color: 'rgba(255,255,255,0.03)' } },
+        y: { stacked: true, beginAtZero: true, ticks: { color: tc, font: af }, grid: { color: gc } }
+      }
+    }
+  });
+
+  new Chart(document.getElementById('chart-nodes'), {
+    type: 'doughnut',
+    data: {
+      labels: Object.keys(DEMO_HOME.nodes),
+      datasets: [{
+        data: Object.values(DEMO_HOME.nodes),
+        backgroundColor: ['#1bae9f', '#09a4e8', '#bd33d1', '#625eec', '#ffa502'],
+        borderWidth: 2,
+        borderColor: '#0b1a30',
+        hoverOffset: 6
+      }]
+    },
+    options: {
+      ...base,
+      cutout: '64%',
+      plugins: { legend: { position: 'top', labels: { color: tc, font: lf, boxWidth: 10, usePointStyle: true } } }
+    }
+  });
+
+  new Chart(document.getElementById('chart-clusters'), {
+    type: 'bar',
+    indexAxis: 'y',
+    data: {
+      labels: DEMO_HOME.clusters.map((c) => c[0]),
+      datasets: [{
+        data: DEMO_HOME.clusters.map((c) => c[1]),
+        backgroundColor: 'rgba(98,94,236,0.72)',
+        borderRadius: 7,
+        borderSkipped: false
+      }]
+    },
+    options: {
+      ...base,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { beginAtZero: true, ticks: { color: tc, font: af }, grid: { color: gc } },
+        y: { ticks: { color: tc, font: af }, grid: { color: 'rgba(255,255,255,0.03)' } }
+      }
+    }
+  });
+
+  new Chart(document.getElementById('chart-edges'), {
+    type: 'bar',
+    data: {
+      labels: DEMO_HOME.edges.map((e) => e[0]),
+      datasets: [{
+        data: DEMO_HOME.edges.map((e) => e[1]),
+        backgroundColor: 'rgba(9,164,232,0.68)',
+        borderRadius: 6,
+        borderSkipped: false
+      }]
+    },
+    options: {
+      ...base,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { color: tc, font: af, maxRotation: 35 }, grid: { color: 'rgba(255,255,255,0.03)' } },
+        y: { beginAtZero: true, ticks: { color: tc, font: af }, grid: { color: gc } }
+      }
+    }
+  });
+
+  new Chart(document.getElementById('chart-labels'), {
+    type: 'bar',
+    indexAxis: 'y',
+    data: {
+      labels: DEMO_HOME.labels.map((l) => l[0]),
+      datasets: [{
+        data: DEMO_HOME.labels.map((l) => l[1]),
+        backgroundColor: 'rgba(189,51,209,0.72)',
+        borderRadius: 7,
+        borderSkipped: false
+      }]
+    },
+    options: {
+      ...base,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { beginAtZero: true, ticks: { color: tc, font: af }, grid: { color: gc } },
+        y: { ticks: { color: tc, font: af }, grid: { color: 'rgba(255,255,255,0.03)' } }
+      }
+    }
+  });
+
+  new Chart(document.getElementById('chart-types'), {
+    type: 'bar',
+    data: {
+      labels: DEMO_HOME.types.map((t) => t[0]),
+      datasets: [{
+        data: DEMO_HOME.types.map((t) => t[1]),
+        backgroundColor: ['#1bae9f', '#09a4e8', '#bd33d1', '#625eec', '#005f73', '#8412dd', '#ffa502', '#ff4757', '#2ed573', '#a29bfe'],
+        borderRadius: 8,
+        borderSkipped: false,
+        maxBarThickness: 32
+      }]
+    },
+    options: {
+      ...base,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { color: tc, font: af, autoSkip: false, maxRotation: 35 }, grid: { color: 'rgba(255,255,255,0.02)' } },
+        y: { beginAtZero: true, ticks: { color: tc, font: af }, grid: { color: gc } }
+      }
+    }
+  });
+})();
+
+document.addEventListener('DOMContentLoaded', () => {
+  if (typeof updateRangeLabels === 'function') updateRangeLabels();
+  if (typeof autoLoadDefaultData === 'function') autoLoadDefaultData();
+});
 </script>
 
 </body>
