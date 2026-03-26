@@ -1,6 +1,5 @@
 data/
 .venv/
 lib/
-logo/
 lib/.DS_Store
 .DS_Store

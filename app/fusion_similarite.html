@@ -12,10 +12,10 @@
   <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
-  <link rel="stylesheet" href="../variables.css">
-  <link rel="stylesheet" href="../layout.css">
-  <link rel="stylesheet" href="../demo.css">
-  <link rel="stylesheet" href="../treemap.css">
+  <link rel="stylesheet" href="../css/variables.css">
+  <link rel="stylesheet" href="../css/layout.css">
+  <link rel="stylesheet" href="../css/demo.css">
+  <link rel="stylesheet" href="../css/treemap.css">
 </head>
 <body>
   <div class="page active" id="page-fusion">
@@ -132,15 +132,16 @@
     </div>
   </div>
 
-  <script src="../state.js"></script>
-  <script src="../home.js"></script>
-  <script src="../nav.js"></script>
-  <script src="../data.js"></script>
-  <script src="../articles.js"></script>
-  <script src="../graph.js"></script>
-  <script src="../inspect.js"></script>
-  <script src="../visu.js"></script>
-  <script src="../fusion.js"></script>
+  <script src="../js/state.js"></script>
+  <script src="../js/visu.js"></script>
+  <script src="../js/nav.js"></script>
+  <script src="../js/data.js"></script>
+  <script src="../js/articles.js"></script>
+  <script src="../js/graph.js"></script>
+  <script src="../js/inspect.js"></script>
+  <script src="../js/treemap.js"></script>
+  <script src="../js/fusion.js"></script>
+  
   <script>
     function goToDemoPage() {
       try {
@@ -148,7 +149,7 @@
           window.parent.showPage('demo');
           return;
         }
-      } catch (e) {}
+      } catch (e) { }
       window.location.href = '../index.html';
     }
 
@@ -159,12 +160,12 @@
         Chart.defaults.backgroundColor = 'rgba(27,174,159,0.1)';
       }
 
-      if (typeof updateRangeLabels === 'function') {
-        updateRangeLabels();
-      }
-
       if (typeof autoLoadDefaultData === 'function') {
         autoLoadDefaultData();
+      }
+
+      if (typeof initFusion === 'function') {
+        initFusion();
       }
     });
   </script>
