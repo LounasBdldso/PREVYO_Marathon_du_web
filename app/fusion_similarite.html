@@ -153,21 +153,65 @@
       window.location.href = '../index.html';
     }
 
-    document.addEventListener('DOMContentLoaded', () => {
-      if (typeof Chart !== 'undefined') {
-        Chart.defaults.color = '#6b84a3';
-        Chart.defaults.borderColor = 'rgba(255,255,255,0.04)';
-        Chart.defaults.backgroundColor = 'rgba(27,174,159,0.1)';
-      }
+    async function initFusionPage() {
+      try {
+        if (typeof Chart !== 'undefined') {
+          Chart.defaults.color = '#6b84a3';
+          Chart.defaults.borderColor = 'rgba(255,255,255,0.04)';
+          Chart.defaults.backgroundColor = 'rgba(27,174,159,0.1)';
+        }
 
-      if (typeof autoLoadDefaultData === 'function') {
-        autoLoadDefaultData();
-      }
+        // 1. Si le parent a déjà chargé les données, on les réutilise
+        try {
+          if (
+            window.parent &&
+            window.parent !== window &&
+            window.parent.state &&
+            Array.isArray(window.parent.state.events) &&
+            window.parent.state.events.length
+          ) {
+            state.events = JSON.parse(JSON.stringify(window.parent.state.events));
+            if (typeof buildArticleMap === 'function') buildArticleMap();
+            if (typeof initFusion === 'function') initFusion();
+            return;
+          }
+        } catch (e) {
+          console.warn('Impossible de lire les données du parent :', e);
+        }
 
-      if (typeof initFusion === 'function') {
-        initFusion();
+        // 2. Fallback : chargement local avec le BON chemin
+        const response = await fetch('../data/export.events.clean.json');
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+        const data = await response.json();
+        state.events = Array.isArray(data) ? data : [data];
+
+        if (typeof buildArticleMap === 'function') buildArticleMap();
+        if (typeof initFusion === 'function') initFusion();
+
+      } catch (err) {
+        console.error('Erreur chargement fusion similarité :', err);
+
+        const empty = document.getElementById('f-empty');
+        const content = document.getElementById('f-content');
+
+        if (content) content.style.display = 'none';
+        if (empty) {
+          empty.style.display = 'block';
+          empty.innerHTML = `
+            <div style="font-size:3rem;margin-bottom:1rem">⚠</div>
+            <p style="font-size:.9rem;font-weight:300;max-width:560px;margin:0 auto;line-height:1.8">
+              Impossible de charger les données pour le module de fusion similarité.<br>
+              Ouvre d'abord l'onglet <strong style="color:var(--teal)">Démo outil</strong> pour charger un JSON,
+              ou vérifie la présence du fichier <strong style="color:var(--teal)">../data/export.events.clean.json</strong>.
+            </p>
+            <button class="btn-primary" style="margin-top:1.5rem" onclick="goToDemoPage()">Aller au chargement →</button>
+          `;
+        }
       }
-    });
+    }
+
+    document.addEventListener('DOMContentLoaded', initFusionPage);
   </script>
 </body>
 </html>

@@ -17,16 +17,56 @@ const fusion = {
 
 // ── Options vis.js ────────────────────────────────────────────
 const FUSION_VIS_OPTS = {
-  physics: { enabled: true, stabilization: { iterations: 80 } },
-  interaction: { hover: true, tooltipDelay: 100 },
-  edges: {
-    smooth: { type: 'dynamic' },
-    color: { color: 'rgba(107,132,163,0.45)', highlight: '#1bae9f' },
-    arrows: { to: { enabled: true, scaleFactor: 0.5 } },
-    font: { size: 9, color: '#6b84a3', face: 'Lexend' },
-    width: 1.2,
+  physics: {
+    enabled: true,
+    stabilization: { iterations: 90 }
   },
-  nodes: { font: { color: '#dde8f5', size: 11, face: 'Lexend' } },
+  interaction: {
+    hover: true,
+    tooltipDelay: 80,
+    navigationButtons: false
+  },
+  edges: {
+    smooth: {
+      type: 'dynamic',
+      roundness: 0.22
+    },
+    color: {
+      color: 'rgba(120, 156, 196, 0.72)',
+      highlight: '#25d3c4',
+      hover: '#7be5dc',
+      inherit: false
+    },
+    arrows: {
+      to: {
+        enabled: true,
+        scaleFactor: 0.7
+      }
+    },
+    font: {
+      size: 14,
+      color: '#f4f8ff',
+      face: 'Lexend',
+      strokeWidth: 5,
+      strokeColor: 'rgba(6,16,31,0.96)',
+      background: 'rgba(6,16,31,0.78)',
+      vadjust: -8,
+      align: 'middle'
+    },
+    width: 2.2,
+    hoverWidth: 2.8,
+    selectionWidth: 3.2
+  },
+  nodes: {
+    font: {
+      color: '#f5fbff',
+      size: 16,
+      face: 'Lexend',
+      strokeWidth: 6,
+      strokeColor: 'rgba(6,16,31,0.98)',
+      vadjust: 2
+    }
+  }
 };
 
 // ── Utilitaires ───────────────────────────────────────────────
@@ -74,7 +114,14 @@ function buildFusionVisNodes(nodes, sharedIds, selId) {
       title: fusionNodeTitle(n) + (n._origin ? `\nOrigine : ${n._origin === 'b' ? 'migré depuis B' : n._origin === 'shared' ? 'partagé A+B' : 'original A'}` : ''),
       shape: cfg.shape,
       size:  cfg.size,
-      font:  { color: '#dde8f5', size: 11, face: 'Lexend' },
+      font: {
+        color: '#f7fbff',
+        size: 16,
+        face: 'Lexend',
+        strokeWidth: 6,
+        strokeColor: 'rgba(6,16,31,0.98)',
+        bold: isSelected
+      },
       color: {
         background: bg, border,
         highlight: { background: bg, border },
