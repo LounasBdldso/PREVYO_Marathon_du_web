@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Prevyo — Accueil & Analyses</title>
+  <title>Prevyo - MARATHON DU WEB</title>
   <link rel="icon" type="image/png" href="logo/prevyo/Prevyo(P301CV)600px.png">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -189,6 +189,14 @@
         linear-gradient(180deg, rgba(11,26,48,0.72), rgba(8,20,38,0.68)),
         radial-gradient(circle at 70% 30%, rgba(9,164,232,0.08), transparent 45%);
       box-shadow: inset 0 1px 0 rgba(255,255,255,0.02);
+      overflow: hidden;
+    }
+
+    #page-home .hero-video-slot iframe {
+      display: block;
+      width: 100%;
+      height: 100%;
+      border: none;
     }
 
     #page-home .hero-video-slot::before {
@@ -196,7 +204,7 @@
       position: absolute;
       inset: 0;
       border-radius: 22px;
-      display: flex;
+      display: none;
       align-items: center;
       justify-content: center;
       color: rgba(221,232,245,0.42);
@@ -206,6 +214,8 @@
       background:
         linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0)),
         radial-gradient(circle at 50% 50%, rgba(9,164,232,0.05), transparent 65%);
+      pointer-events: none;
+      z-index: 1;
     }
 
     #page-home .hero-eyebrow {
@@ -1050,7 +1060,7 @@
 
   <div class="nav-links">
     <button class="nav-link active" onclick="showPage('home')" id="nav-home">Accueil</button>
-    <button class="nav-link" onclick="showPage('demo')" id="nav-demo">Démo outil</button>
+    <button class="nav-link" onclick="showPage('demo')" id="nav-demo">Graphe</button>
     <button class="nav-link" onclick="showPage('location')" id="nav-location">Correction</button>
   </div>
 </nav>
@@ -1068,7 +1078,9 @@
         </p>
       </div>
 
-      <div class="hero-video-slot reveal reveal-d2" aria-label="Zone réservée à la vidéo"></div>
+      <div class="hero-video-slot reveal reveal-d2" aria-label="Zone réservée à la vidéo">
+        <iframe width="100%" height="100%" src="https://www.youtube.com/embed/ZaeEYAcqHTc?autoplay=1&mute=1&loop=1&playlist=ZaeEYAcqHTc&modestbranding=1&fs=1&rel=0" title="Vidéo de démonstration PREVYO" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen style="border-radius:12px; position: relative; z-index: 2;"></iframe>
+      </div>
     </div>
   </section>
 
@@ -1631,6 +1643,7 @@
 <script src="js/state.js"></script>
 <script src="js/visu.js"></script>
 <script src="js/nav.js"></script>
+<script src="js/shared_dataset.js"></script>
 <script src="js/data.js"></script>
 <script src="js/articles.js"></script>
 <script src="js/graph.js"></script>

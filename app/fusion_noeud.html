@@ -291,6 +291,118 @@ var labelColors = new Map();
 var colorIdx = 0;
 var $ = function(id){ return document.getElementById(id); };
 
+function installThemeStyles(){
+  if(!document.getElementById('fusion-theme-font-preconnect')){
+    var pre=document.createElement('link');
+    pre.id='fusion-theme-font-preconnect';
+    pre.rel='preconnect';
+    pre.href='https://fonts.googleapis.com';
+    document.head.appendChild(pre);
+  }
+  if(!document.getElementById('fusion-theme-font')){
+    var font=document.createElement('link');
+    font.id='fusion-theme-font';
+    font.rel='stylesheet';
+    font.href='https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;600;700&family=JetBrains+Mono:wght@400;600&display=swap';
+    document.head.appendChild(font);
+  }
+  if(document.getElementById('fusion-theme-override')) return;
+  var st=document.createElement('style');
+  st.id='fusion-theme-override';
+  st.textContent=[
+    ':root{--bg:#06101f;--surface:rgba(11,26,48,.92);--surface-2:rgba(17,34,64,.92);--surface-3:rgba(22,45,78,.95);--text:#dde8f5;--text-2:#6b84a3;--text-3:#6b84a3;--accent:#1bae9f;--accent-2:#09a4e8;--accent-dim:rgba(27,174,159,.12);--ok:#2ed573;--ok-dim:rgba(46,213,115,.12);--warn:#ffa502;--warn-dim:rgba(255,165,2,.12);--danger:#ff4757;--danger-dim:rgba(255,71,87,.10);--purple:#bd33d1;--purple-dim:rgba(189,51,209,.12);--green:#4ade80;--green-dim:rgba(74,222,128,.12);--border:rgba(27,174,159,.15);--border-2:rgba(107,132,163,.24);--radius:14px;--radius-lg:22px;--mono:\'JetBrains Mono\',monospace;--sans:\'Lexend\',system-ui,sans-serif;--shadow:0 24px 50px rgba(0,0,0,.22);}',
+    'body{font-family:var(--sans);background:radial-gradient(circle at top left, rgba(27,174,159,.08), transparent 28%),radial-gradient(circle at top right, rgba(9,164,232,.08), transparent 30%),linear-gradient(180deg, rgba(7,14,28,1), rgba(6,16,31,1));}',
+    '.topbar{gap:1rem;padding:1rem 1.25rem;background:linear-gradient(180deg, rgba(11,26,48,.92), rgba(8,20,38,.88));border-bottom:1px solid var(--border);backdrop-filter:blur(14px);}',
+    '.topbar-meta{display:flex;flex-direction:column;gap:.2rem;}',
+    '.topbar-kicker{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--accent);}',
+    '.topbar h1{font-size:1rem;font-weight:700;letter-spacing:-.02em;color:#f7fbff;}',
+    '.topbar h1 span{background:linear-gradient(135deg,var(--accent),var(--accent-2),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}',
+    '.topbar-sub{color:var(--text-2);font-size:.8rem;}',
+    '.topbar-stats{gap:.75rem;flex-wrap:wrap;justify-content:flex-end;}',
+    '.stat{gap:.55rem;padding:.55rem .8rem;border-radius:999px;background:rgba(17,34,64,.72);border:1px solid rgba(107,132,163,.12);font-size:.78rem;}',
+    '.btn{padding:.82rem 1rem;border-radius:12px;font-size:.82rem;font-weight:700;transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease, background .18s ease;}',
+    '.btn:hover{transform:translateY(-1px);}.btn-accent{background:linear-gradient(135deg,var(--accent),var(--accent-2));box-shadow:0 16px 32px rgba(9,164,232,.18);}.btn-ok{background:rgba(46,213,115,.16);color:var(--ok);border-color:rgba(46,213,115,.22);}.btn-ghost{background:rgba(6,16,31,.68);border-color:rgba(107,132,163,.16);color:var(--text-2);}.btn-ghost:hover{border-color:rgba(27,174,159,.25);color:var(--text);}',
+    '.workspace{grid-template-columns:380px 1fr;padding:1rem 1.25rem 1rem;gap:1rem;}.panel-left,.panel-right{background:linear-gradient(180deg, rgba(11,26,48,.92), rgba(8,20,38,.92));border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:var(--shadow);backdrop-filter:blur(14px);}.panel-left{border-right:none;}',
+    '.panel-header{padding:1rem 1rem .9rem;border-bottom:1px solid var(--border);align-items:flex-start;}.panel-header-copy{display:grid;gap:.2rem;}.panel-header h2{font-size:.92rem;font-weight:700;color:#f7fbff;}.panel-header p{font-size:.76rem;color:var(--text-2);line-height:1.5;}.badge{padding:.2rem .7rem;border-radius:999px;font-size:.75rem;font-weight:700;}',
+    '.toolbar{padding:.85rem 1rem;border-bottom:1px solid var(--border);gap:.75rem;}.toolbar-row label,.select-all-row span{font-size:.76rem;color:var(--text-2);}.toolbar select{padding:.8rem .9rem;border-radius:12px;border:1px solid rgba(107,132,163,.18);background:rgba(6,16,31,.9);color:var(--text);font-family:var(--sans);font-size:.84rem;outline:none;}.toolbar select:focus{border-color:rgba(27,174,159,.5);box-shadow:0 0 0 3px rgba(27,174,159,.12);}.select-all-row{padding:.8rem 1rem;border-bottom:1px solid var(--border);}',
+    '.node-list{padding:.65rem;}.node-card{padding:.9rem;border-radius:16px;border:1px solid transparent;margin-bottom:.35rem;background:rgba(17,34,64,.3);transition:background .18s,border-color .18s,transform .18s;}.node-card:hover{background:rgba(17,34,64,.88);border-color:rgba(107,132,163,.16);transform:translateY(-1px);}.node-card.active{background:var(--accent-dim);border-color:rgba(27,174,159,.4);box-shadow:0 0 0 1px rgba(27,174,159,.12);}.node-card.selected{border-color:rgba(27,174,159,.28);}.ncard-label{font-size:.68rem;font-weight:700;padding:.22rem .6rem;border-radius:999px;letter-spacing:.06em;}.ncard-count{font-size:.72rem;font-weight:700;padding:.2rem .6rem;border-radius:999px;}.ncard-form{font-weight:700;font-size:.92rem;color:#f7fbff;}.ncard-id{font-size:.72rem;color:var(--text-2);}',
+    '.empty-state{padding:1.4rem;text-align:center;color:var(--text-2);gap:.8rem;}.empty-card{width:min(100%,520px);padding:1.2rem;border-radius:20px;background:linear-gradient(180deg, rgba(11,26,48,.92), rgba(8,20,38,.94));border:1px solid rgba(27,174,159,.14);box-shadow:0 16px 30px rgba(0,0,0,.16);display:grid;gap:.7rem;}.empty-icon{width:52px;height:52px;margin:0 auto;border-radius:18px;display:inline-flex;align-items:center;justify-content:center;background:rgba(27,174,159,.12);color:var(--accent);font-size:1.35rem;font-weight:700;}.empty-title{font-size:1.02rem;font-weight:700;color:#f7fbff;}.empty-copy{color:var(--text-2);font-size:.84rem;line-height:1.7;}',
+    '.detail{padding:1.4rem;max-width:980px;width:100%;}.detail-h{font-size:1.35rem;font-weight:700;color:#f7fbff;}.detail-sub{font-size:.84rem;color:var(--text-2);margin:.35rem 0 1rem;}.detail-hero{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:1rem;padding:1rem;margin-bottom:1rem;border-radius:18px;background:linear-gradient(180deg, rgba(11,26,48,.92), rgba(8,20,38,.94));border:1px solid rgba(27,174,159,.14);}.detail-hero p{color:var(--text-2);font-size:.84rem;line-height:1.65;}.detail-badges{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.65rem;}.detail-badge{display:inline-flex;align-items:center;padding:.4rem .7rem;border-radius:999px;border:1px solid rgba(107,132,163,.16);background:rgba(6,16,31,.54);color:var(--text);font-size:.73rem;font-weight:700;}.detail-badge.merge{color:var(--purple);border-color:rgba(189,51,209,.22);background:rgba(189,51,209,.08);}.detail-kpis{display:grid;grid-template-columns:repeat(2,minmax(120px,1fr));gap:.7rem;min-width:260px;}.detail-kpi{padding:.85rem .9rem;border-radius:16px;background:rgba(6,16,31,.72);border:1px solid rgba(107,132,163,.14);}.detail-kpi strong{display:block;color:#f7fbff;font-size:1rem;margin-bottom:.15rem;}.detail-kpi span{color:var(--text-2);font-size:.74rem;line-height:1.45;}',
+    '.section{background:rgba(17,34,64,.5);border:1px solid rgba(107,132,163,.14);border-radius:20px;padding:1.1rem;margin-bottom:1rem;}.sec-title{font-size:.74rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text-2);margin-bottom:.85rem;}.field-grid{display:grid;grid-template-columns:1fr 1fr;gap:.85rem;}.field label{display:block;font-size:.72rem;color:var(--text-2);margin-bottom:.35rem;text-transform:uppercase;letter-spacing:.06em;font-weight:600;}.field .val{font-family:var(--mono);font-size:.8rem;padding:.78rem .85rem;border-radius:12px;background:rgba(6,16,31,.88);border:1px solid rgba(107,132,163,.16);word-break:break-word;color:var(--text);}.field .val.highlight{border-color:rgba(27,174,159,.35);color:var(--accent);background:rgba(27,174,159,.08);}',
+    '.appear-table th{font-size:.72rem;color:var(--text-2);border-bottom:1px solid var(--border);}.appear-table td{border-bottom:1px solid var(--border);}.edge-pre{border-radius:12px;background:rgba(6,16,31,.88);border:1px solid rgba(107,132,163,.16);}',
+    '.bottom-bar{padding:.9rem 1.25rem 1rem;background:linear-gradient(180deg, rgba(11,26,48,.92), rgba(8,20,38,.94));border-top:1px solid var(--border);gap:.85rem;backdrop-filter:blur(14px);}.merge-summary{padding:.9rem 1rem;background:var(--accent-dim);border:1px solid rgba(27,174,159,.3);border-radius:14px;font-size:.82rem;font-weight:700;}.merge-summary strong{color:var(--accent);}',
+    '.overlay{background:radial-gradient(circle at top left, rgba(27,174,159,.08), transparent 28%),radial-gradient(circle at top right, rgba(9,164,232,.08), transparent 30%),rgba(6,16,31,.96);gap:1rem;padding:1.5rem;text-align:center;}.overlay h2{font-size:1.4rem;color:#f7fbff;}.overlay .sub{color:var(--text-2);font-size:.9rem;line-height:1.8;max-width:700px;}',
+    '::-webkit-scrollbar{width:8px;}::-webkit-scrollbar-thumb{background:var(--border-2);border-radius:999px;}',
+    '@media (max-width:1100px){.workspace{grid-template-columns:340px 1fr;}}',
+    '@media (max-width:860px){body{overflow:auto;}.app{height:auto;min-height:100vh;}.topbar{align-items:flex-start;flex-direction:column;}.topbar-stats{margin-left:0;justify-content:flex-start;}.workspace{grid-template-columns:1fr;}.panel-left{min-height:320px;}.detail-hero,.field-grid{grid-template-columns:1fr;}.detail-kpis{grid-template-columns:1fr 1fr;min-width:0;}.bottom-bar{flex-wrap:wrap;}}'
+  ].join('');
+  document.head.appendChild(st);
+}
+
+function installLayoutFixStyles(){
+  if(document.getElementById('fusion-layout-fix')) return;
+  var st=document.createElement('style');
+  st.id='fusion-layout-fix';
+  st.textContent=[
+    '.detail-hero{grid-template-columns:1fr;}',
+    '.detail-kpis{grid-template-columns:repeat(3,minmax(160px,1fr));min-width:0;}',
+    '.detail-kpi strong{font-size:.95rem;line-height:1.35;overflow-wrap:anywhere;word-break:break-word;}',
+    '.detail-sub{max-width:62ch;}',
+    '@media (max-width:900px){.detail-kpis{grid-template-columns:1fr 1fr;}}',
+    '@media (max-width:640px){.detail-kpis{grid-template-columns:1fr;}}'
+  ].join('');
+  document.head.appendChild(st);
+}
+
+function buildEmptyCardHtml(icon,title,copy){
+  return '<div class="empty-card"><div class="empty-icon">'+icon+'</div><div class="empty-title">'+title+'</div><div class="empty-copy">'+copy+'</div></div>';
+}
+
+function initializeLayoutCopy(){
+  installThemeStyles();
+  installLayoutFixStyles();
+  var topbar=document.querySelector('.topbar');
+  if(topbar){
+    topbar.innerHTML=''
+      +'<div class="topbar-meta">'
+      +'<div class="topbar-kicker">Module qualite PREVYO</div>'
+      +'<h1><span>Fusion de noeuds</span> par frequence</h1>'
+      +'<div class="topbar-sub">Repere les doublons frequents, choisis les groupes a fusionner, puis exporte un graphe simplifie.</div>'
+      +'</div>'
+      +'<div class="topbar-stats">'
+      +'<div class="stat"><span class="dot" style="background:var(--accent)"></span><span id="statUniq">0 groupes</span></div>'
+      +'<div class="stat"><span class="dot" style="background:var(--warn)"></span><span id="statDups">0 doublons</span></div>'
+      +'<div class="stat"><span class="dot" style="background:var(--ok)"></span><span id="statSel">0 selectionnes</span></div>'
+      +'<div class="stat"><span class="dot" style="background:var(--purple)"></span><span id="statEdges">0 edges a creer</span></div>'
+      +'</div>'
+      +'<button class="btn btn-ok" id="exportBtn" disabled>Exporter le JSON fusionne</button>';
+  }
+  var header=document.querySelector('.panel-header');
+  if(header){
+    header.innerHTML=''
+      +'<div class="panel-header-copy">'
+      +'<h2>Noeuds dupliques</h2>'
+      +'<p>Filtre les groupes, ouvre un detail puis coche ceux a fusionner.</p>'
+      +'</div>'
+      +'<span class="badge badge-accent" id="listCount">0</span>'
+      +'<span class="badge badge-ok" id="selCount" style="margin-left:4px">0 sel.</span>';
+  }
+  var empty=$('emptyState');
+  if(empty){
+    empty.innerHTML=buildEmptyCardHtml('02','Selectionne un groupe','Le detail affichera ici le noeud conserve, les apparitions et l\'apercu des edges crees.');
+  }
+  var overlay=$('overlay');
+  if(overlay){
+    overlay.innerHTML=''
+      +'<h2>Fusion des noeuds</h2>'
+      +'<button class="btn btn-accent" id="loadFileBtn" style="width:300px">Charger un fichier events.json</button>'
+      +'<button class="btn btn-ghost" id="loadAutoBtn" style="width:300px">Utiliser data/export.events.json</button>'
+      +'<input type="file" id="fileInput" accept=".json" hidden />';
+  }
+  if($('reloadBtn')) $('reloadBtn').textContent='Revenir au chargement';
+  if($('bottomInfo')) $('bottomInfo').textContent='Aucun fichier charge.';
+}
+
 /* ── UTILS ── */
 function norm(v){
   if(Array.isArray(v)) return v.map(norm);
@@ -411,7 +523,7 @@ function loadData(text){
   $('emptyState').style.display = '';
   applyFilter();
   updateStats();
-  $('bottomInfo').textContent = rawJson.length+' événements chargés.';
+  $('bottomInfo').textContent = rawJson.length+' evenements charges.';
 }
 
 /* ── FILTER ── */
@@ -430,7 +542,7 @@ function renderList(){
   $('selCount').textContent = selInFiltered+' sél.';
   
   if(!filteredGroups.length){
-    $('nodeList').innerHTML='<div style="padding:20px;text-align:center;color:var(--text-2);font-size:0.85rem">Aucun nœud correspondant.</div>';
+    $('nodeList').innerHTML='<div class="empty-state">'+buildEmptyCardHtml('00','Aucun resultat','Aucun groupe ne correspond au filtre courant.')+'</div>';
     return;
   }
   
@@ -489,8 +601,7 @@ function selectGroup(realIdx){
   var replacedOccs = g.occurrences.slice(1);
   var mode = $('modeSelect').value;
 
-  var html = '<div class="detail-h">'+esc(g.form)+'</div>'
-    +'<div class="detail-sub">'+g.occurrences.length+' apparitions · '+(g.occurrences.length-1)+' edges à créer si fusionné</div>';
+  var html = '<div class="detail-hero"><div><div class="detail-badges"><span class="detail-badge merge">'+esc(shortLabel(g.label))+'</span><span class="detail-badge">'+g.occurrences.length+' apparitions</span></div><div class="detail-h">'+esc(g.form)+'</div><div class="detail-sub">'+(g.occurrences.length-1)+' edge(s) seront crees si ce groupe est fusionne. L\'identifiant complet du noeud conserve reste visible juste en dessous.</div></div><div class="detail-kpis"><div class="detail-kpi"><strong>'+g.occurrences.length+'</strong><span>Apparitions</span></div><div class="detail-kpi"><strong>'+(g.occurrences.length-1)+'</strong><span>Edges a creer</span></div><div class="detail-kpi"><strong>'+esc(shortLabel(g.label))+'</strong><span>Label principal</span></div></div></div>';
 
   html += '<label style="display:flex;align-items:center;gap:10px;margin-bottom:18px;padding:12px 16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);cursor:pointer;user-select:none;">'
     +'<input type="checkbox" class="checkbox" id="detailCheck" '+(isSel?'checked':'')+' onchange="toggleSelect('+realIdx+',this.checked)" />'
@@ -609,6 +720,7 @@ function exportJson(){
 }
 
 /* ── EVENTS ── */
+initializeLayoutCopy();
 $('minOccRange').addEventListener('input', function(){ $('minOccVal').textContent = this.value; applyFilter(); });
 $('loadFileBtn').addEventListener('click', function(){ $('fileInput').click(); });
 $('fileInput').addEventListener('change', async function(e){

@@ -148,7 +148,7 @@ function buildFusionVisEdges(edges) {
 
 function initFusion() {
   if (!state.events.length) {
-    document.getElementById('f-empty').style.display = 'block';
+    document.getElementById('f-empty').style.display = 'flex';
     document.getElementById('f-content').style.display = 'none';
     return;
   }
@@ -194,12 +194,27 @@ function buildFusionPairs() {
   pairs.sort((a, b) => b.score - a.score);
   fusion.pairs = pairs;
 
+  const pairCountEl = document.getElementById('f-pair-count');
+  if (pairCountEl) {
+    pairCountEl.textContent = `${pairs.length} ${pairs.length > 1 ? 'paires' : 'paire'}`;
+  }
+  const pairCountSideEl = document.getElementById('pairCountSide');
+  if (pairCountSideEl) {
+    pairCountSideEl.textContent = String(pairs.length);
+  }
+
   const sel = document.getElementById('f-pairs');
   sel.innerHTML = pairs.length
     ? pairs.map((p, i) =>
         `<option value="${i}">[${(p.score * 100).toFixed(0)}%] A:${String(p.aid1).slice(0,12)}… — B:${String(p.aid2).slice(0,12)}…</option>`
       ).join('')
     : '<option value="">Aucune paire au-dessus du seuil</option>';
+
+  if (pairs.length) {
+    sel.innerHTML = pairs.map((p, i) =>
+      `<option value="${i}">[${(p.score * 100).toFixed(0)}%] A:${String(p.aid1).slice(0,12)}... - B:${String(p.aid2).slice(0,12)}...</option>`
+    ).join('');
+  }
 
   onFusionPairSel();
 }
@@ -313,12 +328,20 @@ function renderFusion() {
   document.getElementById('f-stats-a').textContent  = `${(ea.nodes||[]).length} nœuds · ${(ea.edges||[]).length} arêtes`;
   document.getElementById('f-stats-b').textContent  = `${(eb.nodes||[]).length} nœuds · ${(eb.edges||[]).length} arêtes`;
 
+  document.getElementById('f-title-a').textContent  = `Event A - ${typeA}`;
+  document.getElementById('f-title-b').textContent  = `Event B - ${typeB}`;
+  document.getElementById('f-stats-a').textContent  = `${(ea.nodes||[]).length} noeuds - ${(ea.edges||[]).length} aretes`;
+  document.getElementById('f-stats-b').textContent  = `${(eb.nodes||[]).length} noeuds - ${(eb.edges||[]).length} aretes`;
+
   // Contexte textuel de chaque event (extrait de l'article source)
   const ctxA = document.getElementById('f-context-a');
   const ctxB = document.getElementById('f-context-b');
   const truncate = (s, n) => s && s.length > n ? s.slice(0, n) + '…' : (s || '');
   ctxA.textContent = truncate(ea.context || '', 220);
   ctxB.textContent = truncate(eb.context || '', 220);
+  const truncateClean = (s, n) => s && s.length > n ? s.slice(0, n) + '...' : (s || '');
+  ctxA.textContent = truncateClean(ea.context || '', 220);
+  ctxB.textContent = truncateClean(eb.context || '', 220);
   document.getElementById('f-sel-a-lbl').textContent = 'aucun';
   document.getElementById('f-sel-b-lbl').textContent = 'aucun';
 
@@ -327,11 +350,18 @@ function renderFusion() {
     ? `<span class="f-shared-badge">${shared.size} nœud(s) partagé(s) — en violet dans les deux graphes</span>`
     : '';
 
+  if (shared.size) {
+    document.getElementById('f-shared-msg').innerHTML = `<span class="f-shared-badge">${shared.size} noeud(s) partages - visibles dans les deux graphes</span>`;
+  }
+
   // Historique
   const hEl = document.getElementById('f-history');
   hEl.innerHTML = fusion.history.length
     ? fusion.history.map((h, i) => `<div class="f-history-item">${i + 1}. ${h.desc}</div>`).join('')
     : '<span style="color:var(--muted);font-size:.8rem">Aucune modification.</span>';
+  if (!fusion.history.length) {
+    hEl.innerHTML = '<span class="f-history-empty">Aucune modification.</span>';
+  }
 
   // Nettoyer anciens réseaux
   fusion.netA?.destroy();

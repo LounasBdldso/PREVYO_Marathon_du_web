@@ -125,7 +125,7 @@
 
     .intro-strip {
       display: grid;
-      grid-template-columns: 1.35fr 1fr 1fr;
+      grid-template-columns: 1.6fr 1fr;
       gap: 1rem;
       padding: 1rem 1.25rem 0;
       background: transparent;
@@ -134,9 +134,9 @@
     .intro-card {
       background: linear-gradient(180deg, rgba(11, 26, 48, 0.92), rgba(8, 20, 38, 0.92));
       border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: 1rem 1.1rem;
-      box-shadow: var(--shadow);
+      border-radius: 18px;
+      padding: 0.95rem 1rem;
+      box-shadow: 0 16px 32px rgba(0, 0, 0, 0.16);
     }
 
     .intro-card h2,
@@ -150,6 +150,91 @@
       color: var(--text-2);
       font-size: 0.8rem;
       line-height: 1.7;
+    }
+
+    .intro-hero-copy {
+      display: grid;
+      gap: 0.8rem;
+    }
+
+    .intro-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      font-size: 0.67rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--accent);
+    }
+
+    .intro-eyebrow::before {
+      content: '';
+      width: 20px;
+      height: 2px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    }
+
+    .intro-hero h2 {
+      font-size: 1.15rem;
+      line-height: 1.25;
+      margin-bottom: 0;
+    }
+
+    .intro-highlights {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .intro-pill {
+      padding: 0.42rem 0.72rem;
+      border-radius: 999px;
+      border: 1px solid rgba(27,174,159,0.16);
+      background: rgba(6,16,31,0.5);
+      color: var(--text);
+      font-size: 0.74rem;
+      font-weight: 600;
+    }
+
+    .step-list {
+      display: grid;
+      gap: 0.65rem;
+      margin-top: 0.2rem;
+    }
+
+    .step-item {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 0.7rem;
+      align-items: start;
+    }
+
+    .step-num {
+      width: 28px;
+      height: 28px;
+      border-radius: 10px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(27,174,159,0.14);
+      color: var(--accent);
+      font-size: 0.78rem;
+      font-weight: 700;
+    }
+
+    .step-copy strong {
+      display: block;
+      color: #f7fbff;
+      font-size: 0.8rem;
+      margin-bottom: 0.1rem;
+    }
+
+    .step-copy span {
+      color: var(--text-2);
+      font-size: 0.76rem;
+      line-height: 1.6;
     }
 
     .mini-list {
@@ -190,12 +275,23 @@
       padding: 1rem 1rem 0.9rem;
       border-bottom: 1px solid var(--border);
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       gap: 10px;
       flex-shrink: 0;
     }
 
+    .panel-header-copy {
+      display: grid;
+      gap: 0.2rem;
+    }
+
     .panel-header h2 { font-size: 0.92rem; font-weight: 700; color: #f7fbff; }
+
+    .panel-header p {
+      font-size: 0.76rem;
+      color: var(--text-2);
+      line-height: 1.5;
+    }
 
     .panel-header .count {
       margin-left: auto;
@@ -212,6 +308,12 @@
       padding: 0.85rem 1rem;
       border-bottom: 1px solid var(--border);
       flex-shrink: 0;
+    }
+
+    .panel-toolbar-note {
+      margin-top: 0.55rem;
+      font-size: 0.74rem;
+      color: var(--text-2);
     }
 
     .panel-toolbar input,
@@ -315,6 +417,51 @@
       margin-top: 0.2rem;
     }
 
+    .acard-bottom {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      margin-top: 0.65rem;
+    }
+
+    .acard-desc {
+      font-size: 0.74rem;
+      color: var(--text-2);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .acard-status {
+      padding: 0.22rem 0.55rem;
+      border-radius: 999px;
+      font-size: 0.67rem;
+      font-weight: 700;
+      flex-shrink: 0;
+      border: 1px solid rgba(107,132,163,0.16);
+      color: var(--text-2);
+      background: rgba(6,16,31,0.62);
+    }
+
+    .acard-status.pending {
+      color: var(--warn);
+      border-color: rgba(255,165,2,0.2);
+      background: rgba(255,165,2,0.08);
+    }
+
+    .acard-status.fixed {
+      color: var(--ok);
+      border-color: rgba(46,213,115,0.22);
+      background: rgba(46,213,115,0.08);
+    }
+
+    .acard-status.deleted {
+      color: var(--danger);
+      border-color: rgba(255,71,87,0.22);
+      background: rgba(255,71,87,0.08);
+    }
+
     .panel-right {
       display: flex;
       flex-direction: column;
@@ -327,16 +474,148 @@
       align-items: center;
       justify-content: center;
       height: 100%;
-      color: var(--text-2);
-      font-size: 0.92rem;
-      padding: 2rem;
+      padding: 1.4rem;
       text-align: center;
+    }
+
+    .empty-card {
+      width: min(100%, 520px);
+      padding: 1.2rem;
+      border-radius: 20px;
+      background:
+        linear-gradient(180deg, rgba(11, 26, 48, 0.92), rgba(8, 20, 38, 0.94)),
+        radial-gradient(circle at top right, rgba(27,174,159,0.1), transparent 42%);
+      border: 1px solid rgba(27,174,159,0.14);
+      box-shadow: 0 16px 30px rgba(0, 0, 0, 0.16);
+      display: grid;
+      gap: 0.7rem;
+    }
+
+    .empty-icon {
+      width: 52px;
+      height: 52px;
+      margin: 0 auto;
+      border-radius: 18px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(27,174,159,0.12);
+      color: var(--accent);
+      font-size: 1.35rem;
+      font-weight: 700;
+    }
+
+    .empty-title {
+      font-size: 1.02rem;
+      font-weight: 700;
+      color: #f7fbff;
+    }
+
+    .empty-copy {
+      color: var(--text-2);
+      font-size: 0.84rem;
+      line-height: 1.7;
+    }
+
+    .empty-steps {
+      display: grid;
+      gap: 0.5rem;
+      text-align: left;
+    }
+
+    .empty-step {
+      padding: 0.75rem 0.85rem;
+      border-radius: 14px;
+      background: rgba(6,16,31,0.68);
+      border: 1px solid rgba(107,132,163,0.14);
+      color: var(--text-2);
+      font-size: 0.78rem;
+      line-height: 1.55;
+    }
+
+    .empty-step strong {
+      color: var(--text);
     }
 
     .detail-view {
       padding: 1.4rem;
       max-width: 980px;
       width: 100%;
+    }
+
+    .detail-hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 1rem;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      border-radius: 18px;
+      background:
+        linear-gradient(180deg, rgba(11, 26, 48, 0.92), rgba(8, 20, 38, 0.94)),
+        radial-gradient(circle at top right, rgba(27,174,159,0.08), transparent 44%);
+      border: 1px solid rgba(27,174,159,0.14);
+    }
+
+    .detail-hero-main {
+      min-width: 0;
+    }
+
+    .detail-badge-row {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-bottom: 0.75rem;
+    }
+
+    .detail-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.42rem 0.72rem;
+      border-radius: 999px;
+      border: 1px solid rgba(107,132,163,0.16);
+      background: rgba(6,16,31,0.54);
+      color: var(--text);
+      font-size: 0.73rem;
+      font-weight: 700;
+    }
+
+    .detail-badge.alert { color: var(--danger); border-color: rgba(255,71,87,0.22); background: rgba(255,71,87,0.08); }
+    .detail-badge.warn { color: var(--warn); border-color: rgba(255,165,2,0.22); background: rgba(255,165,2,0.08); }
+    .detail-badge.info { color: var(--purple); border-color: rgba(189,51,209,0.22); background: rgba(189,51,209,0.08); }
+
+    .detail-hero p {
+      color: var(--text-2);
+      font-size: 0.86rem;
+      line-height: 1.7;
+    }
+
+    .detail-kpis {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(120px, 1fr));
+      gap: 0.7rem;
+      min-width: 260px;
+      align-self: start;
+    }
+
+    .detail-kpi {
+      padding: 0.85rem 0.9rem;
+      border-radius: 16px;
+      background: rgba(6,16,31,0.72);
+      border: 1px solid rgba(107,132,163,0.14);
+    }
+
+    .detail-kpi strong {
+      display: block;
+      color: #f7fbff;
+      font-size: 1rem;
+      margin-bottom: 0.15rem;
+    }
+
+    .detail-kpi span {
+      color: var(--text-2);
+      font-size: 0.74rem;
+      line-height: 1.45;
     }
 
     .detail-view h2 {
@@ -396,6 +675,47 @@
       color: var(--text);
     }
 
+    .wikidata-image-block {
+      margin-top: 0.9rem;
+      padding: 0.9rem;
+      border-radius: 16px;
+      background: rgba(6,16,31,0.62);
+      border: 1px solid rgba(107,132,163,0.14);
+      display: grid;
+      gap: 0.65rem;
+    }
+
+    .wikidata-image-label {
+      font-size: 0.74rem;
+      color: var(--text-2);
+      font-weight: 600;
+    }
+
+    .wikidata-image-frame {
+      width: min(100%, 360px);
+      min-height: 180px;
+      max-height: 360px;
+      overflow: auto;
+      border-radius: 14px;
+      border: 1px solid rgba(107,132,163,0.16);
+      background:
+        linear-gradient(180deg, rgba(17,34,64,0.8), rgba(11,26,48,0.8));
+      box-shadow: 0 14px 28px rgba(0, 0, 0, 0.18);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.75rem;
+    }
+
+    .wikidata-image-frame img {
+      display: block;
+      max-width: 100%;
+      max-height: 100%;
+      width: auto;
+      height: auto;
+      object-fit: contain;
+    }
+
     .val.danger-highlight {
       border-color: rgba(255,71,87,0.32);
       background: rgba(255,71,87,0.1);
@@ -448,6 +768,28 @@
 
     .fix-panel { display: none; }
     .fix-panel.active { display: block; }
+
+    .fix-intro {
+      margin-bottom: 0.9rem;
+      padding: 0.75rem 0.9rem;
+      border-radius: 14px;
+      background: rgba(6,16,31,0.72);
+      border: 1px solid rgba(107,132,163,0.14);
+      color: var(--text-2);
+      font-size: 0.8rem;
+      line-height: 1.55;
+    }
+
+    .fix-intro strong {
+      color: var(--text);
+    }
+
+    .fix-note {
+      margin-bottom: 0.85rem;
+      color: var(--text-2);
+      font-size: 0.82rem;
+      line-height: 1.65;
+    }
 
     .search-row {
       display: flex;
@@ -572,6 +914,48 @@
     .load-overlay h2 { font-size: 1.4rem; color: #f7fbff; }
     .load-overlay .sub { color: var(--text-2); font-size: 0.9rem; line-height: 1.8; max-width: 700px; }
 
+    .load-overlay-grid {
+      width: min(100%, 760px);
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.85rem;
+    }
+
+    .load-overlay-card {
+      padding: 0.95rem 1rem;
+      border-radius: 18px;
+      background: rgba(11, 26, 48, 0.78);
+      border: 1px solid rgba(27,174,159,0.14);
+      text-align: left;
+    }
+
+    .load-overlay-card strong {
+      display: block;
+      color: #f7fbff;
+      font-size: 0.83rem;
+      margin-bottom: 0.3rem;
+    }
+
+    .load-overlay-card span {
+      color: var(--text-2);
+      font-size: 0.76rem;
+      line-height: 1.65;
+    }
+
+    .load-overlay-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+      width: min(100%, 320px);
+    }
+
+    .load-overlay-note {
+      font-size: 0.76rem;
+      color: var(--text-2);
+      max-width: 560px;
+      line-height: 1.7;
+    }
+
     .spinner {
       width: 18px;
       height: 18px;
@@ -635,7 +1019,10 @@
       .topbar-stats { margin-left: 0; justify-content: flex-start; }
       .workspace { grid-template-columns: 1fr; }
       .panel-left { min-height: 320px; }
+      .detail-hero { grid-template-columns: 1fr; }
+      .detail-kpis { grid-template-columns: 1fr 1fr; min-width: 0; }
       .detail-grid, .manual-grid { grid-template-columns: 1fr; }
+      .load-overlay-grid { grid-template-columns: 1fr; }
       .bottom-bar { flex-wrap: wrap; }
       .bottom-bar .spacer { display: none; }
     }
@@ -1261,29 +1648,6 @@
       </div>
     </div>
 
-    <div class="intro-strip">
-      <article class="intro-card">
-        <h2>Lecture du module</h2>
-        <p>Le panneau de gauche priorise les anomalies à traiter. Le panneau principal conserve le contexte article, les métadonnées actuelles et les actions de correction.</p>
-      </article>
-      <article class="intro-card">
-        <h3>Types détectés</h3>
-        <div class="mini-list">
-          <div><strong>Mauvais Wikidata</strong> · mauvais rattachement sémantique</div>
-          <div><strong>Forme collée</strong> · libellé mal segmenté</div>
-          <div><strong>Géocodage 0,0</strong> · coordonnées nulles</div>
-        </div>
-      </article>
-      <article class="intro-card">
-        <h3>Sorties possibles</h3>
-        <div class="mini-list">
-          <div><strong>Correction manuelle</strong> ou assistée</div>
-          <div><strong>Suppression ciblée</strong> d’un nœud ou article</div>
-          <div><strong>Export JSON</strong> consolidé</div>
-        </div>
-      </article>
-    </div>
-
     <div class="workspace">
       <div class="panel-left">
         <div class="panel-header">
@@ -1324,19 +1688,19 @@
           <div class="popup-icon">🏷️</div>
           <div class="label-popup-title-text">
             <h2>Reclasser un label</h2>
-            <p>Navigue dans l’arborescence ou cherche directement un label final. Un clic sur un choix terminal l’applique immédiatement.</p>
+            <p>Naviguer dans l’arborescence ou rechercher directement un label final.</p>
           </div>
         </div>
         <button class="label-popup-close" type="button" onclick="closeLabelPopup()">✕</button>
       </div>
 
-      <div id="popupProgress" class="label-popup-progress"></div>
+      <div id="popupProgress"></div>
 
       <div class="label-popup-body">
         <section class="popup-card">
           <div class="popup-card-head">
             <h3>Arborescence du label</h3>
-            <p>Chaque clic descend d’un niveau. Si tu arrives sur un label final, il est appliqué directement.</p>
+            <p>Chaque clic descend d’un niveau.</p>
           </div>
           <div class="popup-card-body">
             <div id="treeLevels" class="tree-levels"></div>
@@ -1347,7 +1711,7 @@
         <section class="popup-card">
           <div class="popup-card-head">
             <h3>Mini treemap</h3>
-            <p>Vue interactive — cliquer sur un enfant pour naviguer.</p>
+            <p>Vue interactive</p>
           </div>
           <div class="popup-card-body">
             <div class="mini-treemap-wrap">
@@ -1383,11 +1747,7 @@
       </div>
 
       <div class="label-popup-footer">
-        <div class="footer-note">
-          <kbd>Retour</kbd> remonte d’un niveau dans l’arbre. <kbd>Esc</kbd> ferme la popup. Valider applique le label manuel si tu en as saisi un.
-        </div>
         <div class="footer-actions">
-          <button class="btn btn-ghost" type="button" onclick="stepBack()">Retour</button>
           <button class="btn btn-ghost" type="button" onclick="resetPopupFlow()">Réinitialiser</button>
           <button type="button" class="btn btn-purple" onclick="applySelectedLabel()">Valider</button>
         </div>
@@ -1395,7 +1755,8 @@
     </div>
   </div>
 
-<script>
+  <script src="../js/shared_dataset.js"></script>
+  <script>
 
     var rawJson = null;
     var rawText = '';
@@ -1505,6 +1866,108 @@
       return c;
     }
 
+    function buildEmptyCardHtml(icon, title, copy, steps) {
+      var stepsHtml = Array.isArray(steps) && steps.length
+        ? '<div class="empty-steps">' + steps.map(function(step) { return '<div class="empty-step">' + step + '</div>'; }).join('') + '</div>'
+        : '';
+
+      return ''
+        + '<div class="empty-card">'
+        + '<div class="empty-icon">' + icon + '</div>'
+        + '<div class="empty-title">' + title + '</div>'
+        + '<div class="empty-copy">' + copy + '</div>'
+        + stepsHtml
+        + '</div>';
+    }
+
+    function buildInitialListStateHtml() {
+      return '<div class="detail-empty">' + buildEmptyCardHtml(
+        '01',
+        'Charge un export pour lancer l\'analyse',
+        'Le module affichera ici les lieux a verifier des qu\'un fichier JSON aura ete charge.',
+        []
+      ) + '</div>';
+    }
+
+    function buildNoResultStateHtml(filter) {
+      var copy = filter
+        ? 'Aucune anomalie ne correspond a "' + esc(filter) + '". Essaie un autre terme ou retire le filtre.'
+        : 'Aucune anomalie de lieu n\'a ete detectee dans le corpus charge.';
+
+      return '<div class="detail-empty">' + buildEmptyCardHtml(
+        '00',
+        'Rien a afficher pour le moment',
+        copy,
+        filter ? ['<strong>Conseil</strong> : cherche plutot un article, un fragment de lieu ou une description connue.'] : []
+      ) + '</div>';
+    }
+
+    function buildDetailEmptyStateHtml() {
+      return '<div class="detail-empty" id="emptyState">' + buildEmptyCardHtml(
+        '02',
+        'Ouvre une anomalie pour commencer',
+        'Le detail du lieu apparaitra ici avec le contexte et les actions de correction.',
+        [
+          '<strong>Verifier</strong> le contexte avant de corriger.',
+          '<strong>Exporter</strong> une fois les modifications relues.'
+        ]
+      ) + '</div>';
+    }
+
+    function initializePageCopy() {
+      var topbarMeta = document.querySelector('.topbar-meta');
+      if (topbarMeta) {
+        topbarMeta.innerHTML = ''
+          + '<div class="topbar-kicker">Module qualite PREVYO</div>'
+          + '<h1><span>Anomalies de lieu</span></h1>'
+          + '<div class="topbar-sub">Repérer les lieux incoherents, vérifier le contexte article, appliquer une correction puis exporte un JSON.</div>';
+      }
+
+      var introStrip = document.querySelector('.intro-strip');
+
+      var panelHeader = document.querySelector('.panel-left .panel-header');
+      if (panelHeader) {
+        panelHeader.innerHTML = ''
+          + '<div class="panel-header-copy">'
+          + '<h2>File d\'anomalies</h2>'
+          + '<p>Filtre puis ouvre un lieu pour le corriger.</p>'
+          + '</div>'
+          + '<span class="count" id="listCount">0</span>';
+      }
+
+      var panelToolbar = document.querySelector('.panel-left .panel-toolbar');
+      if (panelToolbar) {
+        panelToolbar.innerHTML = ''
+          + '<input id="filterInput" type="text" placeholder="Rechercher un lieu, une description ou un identifiant d\'article..." />'
+          + '<div class="panel-toolbar-note">Recherche par lieu ou identifiant d\'article.</div>';
+      }
+
+      var list = $('anomalyList');
+      if (list && (!rawJson || !rawJson.length)) list.innerHTML = buildInitialListStateHtml();
+
+      var emptyState = $('emptyState');
+      if (emptyState) emptyState.outerHTML = buildDetailEmptyStateHtml();
+
+      var bottomInfo = $('bottomInfo');
+      if (bottomInfo) bottomInfo.textContent = 'Aucun fichier charge. Charge un export pour afficher les lieux a verifier.';
+
+      var reloadBtn = $('reloadBtn');
+      if (reloadBtn) reloadBtn.textContent = 'Revenir au chargement';
+
+      var exportBtn = $('exportBtn');
+      if (exportBtn) exportBtn.textContent = 'Exporter les corrections';
+
+      var overlay = $('loadOverlay');
+      if (overlay) {
+        overlay.innerHTML = ''
+          + '<h2>Correction des lieux</h2>'
+          + '<div class="load-overlay-actions">'
+          + '<button class="btn btn-accent" id="loadFileBtn" style="min-width:320px">Charger un fichier events.json</button>'
+          + '</div>'
+          + '<input type="file" id="fileInput" accept=".json" hidden />';
+      }
+    }
+
     function renderList(filter) {
       filter = filter || '';
       var list = $('anomalyList');
@@ -1514,7 +1977,7 @@
       });
       $('listCount').textContent = filtered.length;
       if (!filtered.length) {
-        list.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-2)">Aucune anomalie trouv\u00e9e.</div>';
+        list.innerHTML = buildNoResultStateHtml(filter);
         return;
       }
       var html = '';
@@ -1526,10 +1989,14 @@
         var typeCls = a.anomalyType === 'wikidata' ? 'wikidata' : a.anomalyType === 'malformed' ? 'malformed' : 'geocode';
         var typeLabel = a.anomalyType === 'wikidata' ? 'Mauvais Wikidata' : a.anomalyType === 'malformed' ? 'Forme coll\u00e9e' : 'G\u00e9ocodage 0,0';
         var stateCls = isDel ? 'deleted' : isFixed ? 'fixed' : '';
+        var stateLabel = isDel ? 'Supprime' : isFixed ? 'Corrige' : 'A traiter';
+        var stateTone = isDel ? 'deleted' : isFixed ? 'fixed' : 'pending';
+        var desc = a.description || ((a.latitude != null && a.longitude != null) ? ('Coordonnees actuelles : ' + a.latitude + ', ' + a.longitude) : 'Article ' + a.articleId);
         html += '<div class="anomaly-card ' + (realIdx === activeIdx ? 'active' : '') + ' ' + stateCls + '" onclick="selectAnomaly(' + realIdx + ')">'
           + '<div class="acard-top"><span class="acard-type ' + typeCls + '">' + typeLabel + '</span></div>'
           + '<div class="acard-form">' + esc(a.form) + '</div>'
-          + '<div class="acard-meta">' + esc(a.description || a.uri || a.articleId) + '</div></div>';
+          + '<div class="acard-meta">Article ' + esc(a.articleId) + '</div>'
+          + '<div class="acard-bottom"><div class="acard-desc">' + esc(desc) + '</div><span class="acard-status ' + stateTone + '">' + stateLabel + '</span></div></div>';
       }
       list.innerHTML = html;
     }
@@ -1568,6 +2035,15 @@
       }
       var edgeCount = countNodeEdges(a.nodeId);
       var articleCount = (a.allArticleIds || []).length;
+      var typeTone = a.anomalyType === 'wikidata' ? 'alert' : a.anomalyType === 'malformed' ? 'info' : 'warn';
+      var typeHint = a.anomalyType === 'wikidata'
+        ? 'Verifie le label et la description : ce lieu semble rattache a la mauvaise entite.'
+        : a.anomalyType === 'malformed'
+        ? 'Le nom du lieu semble mal ecrit ou mal segmente.'
+        : 'Les coordonnees sont absentes ou a 0,0.';
+      var coordSummary = (a.latitude != null && a.longitude != null)
+        ? (a.latitude + ', ' + a.longitude)
+        : 'Coordonnees absentes';
       var h = '';
 
       if (isDel) {
@@ -1582,11 +2058,25 @@
           + '<button class="btn btn-ghost" style="margin-left:auto;padding:6px 14px;font-size:0.82rem" onclick="removeCorrection()">Retirer</button></div>';
       }
 
-      h += '<h2>' + esc(a.form) + '</h2>'
-        + '<div style="color:var(--text-2);margin-bottom:18px">' + typeName + ' \u2014 Article: ' + esc(a.articleId) + '</div>';
+      h += '<div class="detail-hero">'
+        + '<div class="detail-hero-main">'
+        + '<div class="detail-badge-row">'
+        + '<span class="detail-badge ' + typeTone + '">' + typeName + '</span>'
+        + '<span class="detail-badge">Article ' + esc(a.articleId) + '</span>'
+        + '</div>'
+        + '<h2>' + esc(a.form) + '</h2>'
+        + '<p>' + typeHint + '</p>'
+        + '</div>'
+        + '<div class="detail-kpis">'
+        + '<div class="detail-kpi"><strong>' + esc(coordSummary) + '</strong><span>Coordonnees actuelles</span></div>'
+        + '<div class="detail-kpi"><strong>' + edgeCount + '</strong><span>Aretes liees</span></div>'
+        + '<div class="detail-kpi"><strong>' + articleCount + '</strong><span>Article(s) touches</span></div>'
+        + '<div class="detail-kpi"><strong>' + ((a.labels || []).length || 0) + '</strong><span>Label(s)</span></div>'
+        + '</div>'
+        + '</div>';
 
       // Current data section
-      h += '<div class="detail-section"><h3>Donn\u00e9es actuelles</h3><div class="detail-grid">'
+      h += '<div class="detail-section"><h3>Point de controle actuel</h3><div class="detail-grid">'
         + '<div class="detail-field"><label>Form</label><div class="val">' + esc(a.form) + '</div></div>'
         + '<div class="detail-field">'
         + '<label style="display:flex;align-items:center;justify-content:space-between;gap:10px">'
@@ -1601,34 +2091,39 @@
       if (a.description) h += '<div class="detail-field"><label>Description Wikidata</label><div class="val ' + (a.anomalyType==='wikidata'?'danger-highlight':'') + '">' + esc(a.description) + '</div></div>';
       h += '</div>';
       if (a.imageUrl && a.anomalyType === 'wikidata') {
-        h += '<div style="margin-top:12px"><label style="font-size:0.78rem;color:var(--text-2)">Image Wikidata (mauvaise entit\u00e9)</label>'
-          + '<img src="' + esc(a.imageUrl) + '" style="max-height:100px;border-radius:8px;margin-top:4px;border:1px solid var(--border)" onerror="this.style.display=\'none\'" /></div>';
+        h += '<div class="wikidata-image-block">'
+          + '<div class="wikidata-image-label">Image Wikidata associee</div>'
+          + '<div class="wikidata-image-frame">'
+          + '<img src="' + esc(a.imageUrl) + '" alt="Image Wikidata" onerror="this.closest(\'.wikidata-image-block\').style.display=\'none\'" />'
+          + '</div>'
+          + '</div>';
       }
       h += '</div>';
 
       // Context section
-      h += '<div class="detail-section"><h3>Contexte de l\'article</h3>'
+      h += '<div class="detail-section"><h3>Contexte article</h3>'
         + '<div class="context-box">' + (contextHtml || '<span style="color:var(--text-2)">Aucun contexte disponible.</span>') + '</div></div>';
 
       if (!isDel) {
         // Correction section
-        h += '<div class="detail-section"><h3>Correction</h3>'
+        h += '<div class="detail-section"><h3>Corriger</h3>'
+          + '<div class="fix-intro"><strong>Suggestion</strong> pour chercher vite. <strong>Manuel</strong> si tu connais deja la bonne valeur.</div>'
           + '<div class="fix-tabs">'
-          + '<button class="fix-tab active" onclick="switchTab(\'auto\', this)">Automatique</button>'
-          + '<button class="fix-tab" onclick="switchTab(\'manual\', this)">Manuelle</button></div>';
+          + '<button class="fix-tab active" onclick="switchTab(\'auto\', this)">Suggestion</button>'
+          + '<button class="fix-tab" onclick="switchTab(\'manual\', this)">Manuel</button></div>';
 
         // Auto panel
         h += '<div class="fix-panel active" id="fixAuto">'
-          + '<div style="margin-bottom:10px;font-size:0.88rem;color:var(--text-2)">Recherche via <strong>Nominatim</strong> (OpenStreetMap) ou <strong>Wikidata</strong> pour trouver les bonnes coordonn\u00e9es.</div>'
+          + '<div class="fix-note">Cherche une proposition via <strong>Nominatim</strong> ou <strong>Wikidata</strong>.</div>'
           + '<div class="search-row">'
-          + '<input id="autoQuery" type="text" value="' + esc(cleanFormForSearch(a.form)) + '" placeholder="Nom du lieu..." />'
+          + '<input id="autoQuery" type="text" value="' + esc(cleanFormForSearch(a.form)) + '" placeholder="Nom du lieu a rechercher..." />'
           + '<select id="autoSource"><option value="nominatim">Nominatim (OSM)</option><option value="wikidata">Wikidata</option></select>'
-          + '<button class="btn btn-accent" onclick="runAutoSearch()">Rechercher</button></div>'
-          + '<div id="autoResults"><div style="color:var(--text-2);font-size:0.88rem">Lance une recherche pour voir les suggestions.</div></div></div>';
+          + '<button class="btn btn-accent" onclick="runAutoSearch()">Chercher</button></div>'
+          + '<div id="autoResults"><div class="fix-note">Les suggestions apparaitront ici.</div></div></div>';
 
         // Manual panel
         h += '<div class="fix-panel" id="fixManual">'
-          + '<div style="margin-bottom:12px;font-size:0.88rem;color:var(--text-2)">Saisis manuellement les valeurs corrig\u00e9es.</div>'
+          + '<div class="fix-note">Renseigne directement les bonnes valeurs.</div>'
           + '<div class="manual-grid">'
           + '<div class="manual-field"><label>Form</label><input id="manualForm" type="text" value="' + esc(a.form) + '" /></div>'
           + '<div class="manual-field"><label>URI Wikidata</label><input id="manualUri" type="text" value="' + esc(a.uri||'') + '" placeholder="https://www.wikidata.org/entity/Q..." /></div></div>'
@@ -1641,14 +2136,13 @@
         h += '</div>';
 
         // Danger zone
-        h += '<div class="danger-zone"><h3>Zone de suppression</h3>'
-          + '<p>Supprime ce n\u0153ud ou tout l\'article du fichier JSON. La suppression d\'un n\u0153ud retire aussi toutes les ar\u00eates connect\u00e9es \u00e0 lui.</p>'
+        h += '<div class="danger-zone"><h3>Supprimer</h3>'
+          + '<p>A utiliser seulement si ce lieu ne peut pas etre corrige.</p>'
           + '<div style="font-size:0.84rem;color:var(--text-2);margin-bottom:14px">'
-          + 'Ce n\u0153ud est connect\u00e9 \u00e0 <strong style="color:var(--text)">' + edgeCount + ' ar\u00eate(s)</strong>'
-          + ' et pr\u00e9sent dans <strong style="color:var(--text)">' + articleCount + ' article(s)</strong>.</div>'
+          + '<strong style="color:var(--text)">' + edgeCount + ' arete(s)</strong> liee(s) - <strong style="color:var(--text)">' + articleCount + ' article(s)</strong> touche(s).</div>'
           + '<div class="danger-actions">'
-          + '<button class="btn btn-danger" onclick="deleteNode()">Supprimer le n\u0153ud "' + esc(a.form) + '" + ses ar\u00eates</button>'
-          + '<button class="btn btn-danger-ghost" onclick="deleteArticle()">Supprimer tout l\'article</button>'
+          + '<button class="btn btn-danger" onclick="deleteNode()">Supprimer ce noeud et ses aretes</button>'
+          + '<button class="btn btn-danger-ghost" onclick="deleteArticle()">Supprimer l\'article complet</button>'
           + '</div></div>';
       }
       view.innerHTML = h;
@@ -2391,29 +2885,35 @@
       alert('Export termin\u00e9 !\n\n\u2022 ' + fc + ' n\u0153ud(s) corrig\u00e9(s)\n\u2022 ' + dn + ' n\u0153ud(s) supprim\u00e9(s)\n\u2022 ' + da + ' article(s) supprim\u00e9(s)\n\u2022 ' + removed + ' \u00e9v\u00e9nement(s) retir\u00e9(s)\n\nFichier: export.events.corrected.json');
     }
 
-    function loadFromText(text) {
+    function loadFromText(text, options) {
+      options = options || {};
       rawText = text;
       rawJson = parseInput(text);
       anomalies = detectLocationAnomalies(rawJson);
       corrections.clear(); deletedNodes.clear(); deletedArticles.clear();
       activeIdx = -1;
       $('loadOverlay').classList.add('hidden');
-      $('bottomInfo').textContent = rawJson.length + ' \u00e9v\u00e9nements charg\u00e9s \u2014 ' + anomalies.length + ' anomalie(s) de lieux d\u00e9tect\u00e9e(s).';
+      $('bottomInfo').textContent = rawJson.length + ' evenements charges - ' + anomalies.length + ' anomalie(s) de lieu detectee(s).';
       renderList(); updateStats();
       $('emptyState').style.display = '';
       $('detailView').style.display = 'none';
+      if (!options.skipShare && window.PrevyoSharedDataset) {
+        window.PrevyoSharedDataset.saveText(text, options.sourceLabel || 'Location Fixer');
+      }
     }
+
+    initializePageCopy();
 
     $('loadFileBtn').addEventListener('click', function(){ $('fileInput').click(); });
     $('fileInput').addEventListener('change', async function(e) {
       var file = e.target.files[0]; if (!file) return;
-      try { loadFromText(await file.text()); } catch(err) { alert('Erreur: ' + err.message); }
+      try { loadFromText(await file.text(), {sourceLabel: file.name}); } catch(err) { alert('Erreur: ' + err.message); }
     });
     $('loadAutoBtn').addEventListener('click', async function() {
       try {
         var resp = await fetch('data/export.events.json', {cache:'no-store'});
         if (!resp.ok) throw new Error('HTTP ' + resp.status);
-        loadFromText(await resp.text());
+        loadFromText(await resp.text(), {sourceLabel: 'data/export.events.json'});
       } catch(err) { alert('Impossible de charger: ' + err.message); }
     });
     $('reloadBtn').addEventListener('click', function() {
@@ -2422,6 +2922,16 @@
     });
     $('exportBtn').addEventListener('click', exportJson);
     $('filterInput').addEventListener('input', function(){ renderList($('filterInput').value); });
+    if (window.PrevyoSharedDataset) {
+      var shared = window.PrevyoSharedDataset.read();
+      if (shared && shared.text) {
+        try { loadFromText(shared.text, {skipShare:true, sourceLabel: shared.sourceLabel}); } catch(err) { console.warn('Shared dataset ignored:', err); }
+      }
+      window.PrevyoSharedDataset.subscribe(function(payload) {
+        if (!payload || !payload.text) return;
+        try { loadFromText(payload.text, {skipShare:true, sourceLabel: payload.sourceLabel}); } catch(err) { console.warn('Shared dataset refresh failed:', err); }
+      });
+    }
 
   </script>
 </body>

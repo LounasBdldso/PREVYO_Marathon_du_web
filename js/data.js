@@ -1,6 +1,4 @@
-// ═══════════════════════════════════════════════════════════
 // FILE HANDLING
-// ═══════════════════════════════════════════════════════════
 function handleDragOver(e) {
     e.preventDefault();
     document.getElementById('upload-zone').classList.add('drag-over');
@@ -31,10 +29,8 @@ function processFile(file) {
     reader.readAsText(file);
 }
 
-// ═══════════════════════════════════════════════════════════
 // DATA PROCESSING
-// ═══════════════════════════════════════════════════════════
-function processData(data, sourceLabel = 'Données chargées') {
+function processData(data, sourceLabel = 'Donnees chargees', options = {}) {
     if (!Array.isArray(data)) data = [data];
 
     if (typeof destroyVisuCharts === 'function') destroyVisuCharts();
@@ -50,21 +46,12 @@ function processData(data, sourceLabel = 'Données chargées') {
     updateVisuStats();
     if (typeof updateHomeMetrics === 'function') updateHomeMetrics();
 
-    state.events = data;
-    state.selectedIds.clear();
-    state.currentView = 'selected';
-    state.articleDropdownOpen = false;
-    buildArticleMap();
-    renderArticleList();
-    updateSidebarPanels();
-    updateVisuStats();
-    if (typeof updateHomeMetrics === 'function') updateHomeMetrics();
-
     setGraphPlaceholderState('Veuillez choisir un ou plusieurs articles.');
     const loaded = document.getElementById('file-loaded');
     if (loaded) {
         loaded.style.display = 'block';
-        loaded.textContent = `✓ ${data.length.toLocaleString()} événements chargés depuis ${sourceLabel}`;
+        loaded.textContent = `OK ${data.length.toLocaleString()} evenements charges depuis ${sourceLabel}`;
+        loaded.style.color = '';
     }
 
     state.visuChartsBuilt = false;
@@ -74,6 +61,10 @@ function processData(data, sourceLabel = 'Données chargées') {
         buildVisuCharts();
         if (typeof resizeVisuCharts === 'function') resizeVisuCharts();
         if (typeof buildTreemap === 'function') buildTreemap();
+    }
+
+    if (options.share !== false && window.PrevyoSharedDataset) {
+        window.PrevyoSharedDataset.saveData(data, sourceLabel);
     }
 }
 
@@ -89,7 +80,17 @@ function buildArticleMap() {
     if (articleCount) articleCount.textContent = state.articleIds.length;
 }
 
+function tryLoadSharedDataset() {
+    if (!window.PrevyoSharedDataset) return false;
+    const shared = window.PrevyoSharedDataset.read();
+    if (!shared || !shared.data) return false;
+    processData(shared.data, shared.sourceLabel || 'Dataset partage', { share: false });
+    return true;
+}
+
 async function autoLoadDefaultData() {
+    if (tryLoadSharedDataset()) return;
+
     try {
         const response = await fetch('./data/export.events.clean.json');
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
@@ -104,7 +105,7 @@ async function autoLoadDefaultData() {
     }
 }
 
-function setGraphPlaceholderState(message, icon = '🕸') {
+function setGraphPlaceholderState(message, icon = '[]') {
     const placeholder = document.getElementById('graph-placeholder');
     const placeholderText = document.getElementById('graph-placeholder-text');
     const placeholderIcon = document.getElementById('graph-placeholder-icon');
@@ -112,4 +113,11 @@ function setGraphPlaceholderState(message, icon = '🕸') {
     if (placeholder) placeholder.style.display = 'flex';
     if (placeholderText) placeholderText.innerHTML = message;
     if (placeholderIcon) placeholderIcon.textContent = icon;
+}
+
+if (window.PrevyoSharedDataset) {
+    window.PrevyoSharedDataset.subscribe(function (payload) {
+        if (!payload || !payload.data) return;
+        processData(payload.data, payload.sourceLabel || 'Dataset partage', { share: false });
+    });
 }
