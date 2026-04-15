@@ -82,26 +82,62 @@ Pour lancer le projet, ouvrez le fichier `index.html` dans votre navigateur ou u
 
 L'architecture front-end du projet est organisée comme suit :
 
-```bash
+```text
 PREVYO_Marathon_du_web/
 ├── index.html
+├── README.md
+├── requirements.txt
 ├── css/
 │   ├── variables.css
 │   ├── layout.css
 │   ├── demo.css
 │   └── treemap.css
-└── js/
-    ├── state.js
-    ├── nav.js
-    ├── data.js
-    ├── articles.js
-    ├── graph.js
-    ├── inspect.js
-    ├── visu.js
-    └── treemap.js
+├── js/
+│   ├── home.js
+│   ├── nav.js
+│   ├── state.js
+│   ├── data.js
+│   ├── shared_dataset.js
+│   ├── articles.js
+│   ├── graph.js
+│   ├── inspect.js
+│   ├── visu.js
+│   ├── fusion.js
+│   └── treemap.js
+├── app/
+│   ├── app.py
+│   ├── dashboard_articles.html
+│   ├── dashboard_clusters.html
+│   ├── graph_explorer_multi.html
+│   ├── fusion_noeud.html
+│   ├── fusion_similarite.html
+│   ├── location_fixer.html
+│   ├── Ajout_Country.html
+│   ├── treemap.html
+│   └── viz_clusters.py
+├── data/
+│   ├── export.events.json
+│   ├── anomalies.csv
+│   ├── articles_clustering.csv
+│   ├── doublons_articles.csv
+│   └── quasi_doublons.csv
+├── anomalies_similarite/
+│   ├── anomalies.py
+│   ├── deduplicate_events.py
+│   └── intra_cluster_doublons.py
+├── clusters/
+│   ├── clustering.py
+│   ├── clustering_advanced.py
+│   └── cluster_articles.py
+├── EDA/
+│   ├── analyse_exploratoire.ipynb
+│   ├── intro_au_json.ipynb
+│   └── reconstruction_de_contexte.ipynb
+├── figures/
+└── logo/
 ```
 
-## 👥 Équipe du projet
+## Équipe du projet
 
 Ce projet a été réalisé par une équipe pluridisciplinaire réunissant des étudiants en Data Science et en Communication.
 
