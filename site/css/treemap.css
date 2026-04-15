@@ -1,0 +1,321 @@
+/* ─── TREEMAP ──────────────────────────────────── */
+
+.treemap-card {
+  grid-column: 1 / -1;
+  border-radius: 24px;
+  padding: 1.25rem;
+  position: relative;
+  overflow: hidden;
+  min-height: 680px;
+}
+
+.treemap-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.treemap-toolbar label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.treemap-select,
+.treemap-search {
+  background: rgba(7, 16, 30, 0.82);
+  border: 1px solid rgba(107, 132, 163, 0.16);
+  border-radius: 12px;
+  color: var(--text);
+  font-family: 'Lexend', sans-serif;
+  font-size: 0.82rem;
+  padding: 0.68rem 0.9rem;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.treemap-select {
+  min-width: 190px;
+}
+
+.treemap-search {
+  min-width: 280px;
+  flex: 1;
+}
+
+.treemap-select:focus,
+.treemap-search:focus {
+  border-color: rgba(27, 174, 159, 0.5);
+  box-shadow: 0 0 0 3px rgba(27, 174, 159, 0.08);
+}
+
+.treemap-btn {
+  padding: 0.68rem 0.95rem;
+  border-radius: 12px;
+  border: 1px solid rgba(107, 132, 163, 0.16);
+  background: rgba(7, 16, 30, 0.82);
+  color: var(--muted);
+  font-family: 'Lexend', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.treemap-btn:hover {
+  border-color: rgba(27, 174, 159, 0.42);
+  color: var(--teal);
+}
+
+.treemap-wrap {
+  position: relative;
+  min-height: 560px;
+  background:
+    radial-gradient(circle at top left, rgba(27, 174, 159, 0.10), transparent 26%),
+    radial-gradient(circle at top right, rgba(9, 164, 232, 0.09), transparent 28%),
+    linear-gradient(180deg, rgba(6, 16, 31, 0.96), rgba(7, 18, 34, 0.98));
+  border: 1px solid rgba(27, 174, 159, 0.12);
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+#treemap-chart {
+  position: absolute;
+  inset: 0;
+}
+
+#treemap-chart svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  cursor: grab;
+}
+
+#treemap-chart svg:active {
+  cursor: grabbing;
+}
+
+.treemap-node circle {
+  stroke: rgba(255, 255, 255, 0.12);
+  stroke-width: 1px;
+  transition: opacity 0.18s, stroke 0.18s, stroke-width 0.18s, filter 0.18s;
+}
+
+.treemap-node:hover circle {
+  stroke: rgba(255, 255, 255, 0.68);
+  stroke-width: 1.7px;
+  filter: brightness(1.06);
+}
+
+.treemap-node text {
+  pointer-events: none;
+  text-anchor: middle;
+  dominant-baseline: middle;
+  fill: rgba(255, 255, 255, 0.96);
+  font-family: 'Lexend', sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  paint-order: stroke;
+  stroke: rgba(2, 6, 12, 0.42);
+  stroke-width: 3px;
+  stroke-linejoin: round;
+}
+
+#treemap-breadcrumb {
+  position: absolute;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(11, 26, 48, 0.94);
+  border: 1px solid rgba(107, 132, 163, 0.16);
+  border-radius: 12px;
+  padding: 0.5rem 0.85rem;
+  color: var(--text);
+  font-size: 0.78rem;
+  display: none;
+  z-index: 5;
+  max-width: 72%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.16);
+}
+
+#treemap-breadcrumb.visible {
+  display: block;
+}
+
+#treemap-search-count {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  background: linear-gradient(135deg, var(--teal), var(--blue));
+  color: #fff;
+  border-radius: 10px;
+  padding: 0.38rem 0.7rem;
+  font-size: 0.74rem;
+  font-weight: 700;
+  display: none;
+  z-index: 5;
+  box-shadow: 0 12px 24px rgba(9, 164, 232, 0.20);
+}
+
+#treemap-search-count.visible {
+  display: block;
+}
+
+#treemap-tooltip {
+  position: absolute;
+  pointer-events: none;
+  background: rgba(11, 26, 48, 0.96);
+  border: 1px solid rgba(107, 132, 163, 0.18);
+  border-radius: 12px;
+  padding: 0.78rem 0.95rem;
+  font-size: 0.78rem;
+  color: var(--text);
+  max-width: 340px;
+  line-height: 1.55;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.12s ease, transform 0.12s ease;
+  z-index: 8;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 18px 36px rgba(0, 0, 0, 0.22);
+}
+
+#treemap-tooltip.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+#treemap-stats {
+  position: absolute;
+  left: 14px;
+  bottom: 14px;
+  width: min(292px, calc(100% - 28px));
+  background: rgba(11, 26, 48, 0.94);
+  border: 1px solid rgba(107, 132, 163, 0.16);
+  border-radius: 14px;
+  padding: 0.95rem;
+  z-index: 5;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 16px 34px rgba(0, 0, 0, 0.14);
+}
+
+#treemap-stats .s-title {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 0.5rem;
+}
+
+#treemap-stats .s-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.74rem;
+  color: var(--muted);
+  margin-bottom: 0.32rem;
+}
+
+#treemap-stats .s-row strong {
+  color: var(--text);
+}
+
+#treemap-stats hr {
+  border: none;
+  border-top: 1px solid rgba(107, 132, 163, 0.14);
+  margin: 0.55rem 0;
+}
+
+#treemap-top-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+#treemap-top-list li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 78px 34px;
+  gap: 0.45rem;
+  align-items: center;
+  font-size: 0.74rem;
+}
+
+#treemap-top-list .top-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text);
+}
+
+#treemap-top-list .bar-wrap {
+  height: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+#treemap-top-list .bar {
+  height: 100%;
+  background: linear-gradient(135deg, var(--teal), var(--blue));
+  border-radius: 999px;
+}
+
+#treemap-top-list .top-val {
+  color: var(--muted);
+  text-align: right;
+}
+
+.treemap-legend {
+  position: absolute;
+  right: 14px;
+  bottom: 14px;
+  color: #8ba5c1;
+  font-size: 0.72rem;
+  line-height: 1.75;
+  text-align: right;
+  pointer-events: none;
+  background: rgba(11, 26, 48, 0.76);
+  border: 1px solid rgba(107, 132, 163, 0.10);
+  border-radius: 12px;
+  padding: 0.6rem 0.75rem;
+  backdrop-filter: blur(8px);
+}
+
+@media (max-width: 900px) {
+  .treemap-card {
+    min-height: 620px;
+    padding: 1rem;
+  }
+
+  .treemap-wrap {
+    min-height: 520px;
+  }
+
+  .treemap-search {
+    min-width: 100%;
+  }
+
+  #treemap-breadcrumb {
+    max-width: calc(100% - 32px);
+    left: 16px;
+    right: 16px;
+    transform: none;
+  }
+
+  #treemap-stats {
+    width: calc(100% - 28px);
+  }
+
+  .treemap-legend {
+    display: none;
+  }
+}

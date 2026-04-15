@@ -1,0 +1,34 @@
+/* ─── CSS VARIABLES & RESET ──────────────────────────────── */
+:root {
+  --bg: #06101f;
+  --surface: #0b1a30;
+  --surface2: #112240;
+  --surface3: #162d4e;
+  --teal: #1bae9f;
+  --blue: #09a4e8;
+  --purple: #bd33d1;
+  --dark-teal: #005f73;
+  --dark-blue: #625eec;
+  --dark-purple: #8412dd;
+  --logo-blue: #0063a3;
+  --anomaly: #ff4757;
+  --quasi: #ffa502;
+  --normal: #2ed573;
+  --suspect: #ffa502;
+  --text: #dde8f5;
+  --muted: #6b84a3;
+  --border: rgba(27,174,159,0.15);
+  --glow-t: 0 0 20px rgba(27,174,159,0.3);
+  --glow-b: 0 0 20px rgba(9,164,232,0.3);
+  --glow-p: 0 0 20px rgba(189,51,209,0.3);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Lexend', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
